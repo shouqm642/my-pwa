@@ -6,138 +6,57 @@
   <title>Green Guardian</title>
   <meta name="theme-color" content="#0b3f1a" />
   <style>
+    /* (same styling as before, slightly trimmed) */
     :root{
-      --bg:#06260f;
-      --card:#0f3e20;
-      --accent:#2e8b3a;
-      --accent-2:#4caf50;
-      --muted:#b3d8b3;
-      --warn:#f0a02d;
-      --danger:#c94a3d;
-      --glass: rgba(255,255,255,0.03);
+      --bg:#06260f; --card:#0f3e20; --accent:#2e8b3a; --accent-2:#4caf50; --muted:#b3d8b3; --warn:#f0a02d; --danger:#c94a3d;
     }
-    html,body{height:100%;margin:0;font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,"Helvetica Neue",Arial;}
-    body{
-      background: linear-gradient(180deg,#052010 0%, #0a2d12 60%);
-      color: #eaf6ea;
-      -webkit-font-smoothing:antialiased;
-      -moz-osx-font-smoothing:grayscale;
-      padding:18px;
-    }
-
-    header{
-      display:flex;
-      align-items:center;
-      justify-content:space-between;
-      gap:12px;
-      padding:12px 16px;
-      border-radius:12px;
-      background: linear-gradient(90deg,var(--card), rgba(14,56,30,0.9));
-      box-shadow: 0 6px 18px rgba(0,0,0,0.45);
-      margin-bottom:16px;
-    }
-    .brand{
-      display:flex;align-items:center;gap:10px;
-      font-weight:700;font-size:20px;color:var(--accent-2);
-    }
-    .plant-svg{width:30px;height:30px;filter: drop-shadow(0 1px 2px rgba(0,0,0,0.6));}
-
-    .badge{
-      display:inline-flex;align-items:center;gap:8px;
-      background:linear-gradient(180deg,#1b6b32,#0e4f21);
-      padding:6px 12px;border-radius:20px;font-size:13px;
-      box-shadow: inset 0 -2px 0 rgba(0,0,0,0.2);
-    }
-    .badge .dot{width:10px;height:10px;border-radius:50%;background:#9ef08f;box-shadow:0 0 6px rgba(150,255,150,0.25)}
-
+    html,body{height:100%;margin:0;font-family:Inter,system-ui,Segoe UI,Roboto,Arial;}
+    body{background:linear-gradient(180deg,#052010 0%, #0a2d12 60%);color:#eaf6ea;padding:16px;}
     .container{max-width:520px;margin:0 auto;}
-    .card{
-      background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
-      border-radius:14px;padding:18px;margin-bottom:14px;
-      box-shadow: 0 6px 18px rgba(0,0,0,0.45);
-      border-left:6px solid rgba(255,255,255,0.03);
-    }
-    .card.title-like{padding:12px 16px;display:flex;align-items:center;justify-content:space-between;}
-    .sensor-title{display:flex;gap:10px;align-items:center;font-weight:700;color:var(--muted);}
-
-    .big-number{font-size:34px;font-weight:800;color:#fff;margin-top:6px}
+    header{display:flex;align-items:center;justify-content:space-between;padding:12px;border-radius:12px;background:linear-gradient(90deg,var(--card), rgba(14,56,30,0.9));box-shadow:0 6px 18px rgba(0,0,0,0.45);margin-bottom:14px}
+    .brand{display:flex;align-items:center;gap:10px;font-weight:700;font-size:18px;color:var(--accent-2)}
+    .badge{display:inline-flex;align-items:center;gap:8px;background:linear-gradient(180deg,#1b6b32,#0e4f21);padding:6px 12px;border-radius:20px;font-size:13px}
+    .card{background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));border-radius:12px;padding:14px;margin-bottom:12px;box-shadow:0 6px 18px rgba(0,0,0,0.35);border-left:6px solid rgba(255,255,255,0.03)}
+    .row{display:flex;flex-direction:column;gap:12px}
+    .sensor-title{display:flex;gap:10px;align-items:center;font-weight:700;color:var(--muted)}
+    .big-number{font-size:30px;font-weight:800;color:#fff;margin-top:6px}
     .small{font-size:13px;color:var(--muted);margin-top:4px}
-
-    .row {display:flex;flex-direction:column;gap:12px;}
-    /* colored accent bars */
-    .card.soil{border-left-color: #6fd97a;}
-    .card.light{border-left-color: #f0a02d;}
-    .card.motion{border-left-color: #9fb3b0;}
-
-    /* Water control */
-    .watering{
-      display:flex;flex-direction:column;align-items:center;gap:12px;padding-top:8px;padding-bottom:18px;
-    }
-    .circle-btn{
-      width:88px;height:88px;border-radius:50%;display:flex;align-items:center;justify-content:center;
-      background: linear-gradient(180deg,var(--accent-2),var(--accent));
-      box-shadow:0 10px 24px rgba(30,100,40,0.45);
-      border: 3px solid rgba(255,255,255,0.04);
-      cursor:pointer;transition:transform .12s ease;
-    }
-    .circle-btn:active{transform:scale(.96)}
-    .circle-btn .drop{width:34px;height:34px;fill:#fff;opacity:0.95}
-
+    .card.soil{border-left-color:#6fd97a}.card.light{border-left-color:#f0a02d}.card.motion{border-left-color:#9fb3b0}
+    .watering{display:flex;flex-direction:column;align-items:center;gap:12px;padding:8px 0}
+    .circle-btn{width:84px;height:84px;border-radius:50%;display:flex;align-items:center;justify-content:center;background:linear-gradient(180deg,var(--accent-2),var(--accent));box-shadow:0 10px 24px rgba(30,100,40,0.45);border:3px solid rgba(255,255,255,0.04);cursor:pointer}
     .water-state{font-weight:700;color:#dcffd4;font-size:15px}
-    .btn-full{
-      margin-top:6px;background:transparent;border:1px solid rgba(255,255,255,0.06);padding:12px 18px;border-radius:10px;color:var(--muted);width:100%;
-      font-weight:700;cursor:pointer;
-    }
-    .btn-disabled{opacity:.4;pointer-events:none}
-
+    .btn{padding:10px 14px;border-radius:8px;background:#234; color:#dfffe0;border:1px solid rgba(255,255,255,0.04);cursor:pointer}
+    .btn.secondary{background:transparent;color:var(--muted);border:1px solid rgba(255,255,255,0.06)}
+    .danger{background:var(--danger);color:#fff}
+    .alert-line{padding:10px;border-radius:8px;margin-bottom:10px;font-weight:700}
+    .alert-danger{background:linear-gradient(90deg,#5b0f0f,#9e2b2b);color:#fff}
     footer{margin-top:10px;text-align:center;color:rgba(255,255,255,0.25);font-size:13px}
-
-    /* Icons and labels alignment */
-    .left-icon{width:28px;height:28px;opacity:0.95}
-    .status-text{font-size:14px;font-weight:600;color:#dff7d7}
-    .status-sub{font-size:12px;color:var(--muted)}
-
-    /* responsive for small phones */
-    @media (max-width:420px){
-      body{padding:12px}
-      header{padding:10px}
-      .brand{font-size:18px}
-      .big-number{font-size:28px}
-      .circle-btn{width:76px;height:76px}
-    }
+    @media (max-width:420px){body{padding:10px}.big-number{font-size:26px}.circle-btn{width:72px;height:72px}}
   </style>
 </head>
 <body>
   <div class="container">
     <header>
       <div class="brand">
-        <!-- inline plant icon -->
-        <svg class="plant-svg" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <path d="M12 2c2.8 0 5 2 6 4-1.6.2-3.5 1-5 2-1.4 1-2.5 2.5-3 4-.5-1.5-1.6-3-3-4-1.4-1-3.4-1.8-5-2 1-2 3.2-4 6-4z" fill="#9feab0"/>
-          <path d="M6 13c1-1 3-2 6-2s5 1 6 2c-2 0-4 1-6 1s-4-1-6-1z" fill="#2e8b3a"/>
-          <path d="M12 22s1-4 4-6c0 0-3 0-4 2-1-2-4-2-4-2 3 2 4 6 4 6z" fill="#1f6f2b"/>
-        </svg>
+        <svg width="26" height="26" viewBox="0 0 24 24"><path d="M12 2c2.8 0 5 2 6 4-1.6.2-3.5 1-5 2-1.4 1-2.5 2.5-3 4-.5-1.5-1.6-3-3-4-1.4-1-3.4-1.8-5-2 1-2 3.2-4 6-4z" fill="#9feab0"/></svg>
         Green Guardian
       </div>
-      <div class="badge" title="connection status">
-        <span class="dot" id="conn-dot"></span>
-        <span id="conn-text">Connected</span>
+
+      <div style="display:flex;gap:10px;align-items:center">
+        <div id="alert-banner" style="display:none"></div>
+        <div class="badge" id="conn-badge">
+          <span style="width:10px;height:10px;border-radius:50%;background:#9ef08f;display:inline-block;margin-right:6px" id="conn-dot"></span>
+          <span id="conn-text">Disconnected</span>
+        </div>
+        <button id="bt-btn" class="btn secondary" title="Connect to robot">Connect Bluetooth</button>
       </div>
     </header>
 
-    <!-- Sensors -->
     <section class="row">
       <div class="card soil">
-        <div style="display:flex;align-items:center;justify-content:space-between;">
-          <div>
-            <div class="sensor-title">
-              <!-- soil icon -->
-              <svg class="left-icon" viewBox="0 0 24 24" fill="none"><path d="M12 2s-4 4-4 8 1.79 8 4 12c2.21-4 4-8 4-12s-4-8-4-8z" fill="#9feab0"/></svg>
-              <div style="display:flex;flex-direction:column;">
-                <div style="font-weight:700;color:#cdefd0">Soil Moisture</div>
-                <div class="status-sub">Moisture level of soil</div>
-              </div>
-            </div>
+        <div style="display:flex;align-items:center;justify-content:space-between">
+          <div class="sensor-title"><svg width="26" height="26"><path d="M12 2s-4 4-4 8 1.79 8 4 12c2.21-4 4-8 4-12s-4-8-4-8z" fill="#9feab0"/></svg>
+            <div style="display:flex;flex-direction:column"><div style="font-weight:700;color:#cdefd0">Soil Moisture</div><div style="font-size:12px;color:var(--muted)">Moisture %</div></div>
           </div>
           <div style="text-align:right">
             <div class="big-number" id="soil-value">--%</div>
@@ -147,17 +66,10 @@
       </div>
 
       <div class="card light">
-        <div style="display:flex;align-items:center;justify-content:space-between;">
-          <div>
-            <div class="sensor-title">
-              <svg class="left-icon" viewBox="0 0 24 24" fill="none"><path d="M11 2h2v4h-2zM4.2 5.6l1.4 1.4 2.8-2.8L7 2.7zM1 11h4v2H1zm18 0h4v2h-4zM16.8 5.6l1.4-1.4 1.6 1.6-2.8 2.8zM12 8a4 4 0 100 8 4 4 0 000-8z" fill="#ffd88a"/></svg>
-              <div style="display:flex;flex-direction:column;">
-                <div style="font-weight:700;color:#ffe7b5">Light Level</div>
-                <div class="status-sub">Ambient light near plant</div>
-              </div>
-            </div>
+        <div style="display:flex;align-items:center;justify-content:space-between">
+          <div class="sensor-title"><svg width="26" height="26"><path d="M12 8a4 4 0 100 8 4 4 0 000-8z" fill="#ffd88a"/></svg>
+            <div style="display:flex;flex-direction:column"><div style="font-weight:700;color:#ffe7b5">Light Level</div><div style="font-size:12px;color:var(--muted)">Ambient</div></div>
           </div>
-
           <div style="text-align:right">
             <div class="big-number" id="light-value">--</div>
             <div class="small" id="light-label">--</div>
@@ -166,180 +78,375 @@
       </div>
 
       <div class="card motion">
-        <div style="display:flex;align-items:center;justify-content:space-between;">
-          <div>
-            <div class="sensor-title">
-              <svg class="left-icon" viewBox="0 0 24 24" fill="none"><path d="M12 2a9 9 0 100 18 9 9 0 000-18zm1 11h-2v5h2v-5z" fill="#d7e8d7"/></svg>
-              <div style="display:flex;flex-direction:column;">
-                <div style="font-weight:700;color:#dff7d7">Motion Sensor</div>
-                <div class="status-sub">Detects nearby movement</div>
-              </div>
-            </div>
+        <div style="display:flex;align-items:center;justify-content:space-between">
+          <div class="sensor-title"><svg width="26" height="26"><path d="M12 2a9 9 0 100 18 9 9 0 000-18z" fill="#d7e8d7"/></svg>
+            <div style="display:flex;flex-direction:column"><div style="font-weight:700;color:#dff7d7">Motion Sensor</div><div style="font-size:12px;color:var(--muted)">Movement near plant</div></div>
           </div>
-
           <div style="text-align:right">
             <div class="big-number" id="motion-value">--</div>
             <div class="small" id="motion-label">--</div>
           </div>
         </div>
       </div>
-    </section>
 
-    <!-- Water control -->
-    <section class="card">
-      <div style="font-weight:800;color:var(--muted);margin-bottom:8px">Watering Control</div>
-      <div class="watering">
-        <div class="circle-btn" id="water-btn" title="Toggle watering">
-          <!-- drop icon -->
-          <svg class="drop" viewBox="0 0 24 24"><path d="M12 3.3s4 4.2 4 7.2a4 4 0 01-8 0c0-3 4-7.2 4-7.2z" /></svg>
+      <div class="card">
+        <div style="font-weight:800;color:var(--muted);margin-bottom:8px">Watering Control</div>
+        <div class="watering">
+          <div class="circle-btn" id="water-btn" title="Toggle watering">
+            <svg width="30" height="30" viewBox="0 0 24 24"><path d="M12 3.3s4 4.2 4 7.2a4 4 0 01-8 0c0-3 4-7.2 4-7.2z" fill="#fff"/></svg>
+          </div>
+          <div class="water-state" id="water-state">Idle</div>
+          <div style="display:flex;gap:8px;width:100%">
+            <button id="manual-btn" class="btn" style="flex:1">Start Watering</button>
+            <button id="stop-btn" class="btn secondary" style="flex:0">Stop</button>
+          </div>
         </div>
-        <div class="water-state" id="water-state">Idle</div>
-        <button id="manual-btn" class="btn-full">Start Watering</button>
       </div>
+
+      <div class="card" id="insect-card" style="display:none;border-left-color:#c94a3d">
+        <div style="font-weight:800;color:#ffd7d7">Insect Alert</div>
+        <div id="insect-msg" style="margin-top:8px;color:#fff;font-weight:700"></div>
+      </div>
+
     </section>
 
     <footer>Green Guardian • demo PWA</footer>
   </div>
 
 <script>
-  // ---------- Elements ----------
-  const soilValEl = document.getElementById('soil-value');
-  const soilLabel = document.getElementById('soil-label');
-  const lightValEl = document.getElementById('light-value');
-  const lightLabel = document.getElementById('light-label');
-  const motionValEl = document.getElementById('motion-value');
-  const motionLabel = document.getElementById('motion-label');
+/* -------------------------
+  Configuration & state
+   ------------------------- */
+const SERVICE_UUID = '0000ffe0-0000-1000-8000-00805f9b34fb'; // <-- replace with your robot's BLE service UUID
+const CHAR_UUID    = '0000ffe1-0000-1000-8000-00805f9b34fb'; // <-- replace with your robot's characteristic UUID (notify)
 
-  const connDot = document.getElementById('conn-dot');
-  const connText = document.getElementById('conn-text');
+let bleDevice = null;
+let bleChar = null;
+let connected = false;
 
-  const waterBtn = document.getElementById('water-btn');
-  const waterState = document.getElementById('water-state');
-  const manualBtn = document.getElementById('manual-btn');
+let watering = false;
+let last = { soil: 50, light: 50, motion: false, insects: 0, dangerousMotion: 0 };
 
-  // ---------- State ----------
-  let watering = false;
-  let conn = true;
-  // last known sensor values (kept so toggleWater can reuse them)
-  let last = { soil: 50, light: 50, motion: false };
+// debounce map: type -> timestamp of last notification
+const DEBOUNCE_MS = { soil: 1000 * 60 * 30, // 30 min for dry soil reminders
+                      motion: 1000 * 60 * 5, // 5 min for motion alerts
+                      insects: 1000 * 60 * 60 // 60 min for insect alerts
+                    };
+const lastNotified = { soil: 0, motion: 0, insects: 0 };
 
-  // ---------- Helpers ----------
-  function clamp(v, min, max){ return Math.max(min, Math.min(max, v)); }
-  function rand(min,max){ return Math.random()*(max-min)+min; }
+/* -------------------------
+  UI elements
+   ------------------------- */
+const soilValEl = document.getElementById('soil-value');
+const soilLabel = document.getElementById('soil-label');
+const lightValEl = document.getElementById('light-value');
+const lightLabel = document.getElementById('light-label');
+const motionValEl = document.getElementById('motion-value');
+const motionLabel = document.getElementById('motion-label');
+const connDot = document.getElementById('conn-dot');
+const connText = document.getElementById('conn-text');
+const connBadge = document.getElementById('conn-badge');
 
-  function statusTextForSoil(n){
-    if(n < 25) return 'Dry — needs water';
-    if(n < 45) return 'Low';
-    if(n < 70) return 'Good';
-    return 'Wet';
+const btBtn = document.getElementById('bt-btn');
+const waterBtn = document.getElementById('water-btn');
+const manualBtn = document.getElementById('manual-btn');
+const stopBtn = document.getElementById('stop-btn');
+
+const insectCard = document.getElementById('insect-card');
+const insectMsg = document.getElementById('insect-msg');
+const alertBanner = document.getElementById('alert-banner');
+
+/* -------------------------
+  Utility functions
+   ------------------------- */
+function clamp(v,min,max){ return Math.max(min,Math.min(max,v)); }
+function now(){ return (new Date()).getTime(); }
+function canNotify(type){
+  const t = lastNotified[type] || 0;
+  return (now() - t) > (DEBOUNCE_MS[type] || 0);
+}
+function markNotified(type){ lastNotified[type] = now(); }
+
+function showAlertLine(message, kind='danger'){
+  alertBanner.style.display = 'block';
+  alertBanner.className = 'alert-line ' + (kind==='danger' ? 'alert-danger' : '');
+  alertBanner.textContent = message;
+  // auto hide after 8s
+  setTimeout(()=>{ alertBanner.style.display = 'none'; }, 8000);
+}
+
+function sendNotification(title, body, urgent=false){
+  if(!('Notification' in window)) return;
+  if(Notification.permission === 'granted'){
+    try{
+      const n = new Notification(title, { body, renotify: !urgent });
+      if(urgent && navigator.vibrate) navigator.vibrate([300,100,300]);
+      return n;
+    }catch(e){ console.warn('notify fail', e) }
+  } else if(Notification.permission === 'default'){
+    Notification.requestPermission().then(p => { if(p==='granted') sendNotification(title, body, urgent); });
   }
-  function statusTextForLight(n){
-    if(n < 20) return 'Very Low';
-    if(n < 50) return 'Low';
-    if(n < 80) return 'Moderate';
-    return 'Bright';
+}
+
+/* -------------------------
+  UI update
+   ------------------------- */
+function statusTextForSoil(n){
+  if(n < 20) return 'Dry — needs water';
+  if(n < 40) return 'Low';
+  if(n < 70) return 'Good';
+  return 'Wet';
+}
+function statusTextForLight(n){
+  if(n < 20) return 'Very Low';
+  if(n < 50) return 'Low';
+  if(n < 80) return 'Moderate';
+  return 'Bright';
+}
+function statusTextForMotion(flag, dm){
+  if(dm) return 'Dangerous movement';
+  return flag ? 'Movement' : 'No Motion';
+}
+
+/* updateUI accepts partial data */
+function updateUI(data = {}){
+  last.soil = (typeof data.soil !== 'undefined') ? clamp(parseFloat(data.soil)||0,0,100) : last.soil;
+  last.light = (typeof data.light !== 'undefined') ? clamp(parseFloat(data.light)||0,0,100) : last.light;
+  last.motion = (typeof data.motion !== 'undefined') ? !!data.motion : last.motion;
+  last.insects = (typeof data.insects !== 'undefined') ? parseInt(data.insects)||0 : last.insects;
+  last.dangerousMotion = (typeof data.dangerousMotion !== 'undefined') ? !!data.dangerousMotion : last.dangerousMotion;
+
+  soilValEl.textContent = (Math.round(last.soil*10)/10) + '%';
+  soilLabel.textContent = statusTextForSoil(last.soil);
+  lightValEl.textContent = (Math.round(last.light*10)/10) + '%';
+  lightLabel.textContent = statusTextForLight(last.light);
+  motionValEl.textContent = last.dangerousMotion ? '!' : (last.motion ? '•' : '—');
+  motionLabel.textContent = statusTextForMotion(last.motion, last.dangerousMotion);
+
+  connDot.style.background = connected ? '#9ef08f' : '#6b6b6b';
+  connText.textContent = connected ? 'Connected' : 'Disconnected';
+
+  // insect UI
+  if(last.insects > 0){
+    insectCard.style.display = 'block';
+    insectMsg.textContent = `${last.insects} insect(s) detected — inspect plant`;
+  } else {
+    insectCard.style.display = 'none';
   }
-  function statusTextForMotion(flag){
-    return flag ? 'Motion Detected' : 'Idle';
+}
+
+/* -------------------------
+  Notification logic (smart)
+   ------------------------- */
+function checkAlertsAndNotify(){
+  // Soil dry
+  if(last.soil < 28 && canNotify('soil')){
+    sendNotification('Green Guardian — Dry soil', 'Soil is dry. Consider watering the plant.', false);
+    markNotified('soil');
+    showAlertLine('Soil is dry — watering recommended', 'danger');
   }
 
-  // updateUI accepts a partial object and preserves last values
-  function updateUI(data = {}){
-    // merge provided values into last
-    last.soil = (typeof data.soil !== 'undefined') ? clamp(parseFloat(data.soil) || 0, 0, 100) : last.soil;
-    last.light = (typeof data.light !== 'undefined') ? clamp(parseFloat(data.light) || 0, 0, 100) : last.light;
-    last.motion = (typeof data.motion !== 'undefined') ? !!data.motion : last.motion;
+  // Dangerous motion
+  if((last.dangerousMotion || last.motion) && canNotify('motion')){
+    sendNotification('Green Guardian — Movement detected', last.dangerousMotion ? 'Dangerous motion detected near plant!' : 'Movement detected near plant', true);
+    markNotified('motion');
+    showAlertLine(last.dangerousMotion ? 'Dangerous movement detected — check immediately' : 'Movement detected nearby', 'danger');
+  }
 
-    // show values
-    soilValEl.textContent = (Math.round(last.soil * 10) / 10) + '%';
-    soilLabel.textContent = statusTextForSoil(last.soil);
+  // Insects
+  if(last.insects > 0 && canNotify('insects')){
+    sendNotification('Green Guardian — Insects detected', `${last.insects} possible insect(s) detected near the plant. Inspect and treat.`, true);
+    markNotified('insects');
+    showAlertLine('Insects detected — inspect plant', 'danger');
+  }
+}
 
-    lightValEl.textContent = (Math.round(last.light * 10) / 10) + '%';
-    lightLabel.textContent = statusTextForLight(last.light);
+/* -------------------------
+  Bluetooth: connect & handlers
+   ------------------------- */
+async function connectBluetooth(){
+  if(!navigator.bluetooth){
+    alert('Web Bluetooth not supported in this browser. Use Chrome on Android.');
+    return;
+  }
 
-    motionValEl.textContent = last.motion ? '!' : '—';
-    motionLabel.textContent = last.motion ? 'Movement' : 'No Motion';
+  try{
+    btBtn.textContent = 'Choosing device...';
+    // You may use filters for specific name or service; using acceptAllDevices with optionalServices for demo
+    const device = await navigator.bluetooth.requestDevice({
+      acceptAllDevices: true,
+      optionalServices: [SERVICE_UUID]
+      // OR use filters: filters: [{namePrefix: 'GreenBot'}]
+    });
+    bleDevice = device;
+    bleDevice.addEventListener('gattserverdisconnected', onDisconnected);
 
-    connDot.style.background = conn ? '#9ef08f' : '#6b6b6b';
-    connText.textContent = conn ? 'Connected' : 'Disconnected';
+    const server = await device.gatt.connect();
+    const service = await server.getPrimaryService(SERVICE_UUID);
+    const char = await service.getCharacteristic(CHAR_UUID);
+    bleChar = char;
 
-    // watering state UI
-    if(watering){
-      waterState.textContent = 'Watering Active';
-      manualBtn.textContent = 'Stop Watering';
-      manualBtn.classList.remove('btn-disabled');
-      waterBtn.style.transform = 'scale(1.02)';
-      waterBtn.style.boxShadow = '0 10px 30px rgba(40,165,68,0.5)';
+    // start notifications if supported
+    if(char.properties.notify){
+      await char.startNotifications();
+      char.addEventListener('characteristicvaluechanged', onCharacteristicValueChanged);
+    }
+
+    connected = true;
+    btBtn.textContent = 'Disconnect';
+    btBtn.classList.remove('secondary');
+    btBtn.classList.add('danger');
+    updateConnUI();
+    showAlertLine('Connected to robot', ''); // short banner
+  }catch(err){
+    console.error('BLE connect failed', err);
+    btBtn.textContent = 'Connect Bluetooth';
+    alert('Bluetooth connection failed or cancelled.');
+  }
+}
+
+function onDisconnected(){
+  console.log('Device disconnected');
+  connected = false;
+  updateConnUI();
+  btBtn.textContent = 'Connect Bluetooth';
+  btBtn.classList.remove('danger');
+  btBtn.classList.add('secondary');
+  showAlertLine('Robot disconnected', 'danger');
+}
+
+function disconnectBluetooth(){
+  if(bleDevice && bleDevice.gatt.connected){
+    bleDevice.gatt.disconnect();
+  }
+  connected = false;
+  updateConnUI();
+}
+
+/* parse incoming characteristic data (assumes UTF-8 text lines) */
+function parseSensorString(s){
+  // tolerant parse: key:value;key2:value2
+  const parts = s.trim().split(';');
+  const out = {};
+  for(const p of parts){
+    if(!p.includes(':')) continue;
+    const [k,v] = p.split(':').map(x => x.trim());
+    if(!k) continue;
+    const key = k.toUpperCase();
+    if(key === 'S') out.soil = parseFloat(v);
+    else if(key === 'L') out.light = parseFloat(v);
+    else if(key === 'M') out.motion = (v === '1' || v.toLowerCase() === 'true');
+    else if(key === 'I') out.insects = parseInt(v) || 0;
+    else if(key === 'DM') out.dangerousMotion = (v === '1' || v.toLowerCase() === 'true');
+  }
+  return out;
+}
+
+function onCharacteristicValueChanged(evt){
+  try{
+    const value = evt.target.value; // DataView
+    // try decode as text
+    let text = '';
+    if(window.TextDecoder){
+      text = new TextDecoder().decode(value);
     } else {
-      waterState.textContent = 'Idle';
-      manualBtn.textContent = 'Start Watering';
-      manualBtn.classList.remove('btn-disabled');
-      waterBtn.style.transform = 'scale(1)';
-      waterBtn.style.boxShadow = '0 8px 18px rgba(0,0,0,0.35)';
+      // fallback
+      for(let i=0;i<value.byteLength;i++) text += String.fromCharCode(value.getUint8(i));
     }
+    // some devices send multiple lines: take last non-empty line
+    const lastLine = text.trim().split('\n').filter(Boolean).pop() || text.trim();
+    const data = parseSensorString(lastLine);
+    updateUI(data);
+    checkAlertsAndNotify();
+  }catch(e){
+    console.error('value parse error', e);
   }
+}
 
-  // ---------- Simulation ----------
-  function simulateOnce(){
-    // small random walk from last values
-    let soil = last.soil + rand(-4,4);
-    let light = last.light + rand(-6,6);
-    const motion = Math.random() > 0.88;
-
-    soil = clamp(soil, 15, 90);
-    light = clamp(light, 5, 95);
-
-    updateUI({ soil, light, motion });
-
-    // show browser notification when soil dry (if permission granted)
-    if(soil < 28 && 'Notification' in window && Notification.permission === 'granted'){
-      new Notification('Green Guardian', { body: 'Soil is dry — watering recommended' });
-    }
+/* -------------------------
+  Manual commands (send to robot)
+   ------------------------- */
+async function sendCommandToRobot(cmd){
+  if(!bleChar) {
+    console.log('No BLE char; simulating command:', cmd);
+    return;
   }
-
-  // toggle watering safely (reuses last known values)
-  function toggleWater(){
-    watering = !watering;
-
-    // when toggling, we still pass current last values (so updateUI doesn't get empty)
-    updateUI({ soil: last.soil, light: last.light, motion: last.motion });
-
-    console.log('WATER_CMD ->', watering ? 'ON' : 'OFF');
-
-    // simulate watering effect: increase soil gradually while watering
-    if(watering){
-      let raised = 0;
-      const t = setInterval(()=>{
-        raised += 1.5;
-        const newSoil = clamp(last.soil + raised, 0, 95);
-        updateUI({ soil: newSoil, light: last.light, motion: false });
-        if(raised > 8){
-          clearInterval(t);
-        }
-      }, 900);
-    }
+  try{
+    const enc = new TextEncoder();
+    await bleChar.writeValue(enc.encode(cmd + '\n'));
+    console.log('sent', cmd);
+  }catch(e){
+    console.warn('send failed', e);
   }
+}
 
-  // ---------- Events ----------
-  waterBtn.addEventListener('click', toggleWater);
-  manualBtn.addEventListener('click', toggleWater);
+/* -------------------------
+  Water control
+   ------------------------- */
+function startWatering(){
+  watering = true;
+  updateUI({}); // refresh
+  sendCommandToRobot('WATER_ON');
+  showAlertLine('Watering started', '');
+}
+function stopWatering(){
+  watering = false;
+  updateUI({});
+  sendCommandToRobot('WATER_OFF');
+  showAlertLine('Watering stopped', '');
+}
 
-  // ---------- Notifications permission ----------
-  if('Notification' in window){
-    if(Notification.permission === 'default'){
-      Notification.requestPermission().catch(()=>{ /* ignore */ });
-    }
-  }
+/* -------------------------
+  Wiring events & simulation fallback
+   ------------------------- */
+btBtn.addEventListener('click', async ()=>{
+  if(!connected) await connectBluetooth();
+  else disconnectBluetooth();
+});
 
-  // ---------- Start ----------
-  // initialize UI with defaults and start simulation
-  updateUI({ soil: last.soil, light: last.light, motion: last.motion });
-  setInterval(simulateOnce, 2000);
+waterBtn.addEventListener('click', ()=>{
+  if(watering) stopWatering(); else startWatering();
+});
+manualBtn.addEventListener('click', ()=>{ if(watering) stopWatering(); else startWatering(); });
+stopBtn.addEventListener('click', stopWatering);
 
-  // register service worker (keeps existing service-worker.js)
-  if('serviceWorker' in navigator){
-    navigator.serviceWorker.register('service-worker.js').catch(()=>{ console.log('service worker failed to register'); });
-  }
+function updateConnUI(){
+  connDot.style.background = connected ? '#9ef08f' : '#6b6b6b';
+  connText.textContent = connected ? 'Connected' : 'Disconnected';
+}
+
+/* -------------------------
+  Simulation (runs when NOT connected)
+   ------------------------- */
+function simulateOnce(){
+  if(connected) return; // when connected, robot will send data via BLE
+  // small random walk
+  last.soil = clamp((last.soil || 50) + (Math.random()*6 - 3), 10, 92);
+  last.light = clamp((last.light || 50) + (Math.random()*8 - 4), 6, 96);
+  last.motion = (Math.random() > 0.88);
+  last.dangerousMotion = (Math.random() > 0.97);
+  // occasionally simulate insects
+  last.insects = (Math.random() > 0.985) ? Math.floor(Math.random()*3)+1 : 0;
+
+  updateUI({});
+  checkAlertsAndNotify();
+}
+
+updateUI({ soil: last.soil, light: last.light, motion: last.motion, insects:last.insects });
+setInterval(simulateOnce, 2000);
+
+/* -------------------------
+  Notifications permission & SW registration
+   ------------------------- */
+if('Notification' in window && Notification.permission === 'default'){
+  Notification.requestPermission().catch(()=>{});
+}
+
+// register service worker if available
+if('serviceWorker' in navigator){
+  navigator.serviceWorker.register('service-worker.js').catch(()=>{console.log('sw register failed');});
+}
+
 </script>
 </body>
 </html>
