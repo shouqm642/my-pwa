@@ -6,13 +6,12 @@
   <title>Green Guardian</title>
   <meta name="theme-color" content="#0b3f1a" />
   <style>
-    /* (same styling as before, slightly trimmed) */
     :root{
-      --bg:#06260f; --card:#0f3e20; --accent:#2e8b3a; --accent-2:#4caf50; --muted:#b3d8b3; --warn:#f0a02d; --danger:#c94a3d;
+      --bg:#05260f; --card:#0f3e20; --accent:#2e8b3a; --accent-2:#4caf50; --muted:#b3d8b3; --warn:#f0a02d; --danger:#c94a3d;
     }
-    html,body{height:100%;margin:0;font-family:Inter,system-ui,Segoe UI,Roboto,Arial;}
-    body{background:linear-gradient(180deg,#052010 0%, #0a2d12 60%);color:#eaf6ea;padding:16px;}
-    .container{max-width:520px;margin:0 auto;}
+    html,body{height:100%;margin:0;font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Arial;}
+    body{background:linear-gradient(180deg,#042010 0%, #072712 70%);color:#eaf6ea;padding:14px;}
+    .container{max-width:560px;margin:0 auto;}
     header{display:flex;align-items:center;justify-content:space-between;padding:12px;border-radius:12px;background:linear-gradient(90deg,var(--card), rgba(14,56,30,0.9));box-shadow:0 6px 18px rgba(0,0,0,0.45);margin-bottom:14px}
     .brand{display:flex;align-items:center;gap:10px;font-weight:700;font-size:18px;color:var(--accent-2)}
     .badge{display:inline-flex;align-items:center;gap:8px;background:linear-gradient(180deg,#1b6b32,#0e4f21);padding:6px 12px;border-radius:20px;font-size:13px}
@@ -25,7 +24,7 @@
     .watering{display:flex;flex-direction:column;align-items:center;gap:12px;padding:8px 0}
     .circle-btn{width:84px;height:84px;border-radius:50%;display:flex;align-items:center;justify-content:center;background:linear-gradient(180deg,var(--accent-2),var(--accent));box-shadow:0 10px 24px rgba(30,100,40,0.45);border:3px solid rgba(255,255,255,0.04);cursor:pointer}
     .water-state{font-weight:700;color:#dcffd4;font-size:15px}
-    .btn{padding:10px 14px;border-radius:8px;background:#234; color:#dfffe0;border:1px solid rgba(255,255,255,0.04);cursor:pointer}
+    .btn{padding:10px 14px;border-radius:8px;background:#234;color:#dfffe0;border:1px solid rgba(255,255,255,0.04);cursor:pointer}
     .btn.secondary{background:transparent;color:var(--muted);border:1px solid rgba(255,255,255,0.06)}
     .danger{background:var(--danger);color:#fff}
     .alert-line{padding:10px;border-radius:8px;margin-bottom:10px;font-weight:700}
@@ -45,7 +44,7 @@
       <div style="display:flex;gap:10px;align-items:center">
         <div id="alert-banner" style="display:none"></div>
         <div class="badge" id="conn-badge">
-          <span style="width:10px;height:10px;border-radius:50%;background:#9ef08f;display:inline-block;margin-right:6px" id="conn-dot"></span>
+          <span style="width:10px;height:10px;border-radius:50%;background:#6b6b6b;display:inline-block;margin-right:6px" id="conn-dot"></span>
           <span id="conn-text">Disconnected</span>
         </div>
         <button id="bt-btn" class="btn secondary" title="Connect to robot">Connect Bluetooth</button>
@@ -114,83 +113,66 @@
   </div>
 
 <script>
-/* -------------------------
-  Configuration & state
-   ------------------------- */
-const SERVICE_UUID = '0000ffe0-0000-1000-8000-00805f9b34fb'; // <-- replace with your robot's BLE service UUID
-const CHAR_UUID    = '0000ffe1-0000-1000-8000-00805f9b34fb'; // <-- replace with your robot's characteristic UUID (notify)
+/* ============================
+   Configuration & state
+   ============================ */
+
+/* Replace these UUIDs with your robot's BLE service & characteristic UUIDs */
+const SERVICE_UUID = '0000ffe0-0000-1000-8000-00805f9b34fb';
+const CHAR_UUID    = '0000ffe1-0000-1000-8000-00805f9b34fb';
 
 let bleDevice = null;
 let bleChar = null;
 let connected = false;
 
 let watering = false;
-let last = { soil: 50, light: 50, motion: false, insects: 0, dangerousMotion: 0 };
+let last = { soil: 50, light: 50, motion: false, insects: 0, dangerousMotion: false };
 
-// debounce map: type -> timestamp of last notification
-const DEBOUNCE_MS = { soil: 1000 * 60 * 30, // 30 min for dry soil reminders
-                      motion: 1000 * 60 * 5, // 5 min for motion alerts
-                      insects: 1000 * 60 * 60 // 60 min for insect alerts
+/* Debounce configuration to avoid repeated notifications */
+const DEBOUNCE_MS = { soil: 1000 * 60 * 30, // 30 min
+                      motion: 1000 * 60 * 5,  // 5 min
+                      insects: 1000 * 60 * 60 // 60 min
                     };
 const lastNotified = { soil: 0, motion: 0, insects: 0 };
 
-/* -------------------------
-  UI elements
-   ------------------------- */
-const soilValEl = document.getElementById('soil-value');
-const soilLabel = document.getElementById('soil-label');
-const lightValEl = document.getElementById('light-value');
-const lightLabel = document.getElementById('light-label');
-const motionValEl = document.getElementById('motion-value');
-const motionLabel = document.getElementById('motion-label');
-const connDot = document.getElementById('conn-dot');
-const connText = document.getElementById('conn-text');
-const connBadge = document.getElementById('conn-badge');
+/* ============================
+   Simple helpers & UI refs
+   ============================ */
+const el = id => document.getElementById(id);
+const soilValEl = el('soil-value'), soilLabel = el('soil-label');
+const lightValEl = el('light-value'), lightLabel = el('light-label');
+const motionValEl = el('motion-value'), motionLabel = el('motion-label');
+const connDot = el('conn-dot'), connText = el('conn-text'), alertBanner = el('alert-banner');
+const btBtn = el('bt-btn'), waterBtn = el('water-btn'), manualBtn = el('manual-btn'), stopBtn = el('stop-btn');
+const insectCard = el('insect-card'), insectMsg = el('insect-msg');
 
-const btBtn = document.getElementById('bt-btn');
-const waterBtn = document.getElementById('water-btn');
-const manualBtn = document.getElementById('manual-btn');
-const stopBtn = document.getElementById('stop-btn');
-
-const insectCard = document.getElementById('insect-card');
-const insectMsg = document.getElementById('insect-msg');
-const alertBanner = document.getElementById('alert-banner');
-
-/* -------------------------
-  Utility functions
-   ------------------------- */
-function clamp(v,min,max){ return Math.max(min,Math.min(max,v)); }
-function now(){ return (new Date()).getTime(); }
-function canNotify(type){
-  const t = lastNotified[type] || 0;
-  return (now() - t) > (DEBOUNCE_MS[type] || 0);
-}
+const clamp = (v,m,M) => Math.max(m, Math.min(M, v));
+const now = () => (new Date()).getTime();
+function canNotify(type){ return (now() - (lastNotified[type] || 0)) > (DEBOUNCE_MS[type] || 0); }
 function markNotified(type){ lastNotified[type] = now(); }
 
-function showAlertLine(message, kind='danger'){
+function showBanner(msg, kind='danger'){
   alertBanner.style.display = 'block';
   alertBanner.className = 'alert-line ' + (kind==='danger' ? 'alert-danger' : '');
-  alertBanner.textContent = message;
-  // auto hide after 8s
-  setTimeout(()=>{ alertBanner.style.display = 'none'; }, 8000);
+  alertBanner.textContent = msg;
+  setTimeout(()=> alertBanner.style.display = 'none', 7000);
 }
 
 function sendNotification(title, body, urgent=false){
   if(!('Notification' in window)) return;
   if(Notification.permission === 'granted'){
     try{
-      const n = new Notification(title, { body, renotify: !urgent });
+      new Notification(title, { body, renotify: !!urgent });
       if(urgent && navigator.vibrate) navigator.vibrate([300,100,300]);
-      return n;
-    }catch(e){ console.warn('notify fail', e) }
+    }catch(e){ console.warn('notify failed', e) }
   } else if(Notification.permission === 'default'){
-    Notification.requestPermission().then(p => { if(p==='granted') sendNotification(title, body, urgent); });
+    Notification.requestPermission().then(p => { if(p === 'granted') sendNotification(title, body, urgent); });
   }
 }
 
-/* -------------------------
-  UI update
-   ------------------------- */
+/* ============================
+   UI update & status helpers
+   ============================ */
 function statusTextForSoil(n){
   if(n < 20) return 'Dry — needs water';
   if(n < 40) return 'Low';
@@ -208,10 +190,10 @@ function statusTextForMotion(flag, dm){
   return flag ? 'Movement' : 'No Motion';
 }
 
-/* updateUI accepts partial data */
 function updateUI(data = {}){
-  last.soil = (typeof data.soil !== 'undefined') ? clamp(parseFloat(data.soil)||0,0,100) : last.soil;
-  last.light = (typeof data.light !== 'undefined') ? clamp(parseFloat(data.light)||0,0,100) : last.light;
+  // merge partial updates into last
+  last.soil = (typeof data.soil !== 'undefined') ? clamp(parseFloat(data.soil)||0, 0, 100) : last.soil;
+  last.light = (typeof data.light !== 'undefined') ? clamp(parseFloat(data.light)||0, 0, 100) : last.light;
   last.motion = (typeof data.motion !== 'undefined') ? !!data.motion : last.motion;
   last.insects = (typeof data.insects !== 'undefined') ? parseInt(data.insects)||0 : last.insects;
   last.dangerousMotion = (typeof data.dangerousMotion !== 'undefined') ? !!data.dangerousMotion : last.dangerousMotion;
@@ -220,13 +202,13 @@ function updateUI(data = {}){
   soilLabel.textContent = statusTextForSoil(last.soil);
   lightValEl.textContent = (Math.round(last.light*10)/10) + '%';
   lightLabel.textContent = statusTextForLight(last.light);
+
   motionValEl.textContent = last.dangerousMotion ? '!' : (last.motion ? '•' : '—');
   motionLabel.textContent = statusTextForMotion(last.motion, last.dangerousMotion);
 
   connDot.style.background = connected ? '#9ef08f' : '#6b6b6b';
   connText.textContent = connected ? 'Connected' : 'Disconnected';
 
-  // insect UI
   if(last.insects > 0){
     insectCard.style.display = 'block';
     insectMsg.textContent = `${last.insects} insect(s) detected — inspect plant`;
@@ -235,48 +217,74 @@ function updateUI(data = {}){
   }
 }
 
-/* -------------------------
-  Notification logic (smart)
-   ------------------------- */
+/* ============================
+   Smart alerts (debounced)
+   ============================ */
 function checkAlertsAndNotify(){
   // Soil dry
   if(last.soil < 28 && canNotify('soil')){
     sendNotification('Green Guardian — Dry soil', 'Soil is dry. Consider watering the plant.', false);
     markNotified('soil');
-    showAlertLine('Soil is dry — watering recommended', 'danger');
+    showBanner('Soil is dry — watering recommended', 'danger');
   }
-
   // Dangerous motion
   if((last.dangerousMotion || last.motion) && canNotify('motion')){
-    sendNotification('Green Guardian — Movement detected', last.dangerousMotion ? 'Dangerous motion detected near plant!' : 'Movement detected near plant', true);
+    sendNotification('Green Guardian — Movement', last.dangerousMotion ? 'Dangerous motion detected!' : 'Movement detected near plant', true);
     markNotified('motion');
-    showAlertLine(last.dangerousMotion ? 'Dangerous movement detected — check immediately' : 'Movement detected nearby', 'danger');
+    showBanner(last.dangerousMotion ? 'Dangerous movement detected — check immediately' : 'Movement detected nearby', 'danger');
   }
-
   // Insects
   if(last.insects > 0 && canNotify('insects')){
-    sendNotification('Green Guardian — Insects detected', `${last.insects} possible insect(s) detected near the plant. Inspect and treat.`, true);
+    sendNotification('Green Guardian — Insects detected', `${last.insects} possible insect(s) detected. Inspect and treat.`, true);
     markNotified('insects');
-    showAlertLine('Insects detected — inspect plant', 'danger');
+    showBanner('Insects detected — inspect plant', 'danger');
   }
 }
 
-/* -------------------------
-  Bluetooth: connect & handlers
-   ------------------------- */
+/* ============================
+   Parse robot message
+   Expected format example: "S:45;L:60;M:0;I:0;DM:0"
+   Keys:
+     S = soil (0..100)
+     L = light (0..100)
+     M = motion (0/1 or true/false)
+     I = insects (integer count)
+     DM = dangerous motion (0/1)
+   ============================ */
+function parseSensorString(s){
+  const out = {};
+  try {
+    const parts = s.trim().split(';').filter(Boolean);
+    for(const p of parts){
+      const [k,v] = p.split(':').map(x => x.trim());
+      if(!k) continue;
+      const key = k.toUpperCase();
+      if(key === 'S') out.soil = parseFloat(v);
+      else if(key === 'L') out.light = parseFloat(v);
+      else if(key === 'M') out.motion = (v === '1' || v.toLowerCase() === 'true');
+      else if(key === 'I') out.insects = parseInt(v) || 0;
+      else if(key === 'DM') out.dangerousMotion = (v === '1' || v.toLowerCase() === 'true');
+    }
+  } catch(e){
+    console.warn('parseSensorString error', e);
+  }
+  return out;
+}
+
+/* ============================
+   Bluetooth connection & handlers
+   ============================ */
 async function connectBluetooth(){
   if(!navigator.bluetooth){
     alert('Web Bluetooth not supported in this browser. Use Chrome on Android.');
     return;
   }
-
   try{
-    btBtn.textContent = 'Choosing device...';
-    // You may use filters for specific name or service; using acceptAllDevices with optionalServices for demo
+    btBtn.textContent = 'Selecting device...';
     const device = await navigator.bluetooth.requestDevice({
       acceptAllDevices: true,
       optionalServices: [SERVICE_UUID]
-      // OR use filters: filters: [{namePrefix: 'GreenBot'}]
+      // For stricter filter: filters: [{namePrefix: 'GreenBot'}]
     });
     bleDevice = device;
     bleDevice.addEventListener('gattserverdisconnected', onDisconnected);
@@ -286,7 +294,6 @@ async function connectBluetooth(){
     const char = await service.getCharacteristic(CHAR_UUID);
     bleChar = char;
 
-    // start notifications if supported
     if(char.properties.notify){
       await char.startNotifications();
       char.addEventListener('characteristicvaluechanged', onCharacteristicValueChanged);
@@ -294,25 +301,22 @@ async function connectBluetooth(){
 
     connected = true;
     btBtn.textContent = 'Disconnect';
-    btBtn.classList.remove('secondary');
-    btBtn.classList.add('danger');
+    btBtn.classList.remove('secondary'); btBtn.classList.add('danger');
     updateConnUI();
-    showAlertLine('Connected to robot', ''); // short banner
-  }catch(err){
-    console.error('BLE connect failed', err);
+    showBanner('Connected to robot', ''); // short banner
+  } catch(e){
+    console.error('BLE connect failed', e);
     btBtn.textContent = 'Connect Bluetooth';
     alert('Bluetooth connection failed or cancelled.');
   }
 }
 
 function onDisconnected(){
-  console.log('Device disconnected');
   connected = false;
   updateConnUI();
   btBtn.textContent = 'Connect Bluetooth';
-  btBtn.classList.remove('danger');
-  btBtn.classList.add('secondary');
-  showAlertLine('Robot disconnected', 'danger');
+  btBtn.classList.remove('danger'); btBtn.classList.add('secondary');
+  showBanner('Robot disconnected', 'danger');
 }
 
 function disconnectBluetooth(){
@@ -323,130 +327,126 @@ function disconnectBluetooth(){
   updateConnUI();
 }
 
-/* parse incoming characteristic data (assumes UTF-8 text lines) */
-function parseSensorString(s){
-  // tolerant parse: key:value;key2:value2
-  const parts = s.trim().split(';');
-  const out = {};
-  for(const p of parts){
-    if(!p.includes(':')) continue;
-    const [k,v] = p.split(':').map(x => x.trim());
-    if(!k) continue;
-    const key = k.toUpperCase();
-    if(key === 'S') out.soil = parseFloat(v);
-    else if(key === 'L') out.light = parseFloat(v);
-    else if(key === 'M') out.motion = (v === '1' || v.toLowerCase() === 'true');
-    else if(key === 'I') out.insects = parseInt(v) || 0;
-    else if(key === 'DM') out.dangerousMotion = (v === '1' || v.toLowerCase() === 'true');
-  }
-  return out;
-}
-
 function onCharacteristicValueChanged(evt){
   try{
-    const value = evt.target.value; // DataView
-    // try decode as text
+    const dataView = evt.target.value;
     let text = '';
     if(window.TextDecoder){
-      text = new TextDecoder().decode(value);
+      text = new TextDecoder().decode(dataView);
     } else {
-      // fallback
-      for(let i=0;i<value.byteLength;i++) text += String.fromCharCode(value.getUint8(i));
+      for(let i=0;i<dataView.byteLength;i++) text += String.fromCharCode(dataView.getUint8(i));
     }
-    // some devices send multiple lines: take last non-empty line
+    // support multiple lines; pick last non-empty
     const lastLine = text.trim().split('\n').filter(Boolean).pop() || text.trim();
-    const data = parseSensorString(lastLine);
-    updateUI(data);
+    const parsed = parseSensorString(lastLine);
+    updateUI(parsed);
     checkAlertsAndNotify();
-  }catch(e){
-    console.error('value parse error', e);
+  } catch(e){
+    console.warn('characteristic parse error', e);
   }
 }
 
-/* -------------------------
-  Manual commands (send to robot)
-   ------------------------- */
+/* ============================
+   Send command to robot (safe)
+   ============================ */
 async function sendCommandToRobot(cmd){
-  if(!bleChar) {
-    console.log('No BLE char; simulating command:', cmd);
+  if(!bleChar){
+    console.log('No BLE char; simulated send:', cmd);
     return;
   }
   try{
     const enc = new TextEncoder();
     await bleChar.writeValue(enc.encode(cmd + '\n'));
     console.log('sent', cmd);
-  }catch(e){
-    console.warn('send failed', e);
+  } catch(e){
+    console.warn('BLE send failed', e);
   }
 }
 
-/* -------------------------
-  Water control
-   ------------------------- */
-function startWatering(){
-  watering = true;
-  updateUI({}); // refresh
-  sendCommandToRobot('WATER_ON');
-  showAlertLine('Watering started', '');
+/* ============================
+   Watering controls (robust)
+   ============================ */
+let wateringTimer = null;
+
+function safeSendCommand(cmd){
+  if(typeof sendCommandToRobot === 'function'){
+    try{ sendCommandToRobot(cmd); } catch(e){ console.warn('safeSendCommand error', e); }
+  } else {
+    console.log('Simulate command:', cmd);
+  }
 }
+
+function startWatering(){
+  if(watering) return;
+  watering = true;
+  updateUI({});
+  safeSendCommand('WATER_ON');
+  showBanner('Watering started', '');
+  manualBtn.textContent = 'Stop Watering'; waterState.textContent = 'Watering Active';
+  manualBtn.disabled = true; setTimeout(()=>manualBtn.disabled = false, 700);
+
+  // simulate soil rise when not connected
+  if(!connected){
+    if(wateringTimer) clearInterval(wateringTimer);
+    let step = 0;
+    wateringTimer = setInterval(()=>{
+      step += 1.5;
+      const newSoil = clamp(last.soil + step, 0, 98);
+      updateUI({ soil: newSoil, motion: false });
+      if(step > 8){ clearInterval(wateringTimer); wateringTimer = null; }
+    }, 900);
+  }
+}
+
 function stopWatering(){
+  if(!watering) return;
   watering = false;
   updateUI({});
-  sendCommandToRobot('WATER_OFF');
-  showAlertLine('Watering stopped', '');
+  safeSendCommand('WATER_OFF');
+  showBanner('Watering stopped', '');
+  manualBtn.textContent = 'Start Watering'; waterState.textContent = 'Idle';
+  if(wateringTimer){ clearInterval(wateringTimer); wateringTimer = null; }
 }
 
-/* -------------------------
-  Wiring events & simulation fallback
-   ------------------------- */
+function toggleWater(){ if(watering) stopWatering(); else startWatering(); }
+
+/* ============================
+   Events & simulation fallback
+   ============================ */
 btBtn.addEventListener('click', async ()=>{
-  if(!connected) await connectBluetooth();
-  else disconnectBluetooth();
+  if(!connected) await connectBluetooth(); else disconnectBluetooth();
 });
+waterBtn.addEventListener('click', ()=>toggleWater());
+manualBtn.addEventListener('click', ()=>toggleWater());
+stopBtn.addEventListener('click', ()=>stopWatering());
 
-waterBtn.addEventListener('click', ()=>{
-  if(watering) stopWatering(); else startWatering();
-});
-manualBtn.addEventListener('click', ()=>{ if(watering) stopWatering(); else startWatering(); });
-stopBtn.addEventListener('click', stopWatering);
+function updateConnUI(){ connDot.style.background = connected ? '#9ef08f' : '#6b6b6b'; connText.textContent = connected ? 'Connected' : 'Disconnected'; }
 
-function updateConnUI(){
-  connDot.style.background = connected ? '#9ef08f' : '#6b6b6b';
-  connText.textContent = connected ? 'Connected' : 'Disconnected';
-}
-
-/* -------------------------
-  Simulation (runs when NOT connected)
-   ------------------------- */
+/* Simulation: only runs when not connected (useful for testing on desktop) */
 function simulateOnce(){
-  if(connected) return; // when connected, robot will send data via BLE
-  // small random walk
+  if(connected) return;
   last.soil = clamp((last.soil || 50) + (Math.random()*6 - 3), 10, 92);
   last.light = clamp((last.light || 50) + (Math.random()*8 - 4), 6, 96);
   last.motion = (Math.random() > 0.88);
   last.dangerousMotion = (Math.random() > 0.97);
-  // occasionally simulate insects
   last.insects = (Math.random() > 0.985) ? Math.floor(Math.random()*3)+1 : 0;
-
   updateUI({});
   checkAlertsAndNotify();
 }
 
-updateUI({ soil: last.soil, light: last.light, motion: last.motion, insects:last.insects });
+/* Initialize */
+updateUI({ soil: last.soil, light: last.light, motion: last.motion, insects: last.insects });
 setInterval(simulateOnce, 2000);
 
-/* -------------------------
-  Notifications permission & SW registration
-   ------------------------- */
+/* Notifications permission */
 if('Notification' in window && Notification.permission === 'default'){
   Notification.requestPermission().catch(()=>{});
 }
 
-// register service worker if available
+/* Register service worker if available */
 if('serviceWorker' in navigator){
-  navigator.serviceWorker.register('service-worker.js').catch(()=>{console.log('sw register failed');});
+  navigator.serviceWorker.register('service-worker.js').catch(()=>{console.log('service worker registration failed');});
 }
-
 </script>
 </body>
 </html>
