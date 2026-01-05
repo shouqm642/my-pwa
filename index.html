@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Green Guardian App</title>
+
+  <!-- PWA -->
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#2e7d32">
+
+  <style>
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background: #e8f5e9;
+      color: #1b5e20;
+      text-align: center;
+    }
+    header {
+      background: #2e7d32;
+      color: white;
+      padding: 16px;
+      font-size: 22px;
+      font-weight: bold;
+    }
+    .card {
+      background: white;
+      margin: 16px;
+      padding: 16px;
+      border-radius: 12px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+    }
+    button {
+      background: #43a047;
+      color: white;
+      border: none;
+      padding: 12px 18px;
+      border-radius: 8px;
+      font-size: 16px;
+      cursor: pointer;
+      margin: 6px;
+    }
+    button.stop {
+      background: #c62828;
+    }
+  </style>
+</head>
+
+<body>
+  <header>🌱 Green Guardian App</header>
+
+  <div class="card">
+    <h3>Sensor Data</h3>
+    <p>Soil Moisture: <b id="soil">--</b>%</p>
+    <p>Light Level: <b id="light">--</b></p>
+    <p>Motion Detected: <b id="motion">--</b></p>
+  </div>
+
+  <div class="card">
+    <h3>Water Control</h3>
+    <button onclick="waterOn()">Start Watering</button>
+    <button class="stop" onclick="waterOff()">Stop Watering</button>
+  </div>
+
+  <script>
+    // Fake sensor data (simulation)
+    function updateSensors() {
+      document.getElementById("soil").innerText =
+        Math.floor(Math.random() * 60) + 20;
+      document.getElementById("light").innerText =
+        Math.floor(Math.random() * 800);
+      document.getElementById("mo
