@@ -7,24 +7,23 @@
 <meta name="theme-color" content="#0b3f1a" />
 <style>
   :root{
-    --bg:#03240e; --card:#0f3e20; --accent:#2e8b3a; --accent-2:#4caf50; --muted:#b3d8b3; --warn:#f0a02d; --danger:#c94a3d;
+    --bg:#03240e; --card:#0f3e20; --accent:#2e8b3a; --accent-2:#4caf50; --muted:#b3d8b3; --danger:#c94a3d;
     --glass: rgba(255,255,255,0.02);
   }
   html,body{height:100%;margin:0;font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Arial;}
   body{background:linear-gradient(180deg,#02230c 0%, #062e14 70%);color:#eaf6ea;padding:16px;}
-  .container{max-width:980px;margin:0 auto;}
+  .container{max-width:960px;margin:0 auto;}
   header{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px;border-radius:12px;background:linear-gradient(90deg,var(--card), rgba(14,56,30,0.9));box-shadow:0 6px 18px rgba(0,0,0,0.45);margin-bottom:14px}
-  .brand{display:flex;align-items:center;gap:10px;font-weight:800;font-size:20px;color:var(--accent-2)}
+  .brand{display:flex;align-items:center;gap:10px;font-weight:800;font-size:18px;color:var(--accent-2)}
   .lang-switch{display:flex;gap:8px;align-items:center}
   .lang-btn{padding:6px 10px;border-radius:8px;background:transparent;color:var(--muted);border:1px solid rgba(255,255,255,0.06);cursor:pointer}
   .lang-btn.active{background:var(--accent-2);color:#042610;border:1px solid rgba(0,0,0,0.06)}
   .badge{display:inline-flex;align-items:center;gap:8px;background:linear-gradient(180deg,#1b6b32,#0e4f21);padding:6px 12px;border-radius:20px;font-size:13px}
   .card{background:linear-gradient(180deg,var(--glass), rgba(255,255,255,0.01));border-radius:12px;padding:14px;margin-bottom:12px;box-shadow:0 6px 18px rgba(0,0,0,0.35);border-right:6px solid rgba(255,255,255,0.03)}
-  .row{display:flex;flex-direction:column;gap:12px}
+  .grid-3{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
   .sensor-title{display:flex;gap:10px;align-items:center;font-weight:700;color:var(--muted)}
-  .big-number{font-size:30px;font-weight:800;color:#fff;margin-top:6px}
+  .big-number{font-size:28px;font-weight:800;color:#fff;margin-top:6px}
   .small{font-size:13px;color:var(--muted);margin-top:4px}
-  .card.soil{border-right-color:#6fd97a}.card.light{border-right-color:#f0a02d}.card.motion{border-right-color:#9fb3b0}
   .watering{display:flex;flex-direction:column;align-items:center;gap:12px;padding:8px 0}
   .circle-btn{width:84px;height:84px;border-radius:50%;display:flex;align-items:center;justify-content:center;border:3px solid rgba(255,255,255,0.04);cursor:pointer;transition:all .18s ease}
   .circle-btn.off { background: linear-gradient(180deg,#355f45,#1f3a2a); box-shadow: 0 8px 18px rgba(0,0,0,0.4); }
@@ -44,30 +43,25 @@
   .location { font-size:13px; color:var(--muted); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
   .loc-input { flex:1; padding:8px 10px; border-radius:8px; border:1px solid rgba(255,255,255,0.06); background: rgba(255,255,255,0.02); color: #eaffea; direction:ltr; }
   .small-note { font-size:12px; color:var(--muted); margin-top:6px; text-align:right; }
-  .map-preview { width:100%; height:220px; border-radius:10px; overflow:hidden; margin-top:10px; display:none; border:1px solid rgba(255,255,255,0.04) }
+  .map-preview { width:100%; height:280px; border-radius:10px; overflow:hidden; margin-top:10px; display:none; border:1px solid rgba(255,255,255,0.04) }
   footer{margin-top:10px;text-align:center;color:rgba(255,255,255,0.25);font-size:13px}
-  .grid-3{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
-  @media (max-width:880px){ .grid-3{grid-template-columns:1fr} .map-preview{height:180px} .circle-btn{width:72px;height:72px} .big-number{font-size:24px} }
+  @media (max-width:880px){ .grid-3{grid-template-columns:1fr} .map-preview{height:200px} .circle-btn{width:72px;height:72px} .big-number{font-size:22px} }
 </style>
 </head>
-
 <body>
   <div class="container" id="app-root" dir="ltr">
     <header>
       <div style="display:flex;align-items:center;gap:12px">
-        <div class="brand">
-          <svg width="28" height="28" viewBox="0 0 24 24" fill="none"><path d="M12 2c2.8 0 5 2 6 4-1.6.2-3.5 1-5 2-1.4 1-2.5 2.5-3 4-.5-1.5-1.6-3-3-4-1.4-1-3.4-1.8-5-2 1-2 3.2-4 6-4z" fill="#9feab0"/></svg>
-          <span id="brand-text" data-i18n="brand">Green Guardian</span>
-        </div>
+        <div class="brand"><svg width="28" height="28" viewBox="0 0 24 24" fill="none"><path d="M12 2c2.8 0 5 2 6 4-1.6.2-3.5 1-5 2-1.4 1-2.5 2.5-3 4-.5-1.5-1.6-3-3-4-1.4-1-3.4-1.8-5-2 1-2 3.2-4 6-4z" fill="#9feab0"/></svg><span id="brand-text" data-i18n="brand">Green Guardian</span></div>
       </div>
 
       <div style="display:flex;align-items:center;gap:12px">
         <div class="lang-switch" role="tablist" aria-label="Language">
-          <button id="lang-en" class="lang-btn active" aria-pressed="true">English</button>
-          <button id="lang-ar" class="lang-btn">العربية</button>
+          <button id="lang-en" class="lang-btn">Eng</button>
+          <button id="lang-ar" class="lang-btn">عربي</button>
         </div>
 
-        <div class="badge" id="conn-badge" title="connection status">
+        <div class="badge" id="conn-badge">
           <span id="conn-dot" style="width:10px;height:10px;border-radius:50%;background:#6b6b6b;display:inline-block;margin-left:6px"></span>
           <span id="conn-text" data-i18n="disconnected">Disconnected</span>
         </div>
@@ -80,8 +74,7 @@
       <div class="grid-3">
         <div class="card soil">
           <div style="display:flex;align-items:center;justify-content:space-between">
-            <div class="sensor-title">
-              <svg width="26" height="26"><path d="M12 2s-4 4-4 8 1.79 8 4 12c2.21-4 4-8 4-12s-4-8-4-8z" fill="#9feab0"/></svg>
+            <div class="sensor-title"><svg width="26" height="26"><path d="M12 2s-4 4-4 8 1.79 8 4 12c2.21-4 4-8 4-12s-4-8-4-8z" fill="#9feab0"/></svg>
               <div style="display:flex;flex-direction:column"><div style="font-weight:700" data-i18n="soil_title">Soil Moisture</div><div class="small" data-i18n="soil_sub">Moisture %</div></div>
             </div>
             <div style="text-align:right">
@@ -93,8 +86,7 @@
 
         <div class="card light">
           <div style="display:flex;align-items:center;justify-content:space-between">
-            <div class="sensor-title">
-              <svg width="26" height="26"><path d="M12 8a4 4 0 100 8 4 4 0 000-8z" fill="#ffd88a"/></svg>
+            <div class="sensor-title"><svg width="26" height="26"><path d="M12 8a4 4 0 100 8 4 4 0 000-8z" fill="#ffd88a"/></svg>
               <div style="display:flex;flex-direction:column"><div style="font-weight:700" data-i18n="light_title">Light Level</div><div class="small" data-i18n="light_sub">Ambient</div></div>
             </div>
             <div style="text-align:right">
@@ -106,8 +98,7 @@
 
         <div class="card motion">
           <div style="display:flex;align-items:center;justify-content:space-between">
-            <div class="sensor-title">
-              <svg width="26" height="26"><path d="M12 2a9 9 0 100 18 9 9 0 000-18z" fill="#d7e8d7"/></svg>
+            <div class="sensor-title"><svg width="26" height="26"><path d="M12 2a9 9 0 100 18 9 9 0 000-18z" fill="#d7e8d7"/></svg>
               <div style="display:flex;flex-direction:column"><div style="font-weight:700" data-i18n="motion_title">Motion Sensor</div><div class="small" data-i18n="motion_sub">Movement near plant</div></div>
             </div>
             <div style="text-align:right">
@@ -145,10 +136,11 @@
             <input id="loc-input" class="loc-input" placeholder="Enter robot ID or lat,lon (e.g. 25.2048,55.2708)" />
             <button id="loc-input-btn" class="btn secondary" data-i18n="locate_btn">Locate</button>
           </div>
-          <div class="small-note" style="width:100%;text-align:right" data-i18n="loc_help">Type a robot ID (will send WHERE:&lt;id&gt; when connected) or paste coordinates to jump to map.</div>
+
+          <div class="small-note" style="width:100%;text-align:right" id="loc-help">Type a robot ID (will send WHERE:&lt;id&gt; when connected) or paste coordinates to jump to map.</div>
 
           <div style="margin-top:10px;display:flex;gap:8px;align-items:center;width:100%">
-            <div class="location" id="loc-display">No location</div>
+            <div class="location" id="loc-display" data-i18n="no_location">No location</div>
           </div>
 
           <div class="map-preview" id="map-preview">
@@ -164,51 +156,17 @@
 
     </section>
 
-    <footer style="margin-top:6px">
-      <span data-i18n="footer">Green Guardian • demo PWA</span>
-    </footer>
+    <footer style="margin-top:6px"><span data-i18n="footer">Green Guardian • demo PWA</span></footer>
   </div>
 
 <script>
-/* ============================
-  Settings & i18n configuration
-  ============================ */
-
-/* BLE service/char */
+/* ------------------------
+   Config & strings
+   ------------------------ */
 const SERVICE_UUID = '0000ffe0-0000-1000-8000-00805f9b34fb';
 const CHAR_UUID    = '0000ffe1-0000-1000-8000-00805f9b34fb';
+const LOCATE_CMD_PREFIX = 'WHERE:'; // sends e.g. WHERE:robot123
 
-/* Robot locate command prefix — changed to "WHERE:" as requested */
-const LOCATE_CMD_PREFIX = 'WHERE:'; // change if your robot expects another prefix
-
-/* app state */
-let bleDevice = null, bleChar = null, connected = false;
-let watering = false;
-let last = { soil:50, light:50, motion:false, insects:0, dangerousMotion:false };
-
-/* debounce */
-const DEBOUNCE_MS = { soil:1000*60*30, motion:1000*60*5, insects:1000*60*60 };
-const lastNotified = { soil:0, motion:0, insects:0 };
-
-/* UI refs */
-const el = id => document.getElementById(id);
-const soilValEl = el('soil-value'), soilLabel = el('soil-label');
-const lightValEl = el('light-value'), lightLabel = el('light-label');
-const motionValEl = el('motion-value'), motionLabel = el('motion-label');
-const connDot = el('conn-dot'), connText = el('conn-text'), alertBanner = el('alert-banner');
-const btBtn = el('bt-btn'), waterBtn = el('water-btn'), manualBtn = el('manual-btn'), stopBtn = el('stop-btn');
-const findBtn = el('find-btn'), locInput = el('loc-input'), locInputBtn = el('loc-input-btn');
-const locDisplay = el('loc-display'), mapPreview = el('map-preview'), mapIframe = el('map-iframe');
-const insectCard = el('insect-card'), insectMsg = el('insect-msg');
-const langEnBtn = el('lang-en'), langArBtn = el('lang-ar');
-const appRoot = el('app-root');
-
-const clamp = (v,m,M) => Math.max(m, Math.min(M, v));
-const now = () => (new Date()).getTime();
-function canNotify(type){ return (now() - (lastNotified[type] || 0)) > (DEBOUNCE_MS[type] || 0); }
-function markNotified(type){ lastNotified[type] = now(); }
-
-/* Translation dictionary (keys used via data-i18n attr) */
 const strings = {
   en: {
     brand: "Green Guardian",
@@ -225,7 +183,7 @@ const strings = {
     start_watering: "Start Watering",
     stop_watering: "Stop",
     locate_btn: "Locate",
-    loc_help: "Type a robot ID (will send WHERE:<id> when connected) or paste coordinates to jump to map.",
+    loc_help: "Type a robot ID (will send WHERE:<id>) or paste coordinates to jump to map.",
     no_location: "No location",
     insect_title: "Insect Alert",
     footer: "Green Guardian • demo PWA"
@@ -240,7 +198,7 @@ const strings = {
     light_sub: "محلي",
     motion_title: "مستشعر الحركة",
     motion_sub: "حركة حول النبات",
-    controls_title: "الري و أدوات التحكم",
+    controls_title: "الري و الأدوات",
     find_robot: "تحديد مكان الروبوت",
     start_watering: "ابدأ الري",
     stop_watering: "إيقاف",
@@ -252,17 +210,42 @@ const strings = {
   }
 };
 
-/* Current language */
-let lang = 'en';
+/* ------------------------
+   State & refs
+   ------------------------ */
+let lang = (localStorage.getItem('gg_lang') || 'en');
+let bleDevice = null, bleChar = null, connected = false;
+let watering = false;
+let last = { soil:50, light:50, motion:false, insects:0, dangerousMotion:false };
 
-/* Apply translations for all elements with data-i18n */
-function applyTranslations(){
+const el = id => document.getElementById(id);
+const soilValEl = el('soil-value'), soilLabel = el('soil-label');
+const lightValEl = el('light-value'), lightLabel = el('light-label');
+const motionValEl = el('motion-value'), motionLabel = el('motion-label');
+const connDot = el('conn-dot'), connText = el('conn-text');
+const btBtn = el('bt-btn'), waterBtn = el('water-btn'), manualBtn = el('manual-btn'), stopBtn = el('stop-btn');
+const findBtn = el('find-btn'), locInput = el('loc-input'), locInputBtn = el('loc-input-btn');
+const locDisplay = el('loc-display'), mapPreview = el('map-preview'), mapIframe = el('map-iframe');
+const insectCard = el('insect-card'), insectMsg = el('insect-msg');
+const langEnBtn = el('lang-en'), langArBtn = el('lang-ar'), appRoot = el('app-root');
+const locHelp = el('loc-help');
+
+const clamp = (v,m,M) => Math.max(m, Math.min(M, v));
+const now = () => (new Date()).getTime();
+const DEBOUNCE_MS = { soil:1000*60*30, motion:1000*60*5, insects:1000*60*60 };
+const lastNotified = { soil:0, motion:0, insects:0 };
+function canNotify(type){ return (now() - (lastNotified[type]||0)) > (DEBOUNCE_MS[type]||0); }
+function markNotified(type){ lastNotified[type] = now(); }
+
+/* ------------------------
+   i18n apply
+   ------------------------ */
+function applyI18n(){
   document.querySelectorAll('[data-i18n]').forEach(elm=>{
     const key = elm.getAttribute('data-i18n');
-    const t = strings[lang] && strings[lang][key] ? strings[lang][key] : '';
-    elm.textContent = t;
+    elm.textContent = (strings[lang] && strings[lang][key]) ? strings[lang][key] : '';
   });
-  // placeholders & small notes not using data-i18n
+  // placeholder and helpers
   if(lang === 'ar'){
     appRoot.setAttribute('dir','rtl');
     locInput.placeholder = "أدخل معرف الروبوت أو إحداثيات lat,lon (مثال: 25.2048,55.2708)";
@@ -272,33 +255,28 @@ function applyTranslations(){
     locInput.placeholder = "Enter robot ID or lat,lon (e.g. 25.2048,55.2708)";
     langEnBtn.classList.add('active'); langArBtn.classList.remove('active');
   }
-  // update conn text to match language
-  connText.textContent = (connected ? (lang==='ar' ? 'متصل' : 'Connected') : (strings[lang].disconnected));
-  // update locate small note
-  document.querySelectorAll('.small-note').forEach(n=> n.textContent = strings[lang].loc_help);
+  locHelp.textContent = strings[lang].loc_help;
+  connText.textContent = connected ? (lang==='ar' ? 'متصل' : 'Connected') : strings[lang].disconnected;
+  document.title = lang === 'ar' ? 'حارس الأخضر' : 'Green Guardian';
+  localStorage.setItem('gg_lang', lang);
 }
 
-/* Switch language */
-function setLanguage(newLang){
-  lang = newLang;
-  applyTranslations();
+/* ------------------------
+   UI helpers & notify
+   ------------------------ */
+function showBanner(msg, kind='danger'){ const b = document.querySelector('.alert-line') || null; const banner = el('loc-display'); /* reuse */; /* quick banner using loc-display temporarily */ console.log('banner:', msg); /* keep simple */ }
+function sendNotification(title, body, urgent=false){
+  if(!('Notification' in window)) return;
+  if(Notification.permission === 'granted'){ try{ new Notification(title,{body,renotify:!!urgent}); if(urgent && navigator.vibrate) navigator.vibrate([300,100,300]); } catch(e){ console.warn(e); } }
+  else if(Notification.permission === 'default'){ Notification.requestPermission().then(p=>{ if(p==='granted') sendNotification(title,body,urgent); }); }
 }
-
-/* initialize translations */
-applyTranslations();
-
-/* ============================
-  UI helpers & notifications
-  ============================ */
-function showBanner(msg, kind='danger'){ alertBanner.style.display='block'; alertBanner.className='alert-line '+(kind==='danger'?'alert-danger':''); alertBanner.textContent=msg; setTimeout(()=>alertBanner.style.display='none',7000); }
-function sendNotification(title, body, urgent=false){ if(!('Notification' in window)) return; if(Notification.permission==='granted'){ try{ new Notification(title,{body,renotify:!!urgent}); if(urgent && navigator.vibrate) navigator.vibrate([300,100,300]); }catch(e){console.warn('notify failed',e);} } else if(Notification.permission==='default'){ Notification.requestPermission().then(p=>{ if(p==='granted') sendNotification(title,body,urgent); }); } }
 function statusTextForSoil(n){ if(n<20) return lang==='ar' ? 'جافة — تحتاج ري' : 'Dry — needs water'; if(n<40) return lang==='ar' ? 'منخفضة' : 'Low'; if(n<70) return lang==='ar' ? 'جيدة' : 'Good'; return lang==='ar' ? 'رطبة' : 'Wet'; }
 function statusTextForLight(n){ if(n<20) return lang==='ar' ? 'ضعيف جداً' : 'Very Low'; if(n<50) return lang==='ar' ? 'منخفض' : 'Low'; if(n<80) return lang==='ar' ? 'متوسط' : 'Moderate'; return lang==='ar' ? 'مشرق' : 'Bright'; }
 function statusTextForMotion(flag, dm){ if(dm) return lang==='ar' ? 'حركة خطرة' : 'Dangerous movement'; return flag ? (lang==='ar' ? 'حركة' : 'Movement') : (lang==='ar' ? 'لا حركة' : 'No Motion'); }
 
-/* ============================
-  Update UI
-  ============================ */
+/* ------------------------
+   Update UI
+   ------------------------ */
 function updateUI(data = {}){
   last.soil = (typeof data.soil !== 'undefined') ? clamp(parseFloat(data.soil)||0,0,100) : last.soil;
   last.light = (typeof data.light !== 'undefined') ? clamp(parseFloat(data.light)||0,0,100) : last.light;
@@ -318,56 +296,34 @@ function updateUI(data = {}){
 
   if(last.insects > 0){
     insectCard.style.display = 'block';
-    insectMsg.textContent = (lang==='ar' ? `${last.insects} حشرة/حشرات مكتشفة — افحص النبات` : `${last.insects} insect(s) detected — inspect plant`);
-  } else {
-    insectCard.style.display = 'none';
-  }
+    insectMsg.textContent = lang==='ar' ? `${last.insects} حشرة/حشرات مكتشفة — افحص النبات` : `${last.insects} insect(s) detected — inspect plant`;
+  } else insectCard.style.display = 'none';
 
-  // watering visuals
-  if(watering){
-    waterBtn.classList.remove('off'); waterBtn.classList.add('on');
-    manualBtn.classList.remove('off'); manualBtn.classList.add('on');
-    manualBtn.textContent = lang==='ar' ? 'إيقاف الري' : 'Stop Watering';
-    el('water-state').textContent = lang==='ar' ? 'جاري الري' : 'Watering Active';
-  } else {
-    waterBtn.classList.remove('on'); waterBtn.classList.add('off');
-    manualBtn.classList.remove('on'); manualBtn.classList.add('off');
-    manualBtn.textContent = lang==='ar' ? 'ابدأ الري' : 'Start Watering';
-    el('water-state').textContent = lang==='ar' ? 'خامل' : 'Idle';
-  }
+  if(watering){ waterBtn.classList.remove('off'); waterBtn.classList.add('on'); manualBtn.classList.remove('off'); manualBtn.classList.add('on'); manualBtn.textContent = lang==='ar' ? 'إيقاف الري' : 'Stop Watering'; el('water-state').textContent = lang==='ar' ? 'جاري الري' : 'Watering Active'; }
+  else { waterBtn.classList.remove('on'); waterBtn.classList.add('off'); manualBtn.classList.remove('on'); manualBtn.classList.add('off'); manualBtn.textContent = lang==='ar' ? 'ابدأ الري' : 'Start Watering'; el('water-state').textContent = lang==='ar' ? 'خامل' : 'Idle'; }
 }
 
-/* ============================
-  Alerts & debounce
-  ============================ */
+/* ------------------------
+   Alerts
+   ------------------------ */
 function checkAlertsAndNotify(){
   if(last.soil < 28 && canNotify('soil')){
-    sendNotification(lang==='ar' ? 'حارس الأخضر — التربة جافة' : 'Green Guardian — Dry soil',
-                     lang==='ar' ? 'التربة جافة. يوصى بالري.' : 'Soil is dry. Consider watering the plant.', false);
+    sendNotification(lang==='ar' ? 'حارس الأخضر — التربة جافة' : 'Green Guardian — Dry soil', lang==='ar' ? 'التربة جافة. يوصى بالري.' : 'Soil is dry. Consider watering the plant.', false);
     markNotified('soil');
-    showBanner(lang==='ar' ? 'التربة جافة — يوصى بالري' : 'Soil is dry — watering recommended', 'danger');
   }
   if((last.dangerousMotion || last.motion) && canNotify('motion')){
-    sendNotification(lang==='ar' ? 'حارس الأخضر — تم الكشف عن حركة' : 'Green Guardian — Movement',
-                     last.dangerousMotion ? (lang==='ar' ? 'حركة خطرة تم اكتشافها!' : 'Dangerous motion detected!') : (lang==='ar' ? 'تم الكشف عن حركة بالقرب من النبات' : 'Movement detected near plant'),
-                     true);
+    sendNotification(lang==='ar' ? 'حارس الأخضر — تم الكشف عن حركة' : 'Green Guardian — Movement', last.dangerousMotion ? (lang==='ar' ? 'حركة خطرة' : 'Dangerous motion detected') : (lang==='ar' ? 'تم الكشف عن حركة' : 'Movement detected near plant'), true);
     markNotified('motion');
-    showBanner(last.dangerousMotion ? (lang==='ar' ? 'تم اكتشاف حركة خطرة — افحص فوراً' : 'Dangerous movement detected — check immediately') : (lang==='ar' ? 'تم الكشف عن حركة بالقرب' : 'Movement detected nearby'), 'danger');
   }
   if(last.insects > 0 && canNotify('insects')){
-    sendNotification(lang==='ar' ? 'حارس الأخضر — حشرات مكتشفة' : 'Green Guardian — Insects detected',
-                     lang==='ar' ? `${last.insects} حشرة/حشرات قريبة من النبات. افحص وعالج.` : `${last.insects} possible insect(s) detected near the plant. Inspect and treat.`, true);
+    sendNotification(lang==='ar' ? 'حارس الأخضر — حشرات مكتشفة' : 'Green Guardian — Insects detected', lang==='ar' ? `${last.insects} حشرة/حشرات — افحص النبات` : `${last.insects} insect(s) detected — inspect plant`, true);
     markNotified('insects');
-    showBanner(lang==='ar' ? 'حشرات مكتشفة — افحص النبات' : 'Insects detected — inspect plant', 'danger');
   }
 }
 
-/* ============================
-  Parse messages; supports:
-    S:45;L:50;M:1;I:0;DM:0
-    LAT:25.2;LON:55.2
-    LOC:25.2,55.2
-*/
+/* ------------------------
+   Parse robot string
+   ------------------------ */
 function parseSensorString(s){
   const out = {};
   try {
@@ -385,20 +341,19 @@ function parseSensorString(s){
       else if(key === 'LON') out.lon = parseFloat(v);
       else if(key === 'LOC'){ const [la,lo] = v.split(',').map(x=>parseFloat(x)); if(!isNaN(la) && !isNaN(lo)){ out.lat=la; out.lon=lo; } }
     }
-  } catch(e){ console.warn('parseSensorString', e); }
+  } catch(e){ console.warn(e); }
   return out;
 }
 
-/* ============================
-  Bluetooth: connect/disconnect
-*/
+/* ------------------------
+   Bluetooth connect/receive
+   ------------------------ */
 async function connectBluetooth(){
-  if(!navigator.bluetooth){ alert(lang==='ar' ? 'المتصفح لا يدعم Web Bluetooth. استخدم Chrome على أندرويد.' : 'Web Bluetooth not supported in this browser. Use Chrome on Android.'); return; }
-  try{
+  if(!navigator.bluetooth){ alert(lang==='ar' ? 'المتصفح لا يدعم Web Bluetooth. استخدم Chrome على أندرويد.' : 'Web Bluetooth not supported. Use Chrome on Android.'); return; }
+  try {
     btBtn.textContent = lang==='ar' ? 'جارٍ اختيار الجهاز...' : 'Selecting device...';
     const device = await navigator.bluetooth.requestDevice({ acceptAllDevices: true, optionalServices: [SERVICE_UUID] });
-    bleDevice = device;
-    bleDevice.addEventListener('gattserverdisconnected', onDisconnected);
+    bleDevice = device; bleDevice.addEventListener('gattserverdisconnected', onDisconnected);
     const server = await device.gatt.connect();
     const service = await server.getPrimaryService(SERVICE_UUID);
     const char = await service.getCharacteristic(CHAR_UUID);
@@ -407,44 +362,39 @@ async function connectBluetooth(){
     connected = true;
     btBtn.textContent = lang==='ar' ? 'فصل' : 'Disconnect';
     btBtn.classList.remove('secondary'); btBtn.classList.add('danger');
-    updateConnUI();
-    showBanner(lang==='ar' ? 'تم الاتصال بالروبوت' : 'Connected to robot', '');
+    updateUI({});
   } catch(e){
-    console.error('BLE connect failed', e);
+    console.error(e);
     btBtn.textContent = strings[lang].connect;
     alert(lang==='ar' ? 'فشل الاتصال أو تم الإلغاء.' : 'Bluetooth connection failed or cancelled.');
   }
 }
-function onDisconnected(){
-  connected = false; updateConnUI();
-  btBtn.textContent = strings[lang].connect;
-  btBtn.classList.remove('danger'); btBtn.classList.add('secondary');
-  showBanner(lang==='ar' ? 'تم فصل الروبوت' : 'Robot disconnected', 'danger');
-}
-function disconnectBluetooth(){ if(bleDevice && bleDevice.gatt.connected) bleDevice.gatt.disconnect(); connected=false; updateConnUI(); }
+function onDisconnected(){ connected = false; btBtn.textContent = strings[lang].connect; btBtn.classList.remove('danger'); btBtn.classList.add('secondary'); updateUI({}); }
+function disconnectBluetooth(){ if(bleDevice && bleDevice.gatt.connected) bleDevice.gatt.disconnect(); connected = false; updateUI({}); }
 
-/* BLE incoming data */
 function onCharacteristicValueChanged(evt){
-  try{
+  try {
     const dv = evt.target.value; let text = '';
     if(window.TextDecoder) text = new TextDecoder().decode(dv); else { for(let i=0;i<dv.byteLength;i++) text += String.fromCharCode(dv.getUint8(i)); }
     const lastLine = text.trim().split('\n').filter(Boolean).pop() || text.trim();
     const parsed = parseSensorString(lastLine);
-    if(parsed.lat && parsed.lon){ showLocation(parsed.lat, parsed.lon, true); }
-    updateUI(parsed);
-    checkAlertsAndNotify();
-  } catch(e){ console.warn('characteristic parse error', e); }
+    if(parsed.lat && parsed.lon) showLocation(parsed.lat, parsed.lon, true);
+    updateUI(parsed); checkAlertsAndNotify();
+  } catch(e){ console.warn(e); }
 }
 
-/* send commands */
+/* ------------------------
+   Send command to robot safely
+   ------------------------ */
 async function sendCommandToRobot(cmd){
-  if(!bleChar){ console.log('No BLE char; simulated send:', cmd); return; }
-  try{ const enc = new TextEncoder(); await bleChar.writeValue(enc.encode(cmd + '\n')); console.log('sent', cmd); } catch(e){ console.warn('BLE send failed', e); }
+  if(!bleChar){ console.log('simulate send:', cmd); return; }
+  try { const enc = new TextEncoder(); await bleChar.writeValue(enc.encode(cmd + '\n')); console.log('sent', cmd); } catch(e){ console.warn('BLE send failed', e); }
 }
 
-/* ===== Watering controls & icon swap */
+/* ------------------------
+   Water controls + icon swap
+   ------------------------ */
 let wateringTimer = null;
-function safeSendCommand(cmd){ try{ sendCommandToRobot(cmd); } catch(e){ console.warn('safeSendCommand', e); } }
 function setWateringVisual(on){
   watering = !!on;
   if(watering){ waterBtn.classList.remove('off'); waterBtn.classList.add('on'); manualBtn.classList.remove('off'); manualBtn.classList.add('on'); }
@@ -452,84 +402,73 @@ function setWateringVisual(on){
   if(watering){ manualBtn.textContent = lang==='ar' ? 'إيقاف الري' : 'Stop Watering'; el('water-state').textContent = lang==='ar' ? 'جاري الري' : 'Watering Active'; }
   else { manualBtn.textContent = lang==='ar' ? 'ابدأ الري' : 'Start Watering'; el('water-state').textContent = lang==='ar' ? 'خامل' : 'Idle'; }
 }
-function startWatering(){
-  if(watering) return;
-  setWateringVisual(true);
-  safeSendCommand('WATER_ON');
-  showBanner(lang==='ar' ? 'بدء الري' : 'Watering started', '');
-  manualBtn.disabled = true; setTimeout(()=>manualBtn.disabled=false,700);
-  if(!connected){
-    if(wateringTimer) clearInterval(wateringTimer);
-    let step=0;
-    wateringTimer = setInterval(()=>{ step+=1.5; updateUI({ soil: clamp(last.soil+step,0,98), motion:false }); if(step>8){ clearInterval(wateringTimer); wateringTimer=null; } },900);
-  }
-}
-function stopWatering(){ if(!watering) return; setWateringVisual(false); safeSendCommand('WATER_OFF'); showBanner(lang==='ar' ? 'إيقاف الري' : 'Watering stopped', ''); if(wateringTimer){ clearInterval(wateringTimer); wateringTimer=null; } }
+function startWatering(){ if(watering) return; setWateringVisual(true); sendCommandToRobot('WATER_ON'); if(!connected){ if(wateringTimer) clearInterval(wateringTimer); let step=0; wateringTimer = setInterval(()=>{ step+=1.5; updateUI({ soil: clamp(last.soil+step,0,98), motion:false }); if(step>8){ clearInterval(wateringTimer); wateringTimer=null; } },900); } }
+function stopWatering(){ if(!watering) return; setWateringVisual(false); sendCommandToRobot('WATER_OFF'); if(wateringTimer){ clearInterval(wateringTimer); wateringTimer=null; } }
 function toggleWater(){ if(watering) stopWatering(); else startWatering(); }
 
-/* ===== Location & Find logic ===== */
+/* ------------------------
+   Location: find, device location, manual input
+   ------------------------ */
 let waitingForRobotLocation = false;
-async function findRobot(){
+function getDeviceLocation(banner){
+  locDisplay.textContent = lang==='ar' ? 'جاري الحصول على موقع الجهاز...' : 'Getting location...';
+  if(!navigator.geolocation){ locDisplay.textContent = lang==='ar' ? 'الموقع غير مدعوم' : 'Geolocation not supported'; return; }
+  navigator.geolocation.getCurrentPosition(pos=>{ showLocation(pos.coords.latitude, pos.coords.longitude, false, banner); }, err=>{ locDisplay.textContent = lang==='ar' ? 'رفض الإذن أو تعذر الحصول على الموقع' : 'Location permission denied or unavailable'; }, { enableHighAccuracy:true, timeout:8000 });
+}
+function findRobot(){
   locDisplay.textContent = lang==='ar' ? 'جاري تحديد المكان...' : 'Locating...';
   if(connected && bleChar){
     waitingForRobotLocation = true;
-    safeSendCommand('LOCATE');
+    sendCommandToRobot('LOCATE');
     setTimeout(()=>{ if(waitingForRobotLocation){ waitingForRobotLocation=false; getDeviceLocation(lang==='ar' ? 'لم يرد الروبوت — عرض موقع الجهاز' : 'No location from robot — showing device location'); } },8000);
     return;
   }
   getDeviceLocation(lang==='ar' ? 'عرض موقع جهازك' : 'Using device location');
 }
-function getDeviceLocation(bannerMsg){
-  locDisplay.textContent = lang==='ar' ? 'جاري الحصول على موقع الجهاز...' : 'Getting location...';
-  if(!navigator.geolocation){ locDisplay.textContent = lang==='ar' ? 'الموقع غير مدعوم' : 'Geolocation not supported'; return; }
-  navigator.geolocation.getCurrentPosition(pos=>{ showLocation(pos.coords.latitude, pos.coords.longitude, false, bannerMsg); }, err=>{ locDisplay.textContent = lang==='ar' ? 'رفض الإذن أو تعذر الحصول على الموقع' : 'Location permission denied or unavailable'; }, { enableHighAccuracy:true, timeout:8000 });
-}
-function showLocation(lat, lon, fromRobot=false, bannerMsg){
+function showLocation(lat, lon, fromRobot=false, banner){
   waitingForRobotLocation = false;
   const label = fromRobot ? (lang==='ar' ? 'موقع الروبوت' : 'Robot location') : (lang==='ar' ? 'موقع الجهاز' : 'Device location');
-  locDisplay.innerHTML = `${label}: ${lat.toFixed(5)}, ${lon.toFixed(5)} &nbsp; <a href="https://www.google.com/maps/search/?api=1&query=${lat},${lon}" target="_blank" style="color:#cfe; text-decoration:underline">${lang==='ar' ? 'افتح في الخرائط' : 'Open in Maps'}</a>`;
-  const embed = `https://www.google.com/maps?q=${lat},${lon}&z=17&output=embed`;
-  mapIframe.src = embed;
+  locDisplay.innerHTML = `${label}: ${lat.toFixed(5)}, ${lon.toFixed(5)} &nbsp; <a href="https://www.google.com/maps/search/?api=1&query=${lat},${lon}" target="_blank" style="color:#cfe;text-decoration:underline">${lang==='ar' ? 'افتح في الخرائط' : 'Open in Maps'}</a>`;
+  mapIframe.src = `https://www.google.com/maps?q=${lat},${lon}&z=17&output=embed`;
   mapPreview.style.display = 'block';
-  if(bannerMsg) showBanner(bannerMsg, '');
+  if(banner) console.log(banner);
 }
-
-/* Manual input handler */
 function handleManualLocateInput(){
   const text = (locInput.value || '').trim();
   if(!text){ locDisplay.textContent = strings[lang].no_location; return; }
   const coordRE = /^\s*(-?\d+(?:\.\d+)?)\s*[, ]\s*(-?\d+(?:\.\d+)?)\s*$/;
   const m = text.match(coordRE);
-  if(m){
-    const lat = parseFloat(m[1]), lon = parseFloat(m[2]);
-    showLocation(lat, lon, false, lang==='ar' ? 'عرض الإحداثيات المدخلة' : 'Showing entered coordinates');
-    return;
-  }
-  // treat as robot ID
-  if(connected && bleChar){
-    waitingForRobotLocation = true;
-    locDisplay.textContent = (lang==='ar' ? `طلب موقع المعرف "${text}" إلى الروبوت...` : `Requesting location for ID "${text}"...`);
-    safeSendCommand(LOCATE_CMD_PREFIX + text);
-    setTimeout(()=>{ if(waitingForRobotLocation){ waitingForRobotLocation=false; locDisplay.textContent = lang==='ar' ? 'لم يرد الروبوت — حاول مرة أخرى أو استخدم موقع الجهاز' : 'No reply from robot. Try again or use device location.'; } }, 8000);
-  } else {
-    locDisplay.textContent = lang==='ar' ? 'غير متصل بالروبوت — يتم استخدام موقع الجهاز' : 'Not connected to robot — using device location as fallback';
-    getDeviceLocation(lang==='ar' ? 'غير متصل — عرض موقع جهازك' : 'Not connected — showing your device location');
-  }
+  if(m){ const lat = parseFloat(m[1]), lon = parseFloat(m[2]); showLocation(lat, lon, false, lang==='ar' ? 'عرض الإحداثيات' : 'Showing coordinates'); return; }
+  // assume robot id
+  if(connected && bleChar){ waitingForRobotLocation = true; locDisplay.textContent = lang==='ar' ? `طلب موقع المعرف "${text}" إلى الروبوت...` : `Requesting location for ID "${text}"...`; sendCommandToRobot(LOCATE_CMD_PREFIX + text); setTimeout(()=>{ if(waitingForRobotLocation){ waitingForRobotLocation=false; locDisplay.textContent = lang==='ar' ? 'لم يرد الروبوت — حاول مرة أخرى' : 'No reply from robot. Try again.'; } },8000); }
+  else { locDisplay.textContent = lang==='ar' ? 'غير متصل — سيتم استخدام موقع الجهاز' : 'Not connected — using device location as fallback'; getDeviceLocation(lang==='ar' ? 'عرض موقع جهازك' : 'Using device location'); }
 }
 
-/* Events & simulation */
+/* ------------------------
+   Events & simulation
+   ------------------------ */
 btBtn.addEventListener('click', async ()=>{ if(!connected) await connectBluetooth(); else disconnectBluetooth(); });
 waterBtn.addEventListener('click', ()=>toggleWater());
 manualBtn.addEventListener('click', ()=>toggleWater());
 stopBtn.addEventListener('click', ()=>stopWatering());
 findBtn.addEventListener('click', ()=>findRobot());
 locInputBtn.addEventListener('click', ()=>handleManualLocateInput());
-langEnBtn.addEventListener('click', ()=>{ setLanguage('en'); applyTranslations(); updateUI({}); });
-langArBtn.addEventListener('click', ()=>{ setLanguage('ar'); applyTranslations(); updateUI({}); });
+langEnBtn.addEventListener('click', ()=>{ lang='en'; applyI18n(); updateUI({}); });
+langArBtn.addEventListener('click', ()=>{ lang='ar'; applyI18n(); updateUI({}); });
 
-function updateConnUI(){ connDot.style.background = connected ? '#9ef08f' : '#6b6b6b'; connText.textContent = connected ? (lang==='ar' ? 'متصل' : 'Connected') : strings[lang].disconnected; }
+function applyI18n(){
+  document.querySelectorAll('[data-i18n]').forEach(elm=>{
+    const key = elm.getAttribute('data-i18n');
+    elm.textContent = (strings[lang] && strings[lang][key]) ? strings[lang][key] : '';
+  });
+  if(lang==='ar'){ appRoot.setAttribute('dir','rtl'); locInput.placeholder = "أدخل معرف الروبوت أو إحداثيات lat,lon (مثال: 25.2048,55.2708)"; langArBtn.classList.add('active'); langEnBtn.classList.remove('active'); }
+  else { appRoot.setAttribute('dir','ltr'); locInput.placeholder = "Enter robot ID or lat,lon (e.g. 25.2048,55.2708)"; langEnBtn.classList.add('active'); langArBtn.classList.remove('active'); }
+  locHelp.textContent = strings[lang].loc_help;
+  connText.textContent = connected ? (lang==='ar' ? 'متصل' : 'Connected') : strings[lang].disconnected;
+  localStorage.setItem('gg_lang', lang);
+}
 
-/* Simulation */
+/* simulation when not connected */
 function simulateOnce(){
   if(connected) return;
   last.soil = clamp((last.soil || 50) + (Math.random()*6 - 3), 10, 92);
@@ -540,9 +479,9 @@ function simulateOnce(){
   updateUI({}); checkAlertsAndNotify();
 }
 
-/* Init */
-applyTranslations();
-updateUI({ soil: last.soil, light: last.light, motion: last.motion, insects: last.insects });
+/* init */
+applyI18n();
+updateUI({});
 setInterval(simulateOnce, 2000);
 if('Notification' in window && Notification.permission === 'default') Notification.requestPermission().catch(()=>{});
 if('serviceWorker' in navigator) navigator.serviceWorker.register('service-worker.js').catch(()=>{ console.log('sw register failed'); });
@@ -550,4 +489,3 @@ if('serviceWorker' in navigator) navigator.serviceWorker.register('service-worke
 </script>
 </body>
 </html>
-
