@@ -202,10 +202,7 @@
   </div>
 
 <script>
-  // Simulator & UI update
-  let watering = false;
-  let conn = true;
-
+  // ---------- Elements ----------
   const soilValEl = document.getElementById('soil-value');
   const soilLabel = document.getElementById('soil-label');
   const lightValEl = document.getElementById('light-value');
@@ -220,7 +217,16 @@
   const waterState = document.getElementById('water-state');
   const manualBtn = document.getElementById('manual-btn');
 
+  // ---------- State ----------
+  let watering = false;
+  let conn = true;
+  // last known sensor values (kept so toggleWater can reuse them)
+  let last = { soil: 50, light: 50, motion: false };
+
+  // ---------- Helpers ----------
+  function clamp(v, min, max){ return Math.max(min, Math.min(max, v)); }
   function rand(min,max){ return Math.random()*(max-min)+min; }
+
   function statusTextForSoil(n){
     if(n < 25) return 'Dry — needs water';
     if(n < 45) return 'Low';
@@ -228,23 +234,31 @@
     return 'Wet';
   }
   function statusTextForLight(n){
-    if(n < 80) return 'Low';
-    if(n < 300) return 'Moderate';
+    if(n < 20) return 'Very Low';
+    if(n < 50) return 'Low';
+    if(n < 80) return 'Moderate';
     return 'Bright';
   }
   function statusTextForMotion(flag){
     return flag ? 'Motion Detected' : 'Idle';
   }
 
-  function updateUI(data){
-    soilValEl.textContent = data.soil.toFixed(1) + '%';
-    soilLabel.textContent = statusTextForSoil(data.soil);
+  // updateUI accepts a partial object and preserves last values
+  function updateUI(data = {}){
+    // merge provided values into last
+    last.soil = (typeof data.soil !== 'undefined') ? clamp(parseFloat(data.soil) || 0, 0, 100) : last.soil;
+    last.light = (typeof data.light !== 'undefined') ? clamp(parseFloat(data.light) || 0, 0, 100) : last.light;
+    last.motion = (typeof data.motion !== 'undefined') ? !!data.motion : last.motion;
 
-    lightValEl.textContent = data.light.toFixed(1) + '%';
-    lightLabel.textContent = statusTextForLight(data.light);
+    // show values
+    soilValEl.textContent = (Math.round(last.soil * 10) / 10) + '%';
+    soilLabel.textContent = statusTextForSoil(last.soil);
 
-    motionValEl.textContent = data.motion ? '!' : '—';
-    motionLabel.textContent = data.motion ? 'Movement' : 'No Motion';
+    lightValEl.textContent = (Math.round(last.light * 10) / 10) + '%';
+    lightLabel.textContent = statusTextForLight(last.light);
+
+    motionValEl.textContent = last.motion ? '!' : '—';
+    motionLabel.textContent = last.motion ? 'Movement' : 'No Motion';
 
     connDot.style.background = conn ? '#9ef08f' : '#6b6b6b';
     connText.textContent = conn ? 'Connected' : 'Disconnected';
@@ -265,57 +279,66 @@
     }
   }
 
-  // Simulate sensor data periodically (replace with real data later)
+  // ---------- Simulation ----------
   function simulateOnce(){
-    const soil = rand(20,80);
-    const light = rand(10,90); // percent of ideal light
-    const motion = Math.random() > 0.86; // occasional motion
-    updateUI({soil, light, motion});
-    // show browser notification when soil dry (if permission is given)
-    if(soil < 28 && Notification.permission === 'granted'){
+    // small random walk from last values
+    let soil = last.soil + rand(-4,4);
+    let light = last.light + rand(-6,6);
+    const motion = Math.random() > 0.88;
+
+    soil = clamp(soil, 15, 90);
+    light = clamp(light, 5, 95);
+
+    updateUI({ soil, light, motion });
+
+    // show browser notification when soil dry (if permission granted)
+    if(soil < 28 && 'Notification' in window && Notification.permission === 'granted'){
       new Notification('Green Guardian', { body: 'Soil is dry — watering recommended' });
     }
   }
 
-  // toggle watering
+  // toggle watering safely (reuses last known values)
   function toggleWater(){
     watering = !watering;
-    updateUI({});
-    // simulate sending command to robot (log)
+
+    // when toggling, we still pass current last values (so updateUI doesn't get empty)
+    updateUI({ soil: last.soil, light: last.light, motion: last.motion });
+
     console.log('WATER_CMD ->', watering ? 'ON' : 'OFF');
+
+    // simulate watering effect: increase soil gradually while watering
     if(watering){
-      // small simulated behavior: raise soil after watering
-      let raise = 0;
+      let raised = 0;
       const t = setInterval(()=>{
-        raise += 1.2;
-        // read current soil number from UI (strip %)
-        const cur = parseFloat(soilValEl.textContent.replace('%','')) || 30;
-        updateUI({soil: Math.min(95, cur + raise), light: parseFloat(lightValEl.textContent)||50, motion:false});
-        if(raise > 8){
+        raised += 1.5;
+        const newSoil = clamp(last.soil + raised, 0, 95);
+        updateUI({ soil: newSoil, light: last.light, motion: false });
+        if(raised > 8){
           clearInterval(t);
         }
-      },900);
+      }, 900);
     }
   }
 
-  // click events
+  // ---------- Events ----------
   waterBtn.addEventListener('click', toggleWater);
   manualBtn.addEventListener('click', toggleWater);
 
-  // ask for notification permission (optional)
+  // ---------- Notifications permission ----------
   if('Notification' in window){
     if(Notification.permission === 'default'){
-      Notification.requestPermission();
+      Notification.requestPermission().catch(()=>{ /* ignore */ });
     }
   }
 
-  // start interval
-  simulateOnce();
+  // ---------- Start ----------
+  // initialize UI with defaults and start simulation
+  updateUI({ soil: last.soil, light: last.light, motion: last.motion });
   setInterval(simulateOnce, 2000);
 
-  // register service worker (keep your existing file)
+  // register service worker (keeps existing service-worker.js)
   if('serviceWorker' in navigator){
-    navigator.serviceWorker.register('service-worker.js').catch(()=>{console.log('sw fail')});
+    navigator.serviceWorker.register('service-worker.js').catch(()=>{ console.log('service worker failed to register'); });
   }
 </script>
 </body>
