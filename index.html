@@ -81,4 +81,242 @@
       cursor:pointer;transition:transform .12s ease;
     }
     .circle-btn:active{transform:scale(.96)}
+    .circle-btn .drop{width:34px;height:34px;fill:#fff;opacity:0.95}
 
+    .water-state{font-weight:700;color:#dcffd4;font-size:15px}
+    .btn-full{
+      margin-top:6px;background:transparent;border:1px solid rgba(255,255,255,0.06);padding:12px 18px;border-radius:10px;color:var(--muted);width:100%;
+      font-weight:700;cursor:pointer;
+    }
+    .btn-disabled{opacity:.4;pointer-events:none}
+
+    footer{margin-top:10px;text-align:center;color:rgba(255,255,255,0.25);font-size:13px}
+
+    /* Icons and labels alignment */
+    .left-icon{width:28px;height:28px;opacity:0.95}
+    .status-text{font-size:14px;font-weight:600;color:#dff7d7}
+    .status-sub{font-size:12px;color:var(--muted)}
+
+    /* responsive for small phones */
+    @media (max-width:420px){
+      body{padding:12px}
+      header{padding:10px}
+      .brand{font-size:18px}
+      .big-number{font-size:28px}
+      .circle-btn{width:76px;height:76px}
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <div class="brand">
+        <!-- inline plant icon -->
+        <svg class="plant-svg" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M12 2c2.8 0 5 2 6 4-1.6.2-3.5 1-5 2-1.4 1-2.5 2.5-3 4-.5-1.5-1.6-3-3-4-1.4-1-3.4-1.8-5-2 1-2 3.2-4 6-4z" fill="#9feab0"/>
+          <path d="M6 13c1-1 3-2 6-2s5 1 6 2c-2 0-4 1-6 1s-4-1-6-1z" fill="#2e8b3a"/>
+          <path d="M12 22s1-4 4-6c0 0-3 0-4 2-1-2-4-2-4-2 3 2 4 6 4 6z" fill="#1f6f2b"/>
+        </svg>
+        Green Guardian
+      </div>
+      <div class="badge" title="connection status">
+        <span class="dot" id="conn-dot"></span>
+        <span id="conn-text">Connected</span>
+      </div>
+    </header>
+
+    <!-- Sensors -->
+    <section class="row">
+      <div class="card soil">
+        <div style="display:flex;align-items:center;justify-content:space-between;">
+          <div>
+            <div class="sensor-title">
+              <!-- soil icon -->
+              <svg class="left-icon" viewBox="0 0 24 24" fill="none"><path d="M12 2s-4 4-4 8 1.79 8 4 12c2.21-4 4-8 4-12s-4-8-4-8z" fill="#9feab0"/></svg>
+              <div style="display:flex;flex-direction:column;">
+                <div style="font-weight:700;color:#cdefd0">Soil Moisture</div>
+                <div class="status-sub">Moisture level of soil</div>
+              </div>
+            </div>
+          </div>
+          <div style="text-align:right">
+            <div class="big-number" id="soil-value">--%</div>
+            <div class="small" id="soil-label">--</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card light">
+        <div style="display:flex;align-items:center;justify-content:space-between;">
+          <div>
+            <div class="sensor-title">
+              <svg class="left-icon" viewBox="0 0 24 24" fill="none"><path d="M11 2h2v4h-2zM4.2 5.6l1.4 1.4 2.8-2.8L7 2.7zM1 11h4v2H1zm18 0h4v2h-4zM16.8 5.6l1.4-1.4 1.6 1.6-2.8 2.8zM12 8a4 4 0 100 8 4 4 0 000-8z" fill="#ffd88a"/></svg>
+              <div style="display:flex;flex-direction:column;">
+                <div style="font-weight:700;color:#ffe7b5">Light Level</div>
+                <div class="status-sub">Ambient light near plant</div>
+              </div>
+            </div>
+          </div>
+
+          <div style="text-align:right">
+            <div class="big-number" id="light-value">--</div>
+            <div class="small" id="light-label">--</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card motion">
+        <div style="display:flex;align-items:center;justify-content:space-between;">
+          <div>
+            <div class="sensor-title">
+              <svg class="left-icon" viewBox="0 0 24 24" fill="none"><path d="M12 2a9 9 0 100 18 9 9 0 000-18zm1 11h-2v5h2v-5z" fill="#d7e8d7"/></svg>
+              <div style="display:flex;flex-direction:column;">
+                <div style="font-weight:700;color:#dff7d7">Motion Sensor</div>
+                <div class="status-sub">Detects nearby movement</div>
+              </div>
+            </div>
+          </div>
+
+          <div style="text-align:right">
+            <div class="big-number" id="motion-value">--</div>
+            <div class="small" id="motion-label">--</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Water control -->
+    <section class="card">
+      <div style="font-weight:800;color:var(--muted);margin-bottom:8px">Watering Control</div>
+      <div class="watering">
+        <div class="circle-btn" id="water-btn" title="Toggle watering">
+          <!-- drop icon -->
+          <svg class="drop" viewBox="0 0 24 24"><path d="M12 3.3s4 4.2 4 7.2a4 4 0 01-8 0c0-3 4-7.2 4-7.2z" /></svg>
+        </div>
+        <div class="water-state" id="water-state">Idle</div>
+        <button id="manual-btn" class="btn-full">Start Watering</button>
+      </div>
+    </section>
+
+    <footer>Green Guardian • demo PWA</footer>
+  </div>
+
+<script>
+  // Simulator & UI update
+  let watering = false;
+  let conn = true;
+
+  const soilValEl = document.getElementById('soil-value');
+  const soilLabel = document.getElementById('soil-label');
+  const lightValEl = document.getElementById('light-value');
+  const lightLabel = document.getElementById('light-label');
+  const motionValEl = document.getElementById('motion-value');
+  const motionLabel = document.getElementById('motion-label');
+
+  const connDot = document.getElementById('conn-dot');
+  const connText = document.getElementById('conn-text');
+
+  const waterBtn = document.getElementById('water-btn');
+  const waterState = document.getElementById('water-state');
+  const manualBtn = document.getElementById('manual-btn');
+
+  function rand(min,max){ return Math.random()*(max-min)+min; }
+  function statusTextForSoil(n){
+    if(n < 25) return 'Dry — needs water';
+    if(n < 45) return 'Low';
+    if(n < 70) return 'Good';
+    return 'Wet';
+  }
+  function statusTextForLight(n){
+    if(n < 80) return 'Low';
+    if(n < 300) return 'Moderate';
+    return 'Bright';
+  }
+  function statusTextForMotion(flag){
+    return flag ? 'Motion Detected' : 'Idle';
+  }
+
+  function updateUI(data){
+    soilValEl.textContent = data.soil.toFixed(1) + '%';
+    soilLabel.textContent = statusTextForSoil(data.soil);
+
+    lightValEl.textContent = data.light.toFixed(1) + '%';
+    lightLabel.textContent = statusTextForLight(data.light);
+
+    motionValEl.textContent = data.motion ? '!' : '—';
+    motionLabel.textContent = data.motion ? 'Movement' : 'No Motion';
+
+    connDot.style.background = conn ? '#9ef08f' : '#6b6b6b';
+    connText.textContent = conn ? 'Connected' : 'Disconnected';
+
+    // watering state UI
+    if(watering){
+      waterState.textContent = 'Watering Active';
+      manualBtn.textContent = 'Stop Watering';
+      manualBtn.classList.remove('btn-disabled');
+      waterBtn.style.transform = 'scale(1.02)';
+      waterBtn.style.boxShadow = '0 10px 30px rgba(40,165,68,0.5)';
+    } else {
+      waterState.textContent = 'Idle';
+      manualBtn.textContent = 'Start Watering';
+      manualBtn.classList.remove('btn-disabled');
+      waterBtn.style.transform = 'scale(1)';
+      waterBtn.style.boxShadow = '0 8px 18px rgba(0,0,0,0.35)';
+    }
+  }
+
+  // Simulate sensor data periodically (replace with real data later)
+  function simulateOnce(){
+    const soil = rand(20,80);
+    const light = rand(10,90); // percent of ideal light
+    const motion = Math.random() > 0.86; // occasional motion
+    updateUI({soil, light, motion});
+    // show browser notification when soil dry (if permission is given)
+    if(soil < 28 && Notification.permission === 'granted'){
+      new Notification('Green Guardian', { body: 'Soil is dry — watering recommended' });
+    }
+  }
+
+  // toggle watering
+  function toggleWater(){
+    watering = !watering;
+    updateUI({});
+    // simulate sending command to robot (log)
+    console.log('WATER_CMD ->', watering ? 'ON' : 'OFF');
+    if(watering){
+      // small simulated behavior: raise soil after watering
+      let raise = 0;
+      const t = setInterval(()=>{
+        raise += 1.2;
+        // read current soil number from UI (strip %)
+        const cur = parseFloat(soilValEl.textContent.replace('%','')) || 30;
+        updateUI({soil: Math.min(95, cur + raise), light: parseFloat(lightValEl.textContent)||50, motion:false});
+        if(raise > 8){
+          clearInterval(t);
+        }
+      },900);
+    }
+  }
+
+  // click events
+  waterBtn.addEventListener('click', toggleWater);
+  manualBtn.addEventListener('click', toggleWater);
+
+  // ask for notification permission (optional)
+  if('Notification' in window){
+    if(Notification.permission === 'default'){
+      Notification.requestPermission();
+    }
+  }
+
+  // start interval
+  simulateOnce();
+  setInterval(simulateOnce, 2000);
+
+  // register service worker (keep your existing file)
+  if('serviceWorker' in navigator){
+    navigator.serviceWorker.register('service-worker.js').catch(()=>{console.log('sw fail')});
+  }
+</script>
+</body>
+</html>
