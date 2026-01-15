@@ -3,26 +3,28 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>Green Guardian / حارس الأخضر</title>
+<title>Green Guardian — Smart Plant Robot</title>
 <meta name="theme-color" content="#0b3f1a" />
 <style>
   :root{
-    --bg:#03240e; --card:#0f3e20; --accent:#2e8b3a; --accent-2:#4caf50; --muted:#b3d8b3; --danger:#c94a3d;
+    --bg:#07160c; --card:#0f3e20; --accent:#2e8b3a; --accent-2:#4caf50; --muted:#b3d8b3; --danger:#c94a3d;
     --glass: rgba(255,255,255,0.02);
   }
   html,body{height:100%;margin:0;font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Arial;}
-  body{background:linear-gradient(180deg,#02230c 0%, #062e14 70%);color:#eaf6ea;padding:16px;}
-  .container{max-width:960px;margin:0 auto;}
+  body{background:linear-gradient(180deg,#04220c 0%, #063014 70%);color:#eaf6ea;padding:16px;}
+  .container{max-width:980px;margin:0 auto;}
   header{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px;border-radius:12px;background:linear-gradient(90deg,var(--card), rgba(14,56,30,0.9));box-shadow:0 6px 18px rgba(0,0,0,0.45);margin-bottom:14px}
   .brand{display:flex;align-items:center;gap:10px;font-weight:800;font-size:18px;color:var(--accent-2)}
   .lang-switch{display:flex;gap:8px;align-items:center}
   .lang-btn{padding:6px 10px;border-radius:8px;background:transparent;color:var(--muted);border:1px solid rgba(255,255,255,0.06);cursor:pointer}
   .lang-btn.active{background:var(--accent-2);color:#042610;border:1px solid rgba(0,0,0,0.06)}
+  .btn{padding:8px 12px;border-radius:8px;background:#234;color:#dfffe0;border:1px solid rgba(255,255,255,0.04);cursor:pointer}
+  .btn.secondary{background:transparent;color:var(--muted);border:1px solid rgba(255,255,255,0.06)}
   .badge{display:inline-flex;align-items:center;gap:8px;background:linear-gradient(180deg,#1b6b32,#0e4f21);padding:6px 12px;border-radius:20px;font-size:13px}
   .card{background:linear-gradient(180deg,var(--glass), rgba(255,255,255,0.01));border-radius:12px;padding:14px;margin-bottom:12px;box-shadow:0 6px 18px rgba(0,0,0,0.35);border-right:6px solid rgba(255,255,255,0.03)}
   .grid-3{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
   .sensor-title{display:flex;gap:10px;align-items:center;font-weight:700;color:var(--muted)}
-  .big-number{font-size:28px;font-weight:800;color:#fff;margin-top:6px}
+  .big-number{font-size:26px;font-weight:800;color:#fff;margin-top:6px}
   .small{font-size:13px;color:var(--muted);margin-top:4px}
   .watering{display:flex;flex-direction:column;align-items:center;gap:12px;padding:8px 0}
   .circle-btn{width:84px;height:84px;border-radius:50%;display:flex;align-items:center;justify-content:center;border:3px solid rgba(255,255,255,0.04);cursor:pointer;transition:all .18s ease}
@@ -32,18 +34,10 @@
   .circle-btn.on { background: linear-gradient(180deg,#6ff089,#2e8b3a); box-shadow: 0 12px 30px rgba(80,255,140,0.45); transform: translateY(-2px); }
   .circle-btn.on svg .drop-fill { opacity: 1; transform: scale(1); transition: all .15s ease; fill: #05300a; }
   .circle-btn.on svg .drop-outline { opacity: 0; transform: scale(0.8); transition: all .15s ease; }
-  .btn{padding:10px 14px;border-radius:8px;background:#234;color:#dfffe0;border:1px solid rgba(255,255,255,0.04);cursor:pointer}
-  .btn.secondary{background:transparent;color:var(--muted);border:1px solid rgba(255,255,255,0.06)}
-  .btn.off{background:#243a2e;color:#b3d8b3}
-  .btn.on{background:linear-gradient(90deg,#43a047,#2e8b3a);color:#fff;box-shadow:0 6px 18px rgba(80,255,140,0.25)}
-  .danger{background:var(--danger);color:#fff}
-  .alert-line{padding:10px;border-radius:8px;margin-bottom:10px;font-weight:700}
-  .alert-danger{background:linear-gradient(90deg,#5b0f0f,#9e2b2b);color:#fff}
-  .field { display:flex; gap:8px; align-items:center; width:100%; }
-  .location { font-size:13px; color:var(--muted); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
-  .loc-input { flex:1; padding:8px 10px; border-radius:8px; border:1px solid rgba(255,255,255,0.06); background: rgba(255,255,255,0.02); color: #eaffea; direction:ltr; }
-  .small-note { font-size:12px; color:var(--muted); margin-top:6px; text-align:right; }
   .map-preview { width:100%; height:280px; border-radius:10px; overflow:hidden; margin-top:10px; display:none; border:1px solid rgba(255,255,255,0.04) }
+  .detections { display:flex;flex-direction:column;gap:8px;max-height:240px;overflow:auto;padding-right:6px }
+  .detect-item{background:rgba(0,0,0,0.12);padding:8px;border-radius:8px;display:flex;gap:10px;align-items:center}
+  .detect-img{width:64px;height:48px;object-fit:cover;border-radius:6px;border:1px solid rgba(255,255,255,0.04)}
   footer{margin-top:10px;text-align:center;color:rgba(255,255,255,0.25);font-size:13px}
   @media (max-width:880px){ .grid-3{grid-template-columns:1fr} .map-preview{height:200px} .circle-btn{width:72px;height:72px} .big-number{font-size:22px} }
 </style>
@@ -52,7 +46,7 @@
   <div class="container" id="app-root" dir="ltr">
     <header>
       <div style="display:flex;align-items:center;gap:12px">
-        <div class="brand"><svg width="28" height="28" viewBox="0 0 24 24" fill="none"><path d="M12 2c2.8 0 5 2 6 4-1.6.2-3.5 1-5 2-1.4 1-2.5 2.5-3 4-.5-1.5-1.6-3-3-4-1.4-1-3.4-1.8-5-2 1-2 3.2-4 6-4z" fill="#9feab0"/></svg><span id="brand-text" data-i18n="brand">Green Guardian</span></div>
+        <div class="brand"><svg width="28" height="28" viewBox="0 0 24 24" fill="none"><path d="M12 2c2.8 0 5 2 6 4-1.6.2-3.5 1-5 2-1.4 1-2.5 2.5-3 4-.5-1.5-1.6-3-3-4-1.4-1-3.4-1.8-5-2 1-2 3.2-4 6-4z" fill="#9feab0"/></svg><strong id="brand-text">Green Guardian</strong></div>
       </div>
 
       <div style="display:flex;align-items:center;gap:12px">
@@ -63,162 +57,112 @@
 
         <div class="badge" id="conn-badge">
           <span id="conn-dot" style="width:10px;height:10px;border-radius:50%;background:#6b6b6b;display:inline-block;margin-left:6px"></span>
-          <span id="conn-text" data-i18n="disconnected">Disconnected</span>
+          <span id="conn-text">Disconnected</span>
         </div>
 
-        <button id="bt-btn" class="btn secondary" data-i18n="connect">Connect Bluetooth</button>
+        <button id="bt-btn" class="btn secondary">Connect Bluetooth</button>
       </div>
     </header>
 
-    <section class="row">
-      <div class="grid-3">
-        <div class="card soil">
-          <div style="display:flex;align-items:center;justify-content:space-between">
-            <div class="sensor-title"><svg width="26" height="26"><path d="M12 2s-4 4-4 8 1.79 8 4 12c2.21-4 4-8 4-12s-4-8-4-8z" fill="#9feab0"/></svg>
-              <div style="display:flex;flex-direction:column"><div style="font-weight:700" data-i18n="soil_title">Soil Moisture</div><div class="small" data-i18n="soil_sub">Moisture %</div></div>
-            </div>
-            <div style="text-align:right">
-              <div class="big-number" id="soil-value">--%</div>
-              <div class="small" id="soil-label">--</div>
-            </div>
+    <main class="row">
+
+      <section class="grid-3">
+        <div class="card">
+          <div class="sensor-title"><svg width="26" height="26"><path d="M12 2s-4 4-4 8 1.79 8 4 12c2.21-4 4-8 4-12s-4-8-4-8z" fill="#9feab0"/></svg>
+            <div style="display:flex;flex-direction:column"><div style="font-weight:700">Soil Moisture</div><div class="small">Percent</div></div>
+          </div>
+          <div style="text-align:right">
+            <div class="big-number" id="soil-value">--%</div>
+            <div class="small" id="soil-label">--</div>
           </div>
         </div>
 
-        <div class="card light">
-          <div style="display:flex;align-items:center;justify-content:space-between">
-            <div class="sensor-title"><svg width="26" height="26"><path d="M12 8a4 4 0 100 8 4 4 0 000-8z" fill="#ffd88a"/></svg>
-              <div style="display:flex;flex-direction:column"><div style="font-weight:700" data-i18n="light_title">Light Level</div><div class="small" data-i18n="light_sub">Ambient</div></div>
-            </div>
-            <div style="text-align:right">
-              <div class="big-number" id="light-value">--</div>
-              <div class="small" id="light-label">--</div>
-            </div>
+        <div class="card">
+          <div class="sensor-title"><svg width="26" height="26"><path d="M12 8a4 4 0 100 8 4 4 0 000-8z" fill="#ffd88a"/></svg>
+            <div style="display:flex;flex-direction:column"><div style="font-weight:700">Light</div><div class="small">Ambient</div></div>
+          </div>
+          <div style="text-align:right">
+            <div class="big-number" id="light-value">--</div>
+            <div class="small" id="light-label">--</div>
           </div>
         </div>
 
-        <div class="card motion">
-          <div style="display:flex;align-items:center;justify-content:space-between">
-            <div class="sensor-title"><svg width="26" height="26"><path d="M12 2a9 9 0 100 18 9 9 0 000-18z" fill="#d7e8d7"/></svg>
-              <div style="display:flex;flex-direction:column"><div style="font-weight:700" data-i18n="motion_title">Motion Sensor</div><div class="small" data-i18n="motion_sub">Movement near plant</div></div>
-            </div>
-            <div style="text-align:right">
-              <div class="big-number" id="motion-value">--</div>
-              <div class="small" id="motion-label">--</div>
-            </div>
+        <div class="card">
+          <div class="sensor-title"><svg width="26" height="26"><path d="M12 2a9 9 0 100 18 9 9 0 000-18z" fill="#d7e8d7"/></svg>
+            <div style="display:flex;flex-direction:column"><div style="font-weight:700">Motion</div><div class="small">Near plant</div></div>
+          </div>
+          <div style="text-align:right">
+            <div class="big-number" id="motion-value">--</div>
+            <div class="small" id="motion-label">--</div>
           </div>
         </div>
-      </div>
+      </section>
 
-      <div class="card">
-        <div style="display:flex;align-items:center;justify-content:space-between">
-          <div style="font-weight:800;color:var(--muted)" data-i18n="controls_title">Watering & Controls</div>
-          <div style="display:flex;gap:8px;align-items:center">
-            <button id="find-btn" class="btn secondary" data-i18n="find_robot">Find Robot</button>
+      <section class="card">
+        <div style="display:flex;justify-content:space-between;align-items:center">
+          <strong id="controls-title">Watering & Controls</strong>
+          <div style="display:flex;gap:8px">
+            <button id="find-btn" class="btn secondary">Find Robot</button>
           </div>
         </div>
 
-        <div class="watering" style="margin-top:8px">
-          <div class="circle-btn off" id="water-btn" title="Toggle watering">
+        <div class="watering" style="margin-top:10px">
+          <div id="water-btn" class="circle-btn off" title="Toggle watering">
             <svg width="36" height="36" viewBox="0 0 24 24" aria-hidden="true">
               <path class="drop-fill" d="M12 3.3s4 4.2 4 7.2a4 4 0 01-8 0c0-3 4-7.2 4-7.2z" fill="#05300a" style="opacity:0"/>
               <path class="drop-outline" d="M12 3.3s4 4.2 4 7.2a4 4 0 01-8 0c0-3 4-7.2 4-7.2z" fill="none" stroke="#fff" stroke-width="1.5" />
             </svg>
           </div>
 
-          <div class="water-state" id="water-state" style="font-weight:700;color:#dcffd4">Idle</div>
+          <div id="water-state" style="font-weight:700;color:#dcffd4">Idle</div>
 
-          <div style="display:flex;gap:8px;width:100%;margin-top:6px">
-            <button id="manual-btn" class="btn off" style="flex:1" data-i18n="start_watering">Start Watering</button>
-            <button id="stop-btn" class="btn secondary" style="flex:0" data-i18n="stop_watering">Stop</button>
+          <div style="display:flex;gap:8px;width:100%;margin-top:8px">
+            <button id="manual-btn" class="btn off" style="flex:1">Start Watering</button>
+            <button id="stop-btn" class="btn secondary">Stop</button>
           </div>
 
           <div style="margin-top:12px;display:flex;gap:8px;align-items:center;width:100%">
-            <input id="loc-input" class="loc-input" placeholder="Enter robot ID or lat,lon (e.g. 25.2048,55.2708)" />
-            <button id="loc-input-btn" class="btn secondary" data-i18n="locate_btn">Locate</button>
+            <input id="loc-input" class="loc-input" placeholder="Enter robot ID or lat,lon (e.g. 25.2048,55.2708)" style="flex:1;padding:8px;border-radius:6px;border:1px solid rgba(255,255,255,0.06);background:rgba(255,255,255,0.02);color:#eaffea;direction:ltr"/>
+            <button id="loc-input-btn" class="btn secondary">Locate</button>
           </div>
 
-          <div class="small-note" style="width:100%;text-align:right" id="loc-help">Type a robot ID (will send WHERE:&lt;id&gt; when connected) or paste coordinates to jump to map.</div>
-
           <div style="margin-top:10px;display:flex;gap:8px;align-items:center;width:100%">
-            <div class="location" id="loc-display" data-i18n="no_location">No location</div>
+            <div class="location" id="loc-display">No location</div>
           </div>
 
           <div class="map-preview" id="map-preview">
             <iframe id="map-iframe" src="" width="100%" height="100%" frameborder="0" style="border:0"></iframe>
           </div>
         </div>
-      </div>
+      </section>
 
-      <div class="card" id="insect-card" style="display:none;border-right-color:#c94a3d">
-        <div style="font-weight:800;color:#ffd7d7" data-i18n="insect_title">Insect Alert</div>
-        <div id="insect-msg" style="margin-top:8px;color:#fff;font-weight:700"></div>
-      </div>
+      <section class="card">
+        <div style="display:flex;justify-content:space-between;align-items:center">
+          <strong>Detections & AI</strong>
+          <div style="display:flex;gap:8px">
+            <button id="clear-detections" class="btn secondary">Clear</button>
+          </div>
+        </div>
 
-    </section>
+        <div class="detections" id="detections"></div>
+      </section>
 
-    <footer style="margin-top:6px"><span data-i18n="footer">Green Guardian • demo PWA</span></footer>
+    </main>
+
+    <footer>Green Guardian • PWA</footer>
   </div>
 
 <script>
-/* ------------------------
-   Config & strings
-   ------------------------ */
+/* ============================
+  Configuration
+  ============================ */
 const SERVICE_UUID = '0000ffe0-0000-1000-8000-00805f9b34fb';
 const CHAR_UUID    = '0000ffe1-0000-1000-8000-00805f9b34fb';
-const LOCATE_CMD_PREFIX = 'WHERE:'; // sends e.g. WHERE:robot123
-
-const strings = {
-  en: {
-    brand: "Green Guardian",
-    disconnected: "Disconnected",
-    connect: "Connect Bluetooth",
-    soil_title: "Soil Moisture",
-    soil_sub: "Moisture %",
-    light_title: "Light Level",
-    light_sub: "Ambient",
-    motion_title: "Motion Sensor",
-    motion_sub: "Movement near plant",
-    controls_title: "Watering & Controls",
-    find_robot: "Find Robot",
-    start_watering: "Start Watering",
-    stop_watering: "Stop",
-    locate_btn: "Locate",
-    loc_help: "Type a robot ID (will send WHERE:<id>) or paste coordinates to jump to map.",
-    no_location: "No location",
-    insect_title: "Insect Alert",
-    footer: "Green Guardian • demo PWA"
-  },
-  ar: {
-    brand: "حارس الأخضر",
-    disconnected: "غير متصل",
-    connect: "اتصال بلوتوث",
-    soil_title: "رطوبة التربة",
-    soil_sub: "نسبة مئوية",
-    light_title: "مستوى الضوء",
-    light_sub: "محلي",
-    motion_title: "مستشعر الحركة",
-    motion_sub: "حركة حول النبات",
-    controls_title: "الري و الأدوات",
-    find_robot: "تحديد مكان الروبوت",
-    start_watering: "ابدأ الري",
-    stop_watering: "إيقاف",
-    locate_btn: "اذهب",
-    loc_help: "أدخل معرف الروبوت (يرسل WHERE:<id>) أو الصق إحداثيات للعرض على الخريطة.",
-    no_location: "لا يوجد موقع",
-    insect_title: "تنبيه الحشرات",
-    footer: "حارس الأخضر • تطبيق PWA تجريبي"
-  }
-};
-
-/* ------------------------
-   State & refs
-   ------------------------ */
-let lang = (localStorage.getItem('gg_lang') || 'en');
-let bleDevice = null, bleChar = null, connected = false;
-let watering = false;
-let last = { soil:50, light:50, motion:false, insects:0, dangerousMotion:false };
-
-const el = id => document.getElementById(id);
+const LOCATE_CMD_PREFIX = 'WHERE:'; // command to fetch robot location
+/* ============================
+  State & UI refs
+  ============================ */
+const el = id=>document.getElementById(id);
 const soilValEl = el('soil-value'), soilLabel = el('soil-label');
 const lightValEl = el('light-value'), lightLabel = el('light-label');
 const motionValEl = el('motion-value'), motionLabel = el('motion-label');
@@ -226,266 +170,324 @@ const connDot = el('conn-dot'), connText = el('conn-text');
 const btBtn = el('bt-btn'), waterBtn = el('water-btn'), manualBtn = el('manual-btn'), stopBtn = el('stop-btn');
 const findBtn = el('find-btn'), locInput = el('loc-input'), locInputBtn = el('loc-input-btn');
 const locDisplay = el('loc-display'), mapPreview = el('map-preview'), mapIframe = el('map-iframe');
-const insectCard = el('insect-card'), insectMsg = el('insect-msg');
+const detectionsEl = el('detections'), clearDetBtn = el('clear-detections');
 const langEnBtn = el('lang-en'), langArBtn = el('lang-ar'), appRoot = el('app-root');
-const locHelp = el('loc-help');
 
-const clamp = (v,m,M) => Math.max(m, Math.min(M, v));
-const now = () => (new Date()).getTime();
-const DEBOUNCE_MS = { soil:1000*60*30, motion:1000*60*5, insects:1000*60*60 };
-const lastNotified = { soil:0, motion:0, insects:0 };
-function canNotify(type){ return (now() - (lastNotified[type]||0)) > (DEBOUNCE_MS[type]||0); }
-function markNotified(type){ lastNotified[type] = now(); }
+let bleDevice = null, bleChar = null, connected = false;
+let watering = false;
+let last = { soil:50, light:50, motion:false, insects:0, dangerousMotion:false, lat:null, lon:null };
+let detections = []; // history
 
-/* ------------------------
-   i18n apply
-   ------------------------ */
-function applyI18n(){
-  document.querySelectorAll('[data-i18n]').forEach(elm=>{
-    const key = elm.getAttribute('data-i18n');
-    elm.textContent = (strings[lang] && strings[lang][key]) ? strings[lang][key] : '';
-  });
-  // placeholder and helpers
-  if(lang === 'ar'){
-    appRoot.setAttribute('dir','rtl');
-    locInput.placeholder = "أدخل معرف الروبوت أو إحداثيات lat,lon (مثال: 25.2048,55.2708)";
-    langArBtn.classList.add('active'); langEnBtn.classList.remove('active');
-  } else {
-    appRoot.setAttribute('dir','ltr');
-    locInput.placeholder = "Enter robot ID or lat,lon (e.g. 25.2048,55.2708)";
-    langEnBtn.classList.add('active'); langArBtn.classList.remove('active');
-  }
-  locHelp.textContent = strings[lang].loc_help;
-  connText.textContent = connected ? (lang==='ar' ? 'متصل' : 'Connected') : strings[lang].disconnected;
-  document.title = lang === 'ar' ? 'حارس الأخضر' : 'Green Guardian';
+/* language */
+let lang = localStorage.getItem('gg_lang') || 'en';
+function t(en, ar){ return lang==='ar' ? ar : en; }
+
+/* ============================
+  Utilities & UI updates
+  ============================ */
+function setLang(newLang){
+  lang = newLang;
   localStorage.setItem('gg_lang', lang);
+  // adjust UI texts
+  langEnBtn.classList.toggle('active', lang==='en'); langArBtn.classList.toggle('active', lang==='ar');
+  appRoot.setAttribute('dir', lang==='ar' ? 'rtl' : 'ltr');
+  // basic labels — you can add more if needed
+  btBtn.textContent = connected ? (lang==='ar'?'فصل':'Disconnect') : (lang==='ar'?'اتصال بلوتوث':'Connect Bluetooth');
+  manualBtn.textContent = watering ? (lang==='ar'?'إيقاف الري':'Stop Watering') : (lang==='ar'?'ابدأ الري':'Start Watering');
+  findBtn.textContent = lang==='ar' ? 'تحديد مكان الروبوت' : 'Find Robot';
+  locInput.placeholder = lang==='ar' ? 'أدخل معرف الروبوت أو إحداثيات lat,lon (مثال: 25.2048,55.2708)' : 'Enter robot ID or lat,lon (e.g. 25.2048,55.2708)';
+  clearDetBtn.textContent = lang==='ar' ? 'مسح' : 'Clear';
+}
+setLang(lang);
+
+/* small notification helper */
+function notify(title, body, urgent=false){
+  if(!("Notification" in window)) return;
+  if(Notification.permission==='granted'){ try{ new Notification(title,{body}); if(urgent && navigator.vibrate) navigator.vibrate([200,100,200]); } catch(e){} }
+  else if(Notification.permission==='default'){ Notification.requestPermission().then(p=>{ if(p==='granted') notify(title,body,urgent); }); }
 }
 
-/* ------------------------
-   UI helpers & notify
-   ------------------------ */
-function showBanner(msg, kind='danger'){ const b = document.querySelector('.alert-line') || null; const banner = el('loc-display'); /* reuse */; /* quick banner using loc-display temporarily */ console.log('banner:', msg); /* keep simple */ }
-function sendNotification(title, body, urgent=false){
-  if(!('Notification' in window)) return;
-  if(Notification.permission === 'granted'){ try{ new Notification(title,{body,renotify:!!urgent}); if(urgent && navigator.vibrate) navigator.vibrate([300,100,300]); } catch(e){ console.warn(e); } }
-  else if(Notification.permission === 'default'){ Notification.requestPermission().then(p=>{ if(p==='granted') sendNotification(title,body,urgent); }); }
-}
-function statusTextForSoil(n){ if(n<20) return lang==='ar' ? 'جافة — تحتاج ري' : 'Dry — needs water'; if(n<40) return lang==='ar' ? 'منخفضة' : 'Low'; if(n<70) return lang==='ar' ? 'جيدة' : 'Good'; return lang==='ar' ? 'رطبة' : 'Wet'; }
-function statusTextForLight(n){ if(n<20) return lang==='ar' ? 'ضعيف جداً' : 'Very Low'; if(n<50) return lang==='ar' ? 'منخفض' : 'Low'; if(n<80) return lang==='ar' ? 'متوسط' : 'Moderate'; return lang==='ar' ? 'مشرق' : 'Bright'; }
-function statusTextForMotion(flag, dm){ if(dm) return lang==='ar' ? 'حركة خطرة' : 'Dangerous movement'; return flag ? (lang==='ar' ? 'حركة' : 'Movement') : (lang==='ar' ? 'لا حركة' : 'No Motion'); }
+/* status text helpers */
+function soilText(n){ if(n<20) return t('Dry — needs water','جافة — تحتاج ري'); if(n<40) return t('Low','منخفضة'); if(n<70) return t('Good','جيدة'); return t('Wet','رطبة'); }
+function lightText(n){ if(n<20) return t('Very low','ضعيف جداً'); if(n<50) return t('Low','منخفض'); if(n<80) return t('Medium','متوسط'); return t('Bright','مشرق'); }
+function motionText(m, dm){ if(dm) return t('Dangerous motion','حركة خطرة'); return m ? t('Movement','حركة') : t('No motion','لا حركة'); }
 
-/* ------------------------
-   Update UI
-   ------------------------ */
-function updateUI(data = {}){
-  last.soil = (typeof data.soil !== 'undefined') ? clamp(parseFloat(data.soil)||0,0,100) : last.soil;
-  last.light = (typeof data.light !== 'undefined') ? clamp(parseFloat(data.light)||0,0,100) : last.light;
-  last.motion = (typeof data.motion !== 'undefined') ? !!data.motion : last.motion;
-  last.insects = (typeof data.insects !== 'undefined') ? parseInt(data.insects)||0 : last.insects;
-  last.dangerousMotion = (typeof data.dangerousMotion !== 'undefined') ? !!data.dangerousMotion : last.dangerousMotion;
+/* update UI */
+function updateUI(data={}){
+  last.soil = (typeof data.soil !== 'undefined') ? data.soil : last.soil;
+  last.light = (typeof data.light !== 'undefined') ? data.light : last.light;
+  last.motion = (typeof data.motion !== 'undefined') ? data.motion : last.motion;
+  last.insects = (typeof data.insects !== 'undefined') ? data.insects : last.insects;
+  last.dangerousMotion = (typeof data.dangerousMotion !== 'undefined') ? data.dangerousMotion : last.dangerousMotion;
+  if(typeof data.lat !== 'undefined') last.lat = data.lat;
+  if(typeof data.lon !== 'undefined') last.lon = data.lon;
 
-  soilValEl.textContent = (Math.round(last.soil*10)/10) + '%';
-  soilLabel.textContent = statusTextForSoil(last.soil);
-  lightValEl.textContent = (Math.round(last.light*10)/10) + '%';
-  lightLabel.textContent = statusTextForLight(last.light);
-  motionValEl.textContent = last.dangerousMotion ? '!' : (last.motion ? '•' : '—');
-  motionLabel.textContent = statusTextForMotion(last.motion, last.dangerousMotion);
+  soilValEl.textContent = (Math.round(last.soil*10)/10) + '%'; soilLabel.textContent = soilText(last.soil);
+  lightValEl.textContent = (Math.round(last.light*10)/10) + '%'; lightLabel.textContent = lightText(last.light);
+  motionValEl.textContent = last.dangerousMotion ? '!' : (last.motion ? '•' : '—'); motionLabel.textContent = motionText(last.motion,last.dangerousMotion);
 
   connDot.style.background = connected ? '#9ef08f' : '#6b6b6b';
-  connText.textContent = connected ? (lang==='ar' ? 'متصل' : 'Connected') : strings[lang].disconnected;
+  connText.textContent = connected ? (lang==='ar'?'متصل':'Connected') : (lang==='ar'?'غير متصل':'Disconnected');
 
-  if(last.insects > 0){
-    insectCard.style.display = 'block';
-    insectMsg.textContent = lang==='ar' ? `${last.insects} حشرة/حشرات مكتشفة — افحص النبات` : `${last.insects} insect(s) detected — inspect plant`;
-  } else insectCard.style.display = 'none';
+  // watering visuals
+  if(watering){ waterBtn.classList.remove('off'); waterBtn.classList.add('on'); manualBtn.classList.remove('off'); manualBtn.classList.add('on'); manualBtn.textContent = (lang==='ar'?'إيقاف الري':'Stop Watering'); el('water-state').textContent = (lang==='ar'?'جاري الري':'Watering Active'); }
+  else { waterBtn.classList.remove('on'); waterBtn.classList.add('off'); manualBtn.classList.remove('on'); manualBtn.classList.add('off'); manualBtn.textContent = (lang==='ar'?'ابدأ الري':'Start Watering'); el('water-state').textContent = (lang==='ar'?'خامل':'Idle'); }
 
-  if(watering){ waterBtn.classList.remove('off'); waterBtn.classList.add('on'); manualBtn.classList.remove('off'); manualBtn.classList.add('on'); manualBtn.textContent = lang==='ar' ? 'إيقاف الري' : 'Stop Watering'; el('water-state').textContent = lang==='ar' ? 'جاري الري' : 'Watering Active'; }
-  else { waterBtn.classList.remove('on'); waterBtn.classList.add('off'); manualBtn.classList.remove('on'); manualBtn.classList.add('off'); manualBtn.textContent = lang==='ar' ? 'ابدأ الري' : 'Start Watering'; el('water-state').textContent = lang==='ar' ? 'خامل' : 'Idle'; }
-}
-
-/* ------------------------
-   Alerts
-   ------------------------ */
-function checkAlertsAndNotify(){
-  if(last.soil < 28 && canNotify('soil')){
-    sendNotification(lang==='ar' ? 'حارس الأخضر — التربة جافة' : 'Green Guardian — Dry soil', lang==='ar' ? 'التربة جافة. يوصى بالري.' : 'Soil is dry. Consider watering the plant.', false);
-    markNotified('soil');
-  }
-  if((last.dangerousMotion || last.motion) && canNotify('motion')){
-    sendNotification(lang==='ar' ? 'حارس الأخضر — تم الكشف عن حركة' : 'Green Guardian — Movement', last.dangerousMotion ? (lang==='ar' ? 'حركة خطرة' : 'Dangerous motion detected') : (lang==='ar' ? 'تم الكشف عن حركة' : 'Movement detected near plant'), true);
-    markNotified('motion');
-  }
-  if(last.insects > 0 && canNotify('insects')){
-    sendNotification(lang==='ar' ? 'حارس الأخضر — حشرات مكتشفة' : 'Green Guardian — Insects detected', lang==='ar' ? `${last.insects} حشرة/حشرات — افحص النبات` : `${last.insects} insect(s) detected — inspect plant`, true);
-    markNotified('insects');
+  // map preview if lat/lon exists
+  if(last.lat && last.lon){
+    locDisplay.innerHTML = (lang==='ar' ? 'موقع الروبوت: ' : 'Robot location: ') + `${last.lat.toFixed(5)}, ${last.lon.toFixed(5)} <a href="https://www.google.com/maps/search/?api=1&query=${last.lat},${last.lon}" target="_blank" style="color:#cfe;text-decoration:underline">${lang==='ar'?'افتح في الخرائط':'Open in Maps'}</a>`;
+    mapIframe.src = `https://www.google.com/maps?q=${last.lat},${last.lon}&z=17&output=embed`;
+    mapPreview.style.display = 'block';
   }
 }
 
-/* ------------------------
-   Parse robot string
-   ------------------------ */
-function parseSensorString(s){
-  const out = {};
-  try {
-    const parts = s.trim().split(';').filter(Boolean);
+/* Detection handling: adds to list + suggested actions */
+function addDetection(det){
+  // det = { type:'INSECT'|'PERSON'|'PLANT', subtype:'aphid', confidence:0.87, image:'' }
+  det.time = new Date().toLocaleString();
+  detections.unshift(det);
+  renderDetections();
+  // notifications and suggestions
+  let title = '', body = '', urgent=false;
+  if(det.type === 'PERSON'){ title = t('Person detected','تم كشف شخص'); body = t('Human near plants','شخص بالقرب من النباتات'); urgent=true; notify(title, body, urgent); }
+  else if(det.type === 'INSECT'){ title = t('Pest detected','حشرات مكتشفة'); body = `${det.subtype || ''} ${(det.confidence?('('+Math.round(det.confidence*100)+'%)'):'')}`; notify(title, body, true); }
+  else if(det.type === 'PLANT'){ title = t('Plant issue','مشكلة في النبات'); body = det.subtype || ''; notify(title, body, true); }
+}
+
+/* render detection history */
+function renderDetections(){
+  detectionsEl.innerHTML = '';
+  for(const d of detections){
+    const div = document.createElement('div'); div.className='detect-item';
+    const img = document.createElement('img'); img.className='detect-img'; img.src = d.image || 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="64" height="48"><rect width="100%"height="100%"fill="%23000000"/><text x="50%"y="50%"fill="%23fff"dominant-baseline="middle"text-anchor="middle"font-size="8">No Image</text></svg>';
+    const info = document.createElement('div'); info.style.flex='1';
+    const title = document.createElement('div'); title.style.fontWeight='700';
+    title.textContent = (d.type==='INSECT' ? t('Insect','حشرة') : (d.type==='PERSON'?t('Person','شخص'):t('Plant','نبات'))) + (d.subtype?(' — '+d.subtype):'');
+    const meta = document.createElement('div'); meta.style.fontSize='12px'; meta.style.color='#cfe';
+    meta.textContent = `${d.time} ${d.confidence?(' • '+Math.round(d.confidence*100)+'%') : ''}`;
+    const suggestion = document.createElement('div'); suggestion.style.marginTop='6px'; suggestion.style.fontSize='13px';
+    suggestion.textContent = getSuggestionText(d);
+    info.appendChild(title); info.appendChild(meta); info.appendChild(suggestion);
+    div.appendChild(img); div.appendChild(info);
+    detectionsEl.appendChild(div);
+  }
+}
+
+/* built-in suggestion engine (simple rules) */
+function getSuggestionText(d){
+  if(d.type==='PERSON') return t('Check if visitor is authorized. Consider alarm or block access.', 'تحقق إن كان الزائر مصرح له. فكر في إنذار أو منع الوصول.');
+  if(d.type==='INSECT'){
+    const s = (d.subtype||'').toLowerCase();
+    if(s.includes('aphid') || s.includes('aphids')) return t('Possible aphids. Suggest: spray neem oil, increase airflow, remove affected leaves.','احتمال حشرات قمّة (Aphids). الاقتراح: رش زيت النيم، زيادة التهوية، إزالة الأوراق المصابة.');
+    if(s.includes('caterpillar')||s.includes('worm')) return t('Caterpillar detected. Suggest removing manually or apply safe insecticide.','عثة/يرقات. الاقتراح: الإزالة يدوياً أو استخدام مبيد آمن.');
+    return t('Insect detected. Inspect plant and treat with an appropriate method (organic preferred).','حشرة مكتشفة. افحص النبات وعالجه بطريقة مناسبة (يفضل عضوية).');
+  }
+  if(d.type==='PLANT'){
+    const s = (d.subtype||'').toLowerCase();
+    if(s.includes('yellow')||s.includes('chlorosis')) return t('Yellowing leaves: check watering, soil nutrients, and sunlight.','اصفرار الأوراق: تحقق من الري، مغذيات التربة، والضوء.');
+    return t('Plant issue detected. Inspect leaves & soil and compare to care guide.','تم اكتشاف مشكلة بالنبات. افحص الأوراق والتربة وقارن بدليل العناية.');
+  }
+  return '';
+}
+
+/* parse incoming sensor/detection strings
+Formats supported:
+  S:45;L:60;M:1;I:2;DM:0
+  LAT:25.2048;LON:55.2708
+  LOC:25.2048,55.2708
+  DETECT:PERSON
+  DETECT:INSECT:aphid:0.87
+  IMAGE:https://...
+*/
+function parseRobotMessage(s){
+  s = s.trim();
+  if(!s) return;
+  // line contains key:value pairs separated by ;
+  if(s.includes(';')){
+    const parts = s.split(';').map(p=>p.trim()).filter(Boolean);
+    const parsed = {};
     for(const p of parts){
       const [k,v] = p.split(':').map(x=>x.trim());
       if(!k) continue;
-      const key = k.toUpperCase();
-      if(key === 'S') out.soil = parseFloat(v);
-      else if(key === 'L') out.light = parseFloat(v);
-      else if(key === 'M') out.motion = (v === '1' || v.toLowerCase() === 'true');
-      else if(key === 'I') out.insects = parseInt(v) || 0;
-      else if(key === 'DM') out.dangerousMotion = (v === '1' || v.toLowerCase() === 'true');
-      else if(key === 'LAT') out.lat = parseFloat(v);
-      else if(key === 'LON') out.lon = parseFloat(v);
-      else if(key === 'LOC'){ const [la,lo] = v.split(',').map(x=>parseFloat(x)); if(!isNaN(la) && !isNaN(lo)){ out.lat=la; out.lon=lo; } }
+      const K = k.toUpperCase();
+      if(K==='S') parsed.soil = parseFloat(v);
+      else if(K==='L') parsed.light = parseFloat(v);
+      else if(K==='M') parsed.motion = (v==='1'||v.toLowerCase()==='true');
+      else if(K==='I') parsed.insects = parseInt(v)||0;
+      else if(K==='DM') parsed.dangerousMotion = (v==='1'||v.toLowerCase()==='true');
+      else if(K==='LAT') parsed.lat = parseFloat(v);
+      else if(K==='LON') parsed.lon = parseFloat(v);
     }
-  } catch(e){ console.warn(e); }
-  return out;
+    updateUI(parsed);
+    // automatic alerts
+    if(parsed.soil && parsed.soil < 28) { notify(t('Dry soil','التربة جافة'), t('Soil is low — watering recommended','التربة منخفضة — يوصى بالري')); }
+    if(parsed.dangerousMotion) { notify(t('Dangerous motion detected','تم اكتشاف حركة خطرة'), t('Check area immediately','افحص المنطقة فوراً'), true); }
+    return;
+  }
+
+  // other formats single-line:
+  // LOC:lat,lon
+  if(s.toUpperCase().startsWith('LOC:')){
+    const coords = s.substring(4).split(',').map(x=>parseFloat(x.trim()));
+    if(coords.length===2 && !isNaN(coords[0]) && !isNaN(coords[1])){
+      updateUI({lat:coords[0], lon:coords[1]}); notify(t('Location received','تم استلام الموقع'), t('Robot location updated','تم تحديث موقع الروبوت')); return;
+    }
+  }
+  // LAT:..;LON:.. already handled above if semicolon; allow single "LAT:.."
+  if(s.toUpperCase().startsWith('LAT:') && s.includes('LON:')){
+    const parts = s.split(';').map(x=>x.trim());
+    let lat=null, lon=null;
+    for(const p of parts){ const [k,v]=p.split(':'); if(k.toUpperCase()==='LAT') lat=parseFloat(v); if(k.toUpperCase()==='LON') lon=parseFloat(v); }
+    if(lat && lon){ updateUI({lat,lon}); notify(t('Location received','تم استلام الموقع'),''); return; }
+  }
+
+  // DETECT messages
+  if(s.toUpperCase().startsWith('DETECT:') || s.toUpperCase().startsWith('DETECTION:')){
+    const rest = s.split(':').slice(1); // [TYPE, subtype?, conf?]
+    const TYPE = (rest[0]||'').toUpperCase();
+    if(TYPE==='PERSON'){ addDetection({type:'PERSON', subtype:null, confidence:null, image:null}); return; }
+    if(TYPE==='INSECT'){
+      const subtype = rest[1] || 'unknown';
+      const conf = rest[2] ? parseFloat(rest[2]) : null;
+      addDetection({type:'INSECT', subtype, confidence:conf, image:null}); return;
+    }
+    if(TYPE==='PLANT'){ const subtype=rest[1]||'issue'; addDetection({type:'PLANT', subtype, confidence:rest[2]?parseFloat(rest[2]):null, image:null}); return; }
+  }
+
+  // IMAGE: url
+  if(s.toUpperCase().startsWith('IMAGE:')){
+    const url = s.substring(6).trim();
+    // attach as last detection image if exists, otherwise create image-only detection
+    if(detections.length>0){ detections[0].image = url; renderDetections(); notify(t('Image received','تم استلام صورة'), t('AI image available','صورة الذكاء الاصطناعي متاحة')); }
+    else { addDetection({type:'PLANT', subtype:'image', confidence:null, image:url}); }
+    return;
+  }
+
+  // fallback: try parse comma coords
+  const coordMatch = s.match(/(-?\d+\.\d+)\s*,\s*(-?\d+\.\d+)/);
+  if(coordMatch){ const lat=parseFloat(coordMatch[1]), lon=parseFloat(coordMatch[2]); updateUI({lat,lon}); return; }
+
+  console.log('Unhandled robot message:', s);
 }
 
-/* ------------------------
-   Bluetooth connect/receive
-   ------------------------ */
+/* ===== BLE connectivity & messaging ===== */
 async function connectBluetooth(){
-  if(!navigator.bluetooth){ alert(lang==='ar' ? 'المتصفح لا يدعم Web Bluetooth. استخدم Chrome على أندرويد.' : 'Web Bluetooth not supported. Use Chrome on Android.'); return; }
-  try {
-    btBtn.textContent = lang==='ar' ? 'جارٍ اختيار الجهاز...' : 'Selecting device...';
-    const device = await navigator.bluetooth.requestDevice({ acceptAllDevices: true, optionalServices: [SERVICE_UUID] });
+  if(!navigator.bluetooth){ alert(t('Your browser does not support Web Bluetooth. Use Chrome on Android.','المتصفح لا يدعم Web Bluetooth. استخدم Chrome على Android.')); return; }
+  try{
+    btBtn.textContent = t('Selecting device...','جارٍ اختيار الجهاز...');
+    const device = await navigator.bluetooth.requestDevice({ acceptAllDevices:true, optionalServices:[SERVICE_UUID] });
     bleDevice = device; bleDevice.addEventListener('gattserverdisconnected', onDisconnected);
     const server = await device.gatt.connect();
     const service = await server.getPrimaryService(SERVICE_UUID);
     const char = await service.getCharacteristic(CHAR_UUID);
     bleChar = char;
     if(char.properties.notify){ await char.startNotifications(); char.addEventListener('characteristicvaluechanged', onCharacteristicValueChanged); }
-    connected = true;
-    btBtn.textContent = lang==='ar' ? 'فصل' : 'Disconnect';
-    btBtn.classList.remove('secondary'); btBtn.classList.add('danger');
+    connected = true; btBtn.textContent = t('Disconnect','فصل'); btBtn.classList.remove('secondary'); btBtn.classList.add('danger');
     updateUI({});
-  } catch(e){
-    console.error(e);
-    btBtn.textContent = strings[lang].connect;
-    alert(lang==='ar' ? 'فشل الاتصال أو تم الإلغاء.' : 'Bluetooth connection failed or cancelled.');
-  }
+    notify(t('Connected','تم الاتصال'), t('Robot connected','تم الاتصال بالروبوت'));
+  }catch(e){ console.error(e); btBtn.textContent = t('Connect Bluetooth','اتصال بلوتوث'); alert(t('Connection failed or cancelled','فشل الاتصال أو تم الإلغاء')); }
 }
-function onDisconnected(){ connected = false; btBtn.textContent = strings[lang].connect; btBtn.classList.remove('danger'); btBtn.classList.add('secondary'); updateUI({}); }
-function disconnectBluetooth(){ if(bleDevice && bleDevice.gatt.connected) bleDevice.gatt.disconnect(); connected = false; updateUI({}); }
+function onDisconnected(){ connected=false; btBtn.textContent = t('Connect Bluetooth','اتصال بلوتوث'); btBtn.classList.remove('danger'); btBtn.classList.add('secondary'); updateUI({}); notify(t('Disconnected','تم الفصل'), t('Robot disconnected','تم فصل الروبوت')); }
+function disconnectBluetooth(){ if(bleDevice && bleDevice.gatt.connected) bleDevice.gatt.disconnect(); connected=false; updateUI({}); }
 
+/* BLE value changed handler */
 function onCharacteristicValueChanged(evt){
-  try {
-    const dv = evt.target.value; let text = '';
+  try{
+    const dv = evt.target.value; let text='';
     if(window.TextDecoder) text = new TextDecoder().decode(dv); else { for(let i=0;i<dv.byteLength;i++) text += String.fromCharCode(dv.getUint8(i)); }
-    const lastLine = text.trim().split('\n').filter(Boolean).pop() || text.trim();
-    const parsed = parseSensorString(lastLine);
-    if(parsed.lat && parsed.lon) showLocation(parsed.lat, parsed.lon, true);
-    updateUI(parsed); checkAlertsAndNotify();
-  } catch(e){ console.warn(e); }
+    const lines = text.trim().split('\n').map(x=>x.trim()).filter(Boolean);
+    for(const line of lines) parseRobotMessage(line);
+  }catch(e){ console.warn('parse',e); }
 }
 
-/* ------------------------
-   Send command to robot safely
-   ------------------------ */
 async function sendCommandToRobot(cmd){
-  if(!bleChar){ console.log('simulate send:', cmd); return; }
-  try { const enc = new TextEncoder(); await bleChar.writeValue(enc.encode(cmd + '\n')); console.log('sent', cmd); } catch(e){ console.warn('BLE send failed', e); }
+  if(!bleChar){ console.log('Simulate send:',cmd); return; }
+  try{ const enc=new TextEncoder(); await bleChar.writeValue(enc.encode(cmd+'\n')); console.log('sent',cmd); } catch(e){ console.warn('BLE send failed', e); }
 }
 
-/* ------------------------
-   Water controls + icon swap
-   ------------------------ */
+/* ===== Watering controls ===== */
 let wateringTimer = null;
 function setWateringVisual(on){
   watering = !!on;
   if(watering){ waterBtn.classList.remove('off'); waterBtn.classList.add('on'); manualBtn.classList.remove('off'); manualBtn.classList.add('on'); }
   else { waterBtn.classList.remove('on'); waterBtn.classList.add('off'); manualBtn.classList.remove('on'); manualBtn.classList.add('off'); }
-  if(watering){ manualBtn.textContent = lang==='ar' ? 'إيقاف الري' : 'Stop Watering'; el('water-state').textContent = lang==='ar' ? 'جاري الري' : 'Watering Active'; }
-  else { manualBtn.textContent = lang==='ar' ? 'ابدأ الري' : 'Start Watering'; el('water-state').textContent = lang==='ar' ? 'خامل' : 'Idle'; }
+  if(watering) el('water-state').textContent = t('Watering Active','جاري الري'); else el('water-state').textContent = t('Idle','خامل');
 }
-function startWatering(){ if(watering) return; setWateringVisual(true); sendCommandToRobot('WATER_ON'); if(!connected){ if(wateringTimer) clearInterval(wateringTimer); let step=0; wateringTimer = setInterval(()=>{ step+=1.5; updateUI({ soil: clamp(last.soil+step,0,98), motion:false }); if(step>8){ clearInterval(wateringTimer); wateringTimer=null; } },900); } }
-function stopWatering(){ if(!watering) return; setWateringVisual(false); sendCommandToRobot('WATER_OFF'); if(wateringTimer){ clearInterval(wateringTimer); wateringTimer=null; } }
+function startWatering(){
+  if(watering) return;
+  setWateringVisual(true);
+  sendCommandToRobot('WATER_ON');
+  notify(t('Watering started','بدء الري'), t('Water pump turned on','تم تشغيل المضخة'));
+  if(!connected){
+    let step=0; wateringTimer=setInterval(()=>{ step+=1.5; updateUI({soil:Math.min(98,last.soil+step)}); if(step>8){ clearInterval(wateringTimer); wateringTimer=null; } },900);
+  }
+}
+function stopWatering(){
+  if(!watering) return;
+  setWateringVisual(false);
+  sendCommandToRobot('WATER_OFF');
+  notify(t('Watering stopped','إيقاف الري'), '');
+  if(wateringTimer){ clearInterval(wateringTimer); wateringTimer=null; }
+}
 function toggleWater(){ if(watering) stopWatering(); else startWatering(); }
 
-/* ------------------------
-   Location: find, device location, manual input
-   ------------------------ */
+/* ===== Location logic ===== */
 let waitingForRobotLocation = false;
-function getDeviceLocation(banner){
-  locDisplay.textContent = lang==='ar' ? 'جاري الحصول على موقع الجهاز...' : 'Getting location...';
-  if(!navigator.geolocation){ locDisplay.textContent = lang==='ar' ? 'الموقع غير مدعوم' : 'Geolocation not supported'; return; }
-  navigator.geolocation.getCurrentPosition(pos=>{ showLocation(pos.coords.latitude, pos.coords.longitude, false, banner); }, err=>{ locDisplay.textContent = lang==='ar' ? 'رفض الإذن أو تعذر الحصول على الموقع' : 'Location permission denied or unavailable'; }, { enableHighAccuracy:true, timeout:8000 });
-}
 function findRobot(){
-  locDisplay.textContent = lang==='ar' ? 'جاري تحديد المكان...' : 'Locating...';
-  if(connected && bleChar){
-    waitingForRobotLocation = true;
-    sendCommandToRobot('LOCATE');
-    setTimeout(()=>{ if(waitingForRobotLocation){ waitingForRobotLocation=false; getDeviceLocation(lang==='ar' ? 'لم يرد الروبوت — عرض موقع الجهاز' : 'No location from robot — showing device location'); } },8000);
-    return;
-  }
-  getDeviceLocation(lang==='ar' ? 'عرض موقع جهازك' : 'Using device location');
+  locDisplay.textContent = t('Locating...','جاري تحديد المكان...');
+  if(connected && bleChar){ waitingForRobotLocation=true; sendCommandToRobot('LOCATE'); setTimeout(()=>{ if(waitingForRobotLocation){ waitingForRobotLocation=false; getDeviceLocation(t('No reply from robot — showing device location','لم يرد الروبوت — عرض موقع الجهاز')); } },8000); return; }
+  getDeviceLocation(t('Showing device location','عرض موقع جهازك'));
 }
-function showLocation(lat, lon, fromRobot=false, banner){
-  waitingForRobotLocation = false;
-  const label = fromRobot ? (lang==='ar' ? 'موقع الروبوت' : 'Robot location') : (lang==='ar' ? 'موقع الجهاز' : 'Device location');
-  locDisplay.innerHTML = `${label}: ${lat.toFixed(5)}, ${lon.toFixed(5)} &nbsp; <a href="https://www.google.com/maps/search/?api=1&query=${lat},${lon}" target="_blank" style="color:#cfe;text-decoration:underline">${lang==='ar' ? 'افتح في الخرائط' : 'Open in Maps'}</a>`;
-  mapIframe.src = `https://www.google.com/maps?q=${lat},${lon}&z=17&output=embed`;
-  mapPreview.style.display = 'block';
-  if(banner) console.log(banner);
+function getDeviceLocation(banner){
+  locDisplay.textContent = t('Getting location...','جاري الحصول على موقع الجهاز...');
+  if(!navigator.geolocation){ locDisplay.textContent = t('Geolocation not supported','الموقع غير مدعوم'); return; }
+  navigator.geolocation.getCurrentPosition(pos=>{ updateUI({lat:pos.coords.latitude, lon:pos.coords.longitude}); notify(t('Device location','موقع الجهاز'), banner); }, err=>{ locDisplay.textContent = t('Location permission denied','رفض الإذن'); }, { enableHighAccuracy:true, timeout:8000 });
 }
 function handleManualLocateInput(){
-  const text = (locInput.value || '').trim();
-  if(!text){ locDisplay.textContent = strings[lang].no_location; return; }
+  const text = (locInput.value||'').trim();
+  if(!text){ locDisplay.textContent = t('No location','لا يوجد موقع'); return; }
   const coordRE = /^\s*(-?\d+(?:\.\d+)?)\s*[, ]\s*(-?\d+(?:\.\d+)?)\s*$/;
   const m = text.match(coordRE);
-  if(m){ const lat = parseFloat(m[1]), lon = parseFloat(m[2]); showLocation(lat, lon, false, lang==='ar' ? 'عرض الإحداثيات' : 'Showing coordinates'); return; }
-  // assume robot id
-  if(connected && bleChar){ waitingForRobotLocation = true; locDisplay.textContent = lang==='ar' ? `طلب موقع المعرف "${text}" إلى الروبوت...` : `Requesting location for ID "${text}"...`; sendCommandToRobot(LOCATE_CMD_PREFIX + text); setTimeout(()=>{ if(waitingForRobotLocation){ waitingForRobotLocation=false; locDisplay.textContent = lang==='ar' ? 'لم يرد الروبوت — حاول مرة أخرى' : 'No reply from robot. Try again.'; } },8000); }
-  else { locDisplay.textContent = lang==='ar' ? 'غير متصل — سيتم استخدام موقع الجهاز' : 'Not connected — using device location as fallback'; getDeviceLocation(lang==='ar' ? 'عرض موقع جهازك' : 'Using device location'); }
+  if(m){ updateUI({lat:parseFloat(m[1]), lon:parseFloat(m[2])}); notify(t('Coordinates shown','عرض الإحداثيات'),''); return; }
+  // treat as robot id
+  if(connected && bleChar){ waitingForRobotLocation=true; locDisplay.textContent = t('Requesting robot location...','طلب موقع المعرف إلى الروبوت...'); sendCommandToRobot(LOCATE_CMD_PREFIX + text); setTimeout(()=>{ if(waitingForRobotLocation){ waitingForRobotLocation=false; locDisplay.textContent = t('No reply — try again','لم يرد — حاول مرة أخرى'); } },8000); }
+  else { locDisplay.textContent = t('Not connected — using device location','غير متصل — عرض موقع الجهاز'); getDeviceLocation(t('Using device location','عرض موقع جهازك')); }
 }
 
-/* ------------------------
-   Events & simulation
-   ------------------------ */
+/* ===== Simulation for development when BLE not connected ===== */
+function simulateOnce(){
+  if(connected) return;
+  last.soil = Math.max(10, Math.min(95, last.soil + (Math.random()*6 - 3)));
+  last.light = Math.max(6, Math.min(96, last.light + (Math.random()*8 - 4)));
+  last.motion = (Math.random() > 0.88);
+  last.dangerousMotion = (Math.random() > 0.98);
+  last.insects = (Math.random() > 0.985) ? Math.floor(Math.random()*3)+1 : 0;
+  updateUI({});
+}
+setInterval(simulateOnce, 2000);
+
+/* ===== Events ===== */
 btBtn.addEventListener('click', async ()=>{ if(!connected) await connectBluetooth(); else disconnectBluetooth(); });
 waterBtn.addEventListener('click', ()=>toggleWater());
 manualBtn.addEventListener('click', ()=>toggleWater());
 stopBtn.addEventListener('click', ()=>stopWatering());
 findBtn.addEventListener('click', ()=>findRobot());
 locInputBtn.addEventListener('click', ()=>handleManualLocateInput());
-langEnBtn.addEventListener('click', ()=>{ lang='en'; applyI18n(); updateUI({}); });
-langArBtn.addEventListener('click', ()=>{ lang='ar'; applyI18n(); updateUI({}); });
+langEnBtn.addEventListener('click', ()=>{ setLang('en'); setLang('en'); });
+langArBtn.addEventListener('click', ()=>{ setLang('ar'); setLang('ar'); });
+clearDetBtn.addEventListener('click', ()=>{ detections=[]; renderDetections(); });
 
-function applyI18n(){
-  document.querySelectorAll('[data-i18n]').forEach(elm=>{
-    const key = elm.getAttribute('data-i18n');
-    elm.textContent = (strings[lang] && strings[lang][key]) ? strings[lang][key] : '';
-  });
-  if(lang==='ar'){ appRoot.setAttribute('dir','rtl'); locInput.placeholder = "أدخل معرف الروبوت أو إحداثيات lat,lon (مثال: 25.2048,55.2708)"; langArBtn.classList.add('active'); langEnBtn.classList.remove('active'); }
-  else { appRoot.setAttribute('dir','ltr'); locInput.placeholder = "Enter robot ID or lat,lon (e.g. 25.2048,55.2708)"; langEnBtn.classList.add('active'); langArBtn.classList.remove('active'); }
-  locHelp.textContent = strings[lang].loc_help;
-  connText.textContent = connected ? (lang==='ar' ? 'متصل' : 'Connected') : strings[lang].disconnected;
-  localStorage.setItem('gg_lang', lang);
-}
+/* request notification permission */
+if('Notification' in window && Notification.permission==='default') Notification.requestPermission().catch(()=>{});
 
-/* simulation when not connected */
-function simulateOnce(){
-  if(connected) return;
-  last.soil = clamp((last.soil || 50) + (Math.random()*6 - 3), 10, 92);
-  last.light = clamp((last.light || 50) + (Math.random()*8 - 4), 6, 96);
-  last.motion = (Math.random() > 0.88);
-  last.dangerousMotion = (Math.random() > 0.97);
-  last.insects = (Math.random() > 0.985) ? Math.floor(Math.random()*3)+1 : 0;
-  updateUI({}); checkAlertsAndNotify();
-}
-
-/* init */
-applyI18n();
-updateUI({});
-setInterval(simulateOnce, 2000);
-if('Notification' in window && Notification.permission === 'default') Notification.requestPermission().catch(()=>{});
+/* register service worker if present */
 if('serviceWorker' in navigator) navigator.serviceWorker.register('service-worker.js').catch(()=>{ console.log('sw register failed'); });
+
+/* initial UI draw */
+updateUI({});
+renderDetections();
 
 </script>
 </body>
 </html>
+
