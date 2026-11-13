@@ -536,7 +536,7 @@ langEnBtn.addEventListener('click', ()=>setLang('en')); langArBtn.addEventListen
    Set the backend URL in the field below after deploying backend/.
 */
 const NABTA_API_STORAGE_KEY = 'nabta_api_base_url';
-let nabtaApiBase = (localStorage.getItem(NABTA_API_STORAGE_KEY) || '').replace(/\\/$/, '');
+let nabtaApiBase = (localStorage.getItem(NABTA_API_STORAGE_KEY) || '').replace(/\/+$/, '');
 let nabtaLastDetectionId = null;
 let nabtaPollTimer = null;
 const nabtaApiInput = el('nabta-api-url');
@@ -624,8 +624,8 @@ async function refreshNabtaCloud() {
   }
 }
 function connectNabtaApi() {
-  const value = (nabtaApiInput.value || '').trim().replace(/\\/$/, '');
-  if (!/^https:\\/\\//i.test(value)) {
+  const value = (nabtaApiInput.value || '').trim().replace(/\/+$/, '');
+  if (!value.startsWith('https://')) {
     setNabtaApiStatus(t('Enter an HTTPS URL','أدخلي رابط HTTPS'), 'error');
     return;
   }

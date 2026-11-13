@@ -91,8 +91,8 @@ async def create_detection(
         "predictions": predictions,
         "image_url": f"{public_base}/uploads/{filename}",
         "model_id": model_result.get("model_id", "insects-mytwu/1"),
-        "image_width": (model_result.get("image") or {}).get("width"),
-        "image_height": (model_result.get("image") or {}).get("height"),
+        "image_width": ((model_result.get("image") if isinstance(model_result.get("image"), dict) else {}) or {}).get("width", model_result.get("width")),
+        "image_height": ((model_result.get("image") if isinstance(model_result.get("image"), dict) else {}) or {}).get("height", model_result.get("height")),
     }
     detections.insert(0, item)
     del detections[50:]

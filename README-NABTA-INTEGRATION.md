@@ -6,21 +6,20 @@ This integration adds a small FastAPI service between the Raspberry Pi and the G
 
 Raspberry Pi camera → Roboflow inference → authenticated HTTPS upload → FastAPI → public read-only dashboard → GitHub Pages app.
 
-**Important:** The Roboflow private key and the device upload token belong only on the Raspberry Pi/backend environment. Never add either key to `index.html`, GitHub Pages, screenshots, or a public repository.
+**Security:** Keep the Roboflow private key and the device upload token only on the Raspberry Pi/backend environment. Never add either key to `index.html`, GitHub Pages, screenshots, or a public repository.
 
 ## 1. Deploy the backend
 
 The repository includes `render.yaml`, `backend/Dockerfile`, and `backend/requirements.txt` for a Render web service.
 
 1. In Render, create a new Blueprint from this GitHub repository and select the branch `feature/nabta-ai-cloud-dashboard`.
-2. Render reads `render.yaml`. Set the generated secret `NABTA_DEVICE_TOKEN` in the service environment (Render may generate it automatically from the blueprint).
+2. Render reads `render.yaml` and generates a private `NABTA_DEVICE_TOKEN`. Copy this value from the service environment after deployment; do not place it in the website.
 3. After deployment, note the HTTPS service URL, for example `https://nabta-ai-api.onrender.com`.
-4. Set the service environment variable `PUBLIC_BASE_URL` to that same URL if the generated hostname changes.
-5. Check `https://YOUR-SERVICE/api/health`; it should return `{"status":"ok","service":"NABTA AI"}`.
+4. Check `https://YOUR-SERVICE/api/health`; it should return `{"status":"ok","service":"NABTA AI"}`.
+
+The included blueprint uses Render's free web-service plan for a no-cost prototype. Free services can sleep when idle, and their local files are ephemeral. This means the latest detection list and uploaded image files can disappear when the service restarts or spins down. For persistent image/history storage, switch to a paid service with a persistent disk or add a database and object storage. Review Render's current pricing before choosing a paid option.
 
 The dashboard's GET endpoints (`/api/latest` and `/api/history`) are read-only and public so GitHub Pages can retrieve results without putting a secret in browser code. Uploads to `POST /api/detections` require `X-Device-Token`. Only publish images that are safe to make public. For private image history, add user authentication and private object storage before using this with personal data.
-
-The Render blueprint attaches a persistent disk at `/var/data`. The service keeps recent detection metadata in memory, so the latest/history list resets when the service restarts; image files remain on the disk. A database is needed for durable history.
 
 ## 2. Add device settings on Raspberry Pi
 
@@ -30,7 +29,7 @@ On the Pi, open the private environment file (do not upload it to GitHub):
 nano /home/nabta/.nabta-secrets
 ```
 
-Keep your existing Roboflow line and add these lines:
+Keep your existing Roboflow line and add these lines, using the backend URL and generated device token from Render:
 
 ```bash
 export NABTA_DEVICE_TOKEN='PASTE_THE_BACKEND_DEVICE_TOKEN_HERE'
@@ -77,4 +76,4 @@ The original Bluetooth controls remain available and unchanged.
 
 - The current model ID defaults to `insects-mytwu/1`; it only recognizes labels it was trained for. A high confidence score is not proof that the insect species is correct.
 - The web dashboard displays results produced by the Raspberry Pi script; it does not yet trigger the robot to move or capture automatically.
-- The Pi still needs to be on an internet-connected network to call Roboflow and the backend.
+- The Pi still needs an internet-connected network to call Roboflow and the backend.
