@@ -39,6 +39,18 @@
   .suggest-btn{padding:6px 8px;border-radius:6px;background:var(--accent-2);color:#042610;border:none;cursor:pointer}
   footer{margin-top:10px;text-align:center;color:rgba(255,255,255,0.25);font-size:13px}
   @media (max-width:980px){ .grid-3{grid-template-columns:1fr} .grid-2{grid-template-columns:1fr} .map-preview{height:200px} .circle-btn{width:72px;height:72px} .big-number{font-size:22px} }
+
+  .nabta-cloud-card{border:1px solid rgba(159,234,176,.22);background:linear-gradient(145deg,rgba(24,92,43,.42),rgba(4,28,13,.72))}
+  .nabta-cloud-head{display:flex;justify-content:space-between;align-items:center;gap:10px}
+  .nabta-cloud-status{font-size:12px;border-radius:99px;padding:5px 10px;background:rgba(255,255,255,.08);color:var(--muted)}
+  .nabta-cloud-status.online{background:rgba(80,220,120,.15);color:#a9f5b8}
+  .nabta-cloud-status.error{background:rgba(220,80,70,.16);color:#ffb5ae}
+  .nabta-cloud-image{width:100%;height:180px;object-fit:contain;background:#03190b;border-radius:9px;margin-top:10px}
+  .nabta-cloud-field{width:100%;box-sizing:border-box;margin-top:8px;padding:9px;border-radius:8px;border:1px solid rgba(255,255,255,.12);background:rgba(0,0,0,.2);color:#efffef}
+  .nabta-cloud-result{background:rgba(0,0,0,.2);border-radius:9px;padding:10px;margin-top:10px}
+  .nabta-cloud-result strong{color:#b9ffc5}
+  .nabta-cloud-actions{display:flex;gap:8px;margin-top:8px;flex-wrap:wrap}
+
 </style>
 </head>
 <body>
@@ -150,6 +162,23 @@
         </div>
 
         <aside>
+
+          <section class="card nabta-cloud-card" style="margin-bottom:12px">
+            <div class="nabta-cloud-head">
+              <strong>🌱 NABTA AI · Cloud Detection</strong>
+              <span id="nabta-cloud-status" class="nabta-cloud-status">Not connected</span>
+            </div>
+            <div class="small" id="nabta-cloud-help">Connect this dashboard to the secure NABTA API to view Raspberry Pi detections.</div>
+            <label class="small" for="nabta-api-url" style="display:block;margin-top:10px">Backend API URL</label>
+            <input id="nabta-api-url" class="nabta-cloud-field" type="url" placeholder="https://your-nabta-api.example.com" autocomplete="url">
+            <div class="nabta-cloud-actions">
+              <button id="nabta-connect-api" class="btn">Connect</button>
+              <button id="nabta-refresh-api" class="btn secondary">Refresh</button>
+            </div>
+            <div id="nabta-cloud-latest" class="nabta-cloud-result" aria-live="polite">
+              <div class="small">No cloud detection received yet.</div>
+            </div>
+          </section>
           <div class="card">
             <div style="display:flex;justify-content:space-between;align-items:center">
               <strong>Camera & AI</strong>
@@ -500,6 +529,118 @@ captureBtn.addEventListener('click', ()=>requestCapture());
 clearDetBtn.addEventListener('click', ()=>{ detections=[]; renderDetections(); });
 applySuggestBtn.addEventListener('click', ()=>applySuggestion());
 langEnBtn.addEventListener('click', ()=>setLang('en')); langArBtn.addEventListener('click', ()=>setLang('ar'));
+
+
+/* ===== NABTA AI cloud dashboard =====
+   Public read-only dashboard endpoints; the device upload token stays on the Raspberry Pi.
+   Set the backend URL in the field below after deploying backend/.
+*/
+const NABTA_API_STORAGE_KEY = 'nabta_api_base_url';
+let nabtaApiBase = (localStorage.getItem(NABTA_API_STORAGE_KEY) || '').replace(/\\/$/, '');
+let nabtaLastDetectionId = null;
+let nabtaPollTimer = null;
+const nabtaApiInput = el('nabta-api-url');
+const nabtaApiStatus = el('nabta-cloud-status');
+const nabtaLatestBox = el('nabta-cloud-latest');
+if (nabtaApiInput) nabtaApiInput.value = nabtaApiBase;
+
+function setNabtaApiStatus(message, kind='') {
+  nabtaApiStatus.textContent = message;
+  nabtaApiStatus.className = 'nabta-cloud-status' + (kind ? ' ' + kind : '');
+}
+function safeNabtaImageUrl(value) {
+  if (!value) return '';
+  try {
+    const url = new URL(value, nabtaApiBase);
+    return ['https:', 'http:'].includes(url.protocol) ? url.href : '';
+  } catch (_) { return ''; }
+}
+function renderNabtaCloudDetection(item) {
+  nabtaLatestBox.replaceChildren();
+  if (!item) {
+    const empty = document.createElement('div');
+    empty.className = 'small';
+    empty.textContent = t('No cloud detection received yet.','لم تصل أي نتيجة اكتشاف من الروبوت بعد.');
+    nabtaLatestBox.appendChild(empty);
+    return;
+  }
+  const predictions = Array.isArray(item.predictions) ? item.predictions : [];
+  const title = document.createElement('strong');
+  title.textContent = predictions.length ? t('Insect detection result','نتيجة اكتشاف الحشرات') : t('No insect detected','لم يتم اكتشاف حشرة');
+  nabtaLatestBox.appendChild(title);
+  const timestamp = document.createElement('div');
+  timestamp.className = 'small';
+  timestamp.textContent = item.timestamp ? new Date(item.timestamp).toLocaleString() : '';
+  nabtaLatestBox.appendChild(timestamp);
+  const imageUrl = safeNabtaImageUrl(item.image_url);
+  if (imageUrl) {
+    const image = document.createElement('img');
+    image.className = 'nabta-cloud-image';
+    image.src = imageUrl;
+    image.alt = t('Latest image sent by NABTA robot','أحدث صورة أرسلها روبوت نبتة');
+    nabtaLatestBox.appendChild(image);
+    latestImage.replaceChildren(image.cloneNode());
+  }
+  predictions.forEach((prediction, index) => {
+    const row = document.createElement('div');
+    row.className = 'small';
+    const name = prediction.class || prediction.class_name || prediction.label || 'Unknown';
+    const confidence = Number(prediction.confidence);
+    row.textContent = (index + 1) + '. ' + name + (Number.isFinite(confidence) ? ' · ' + Math.round(confidence * 100) + '%' : '');
+    nabtaLatestBox.appendChild(row);
+    if (item.id && item.id !== nabtaLastDetectionId) {
+      addDetection({
+        type: 'INSECT',
+        subtype: String(name),
+        confidence: Number.isFinite(confidence) ? confidence : null,
+        image: imageUrl || null,
+        time: timestamp.textContent
+      });
+    }
+  });
+  if (item.id) nabtaLastDetectionId = item.id;
+  if (!predictions.length) {
+    const note = document.createElement('div');
+    note.className = 'small';
+    note.textContent = t('The model returned no detections for this image.','لم يُرجع النموذج أي اكتشافات لهذه الصورة.');
+    nabtaLatestBox.appendChild(note);
+  }
+}
+async function refreshNabtaCloud() {
+  if (!nabtaApiBase) {
+    setNabtaApiStatus(t('Not connected','غير متصل'));
+    return;
+  }
+  try {
+    const response = await fetch(nabtaApiBase + '/api/latest', { headers: { 'Accept': 'application/json' }, cache: 'no-store' });
+    if (!response.ok) throw new Error('API returned ' + response.status);
+    const data = await response.json();
+    setNabtaApiStatus(t('Connected','متصل'), 'online');
+    renderNabtaCloudDetection(data.detection || null);
+  } catch (error) {
+    setNabtaApiStatus(t('Connection error','خطأ في الاتصال'), 'error');
+    nabtaLatestBox.textContent = t('Could not reach the NABTA API. Check the backend URL and deployment.','تعذر الوصول إلى خادم نبتة. تحققي من الرابط ونشر الخدمة.');
+    console.warn('NABTA cloud API:', error);
+  }
+}
+function connectNabtaApi() {
+  const value = (nabtaApiInput.value || '').trim().replace(/\\/$/, '');
+  if (!/^https:\\/\\//i.test(value)) {
+    setNabtaApiStatus(t('Enter an HTTPS URL','أدخلي رابط HTTPS'), 'error');
+    return;
+  }
+  nabtaApiBase = value;
+  localStorage.setItem(NABTA_API_STORAGE_KEY, nabtaApiBase);
+  refreshNabtaCloud();
+  if (nabtaPollTimer) clearInterval(nabtaPollTimer);
+  nabtaPollTimer = setInterval(refreshNabtaCloud, 15000);
+}
+el('nabta-connect-api').addEventListener('click', connectNabtaApi);
+el('nabta-refresh-api').addEventListener('click', refreshNabtaCloud);
+if (nabtaApiBase) {
+  refreshNabtaCloud();
+  nabtaPollTimer = setInterval(refreshNabtaCloud, 15000);
+}
 
 /* notifications & initial */
 if('Notification' in window && Notification.permission==='default') Notification.requestPermission().catch(()=>{});

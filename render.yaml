@@ -1,0 +1,22 @@
+services:
+  - type: web
+    name: nabta-ai-api
+    runtime: docker
+    dockerfilePath: ./backend/Dockerfile
+    dockerContext: .
+    plan: starter
+    healthCheckPath: /api/health
+    envVars:
+      - key: NABTA_DEVICE_TOKEN
+        generateValue: true
+      - key: ALLOWED_ORIGINS
+        value: https://shouqm642.github.io
+      - key: PUBLIC_BASE_URL
+        fromService:
+          type: web
+          name: nabta-ai-api
+          property: host
+    disk:
+      name: nabta-uploads
+      mountPath: /var/data
+      sizeGB: 1
