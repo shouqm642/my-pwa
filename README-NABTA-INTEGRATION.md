@@ -12,7 +12,7 @@ Raspberry Pi camera → Roboflow inference → authenticated HTTPS upload → Fa
 
 The repository includes `render.yaml`, `backend/Dockerfile`, and `backend/requirements.txt` for a Render web service.
 
-1. In Render, create a new Blueprint from this GitHub repository and select the branch `feature/nabta-ai-cloud-dashboard`.
+1. In Render, create a new Blueprint from this GitHub repository and select the branch `main`.
 2. Render reads `render.yaml` and generates a private `NABTA_DEVICE_TOKEN`. Copy this value from the service environment after deployment; do not place it in the website.
 3. After deployment, note the HTTPS service URL, for example `https://nabta-ai-api.onrender.com`.
 4. Check `https://YOUR-SERVICE/api/health`; it should return `{"status":"ok","service":"NABTA AI"}`.
@@ -51,7 +51,7 @@ source .venv/bin/activate
 python3 -m pip install requests inference-sdk
 ```
 
-Copy `raspberry_pi/publish_detection.py` from this repository into `~/NABTA_AI/publish_detection.py` on the Pi. Then run:
+On the Raspberry Pi, download the publisher script directly from the merged `main` branch into `~/NABTA_AI/publish_detection.py`, then run:
 
 ```bash
 python3 publish_detection.py ladybug.jpg

@@ -10,7 +10,7 @@ from fastapi import FastAPI, File, Form, Header, HTTPException, Request, UploadF
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 
-UPLOAD_DIR = Path(os.getenv("NABTA_UPLOAD_DIR", "/var/data/nabta-uploads"))
+UPLOAD_DIR = Path(os.getenv("NABTA_UPLOAD_DIR", "/tmp/nabta-uploads"))
 UPLOAD_DIR.mkdir(parents=True, exist_ok=True)
 MAX_IMAGE_BYTES = 8 * 1024 * 1024
 DEVICE_TOKEN = os.getenv("NABTA_DEVICE_TOKEN", "")
