@@ -77,3 +77,14 @@ The original Bluetooth controls remain available and unchanged.
 - The current model ID defaults to `insects-mytwu/1`; it only recognizes labels it was trained for. A high confidence score is not proof that the insect species is correct.
 - The web dashboard displays results produced by the Raspberry Pi script; it does not yet trigger the robot to move or capture automatically.
 - The Pi still needs an internet-connected network to call Roboflow and the backend.
+
+
+## 4. Run a limited automatic camera test
+
+For a short automatic test, download `raspberry_pi/auto_capture_publish.sh` into `~/NABTA_AI` on the Pi, then run:
+
+```bash
+bash auto_capture_publish.sh
+```
+
+By default it captures and uploads 5 photos, 60 seconds apart. You can choose a different count and interval in seconds, for example `bash auto_capture_publish.sh 3 90`. Press `Ctrl+C` to stop early. Keep the insect in view and use good lighting. This test does not move the robot.
