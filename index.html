@@ -1005,25 +1005,27 @@ function plantDiseaseGuidance(label) {
   return {status:'warn',heading:ar?'تصنيف يحتاج إلى تأكيد':'Model label needs confirmation',actions:ar?['هذه تسمية النموذج وليست تشخيصًا مؤكدًا.','قارن الأعراض بصورة واضحة للنبات كاملًا وللجهتين العلوية والسفلية للورقة.','اطلب تأكيدًا محليًا قبل المعالجة الكيميائية.']:['This is a model label, not a confirmed diagnosis.','Compare symptoms with clear images of the whole plant and both leaf surfaces.','Seek local confirmation before chemical treatment.']};
 }
 function normalizeNabtaCropName(value) {
-  const name = String(value || '').toLowerCase().trim().replace(/[_-]+/g, ' ').replace(/\\s+/g, ' ');
-  const cropAliases = [
-    [/\\b(tomato|tomatoes|solanum lycopersicum|طماطم|بندورة)\\b/,'tomato'],
-    [/\\b(potato|potatoes|بطاطس|بطاطا)\\b/,'potato'],
-    [/\\b(apple|apples|تفاح)\\b/,'apple'],
-    [/\\b(grape|grapes|عنب)\\b/,'grape'],
-    [/\\b(pepper|bell pepper|capsicum|فلفل)\\b/,'pepper'],
-    [/\\b(corn|maize|ذرة)\\b/,'corn'],
-    [/\\b(strawberry|فراولة)\\b/,'strawberry'],
-    [/\\b(orange|citrus|برتقال|حمضيات)\\b/,'citrus']
+  const name = String(value || '').toLowerCase().trim().replace(/[_-]+/g, ' ').replace(/\s+/g, ' ');
+  const aliases = [
+    ['tomato','tomatoes','solanum lycopersicum','طماطم','بندورة'],
+    ['potato','potatoes','بطاطس','بطاطا'],
+    ['apple','apples','تفاح'],
+    ['grape','grapes','عنب'],
+    ['pepper','bell pepper','capsicum','فلفل'],
+    ['corn','maize','ذرة'],
+    ['strawberry','فراولة'],
+    ['orange','citrus','برتقال','حمضيات']
   ];
-  for (const [pattern,crop] of cropAliases) if (pattern.test(name)) return crop;
+  const crops=['tomato','potato','apple','grape','pepper','corn','strawberry','citrus'];
+  for (let i=0;i<aliases.length;i++) {
+    if (aliases[i].some(alias => name.includes(alias))) return crops[i];
+  }
   return '';
 }
 function cropFromModelClass(label) {
   const normalized=String(label||'').toLowerCase().replace(/[_-]+/g,' ');
-  const aliases=['tomato','potato','apple','grape','pepper','corn','strawberry','orange','citrus'];
-  for(const crop of aliases) if(new RegExp('\\\\b'+crop+'\\\\b').test(normalized)) return crop;
-  return '';
+  const crops=['tomato','potato','apple','grape','pepper','corn','strawberry','orange','citrus'];
+  return crops.find(crop => normalized.startsWith(crop+' ') || normalized===crop) || '';
 }
 function renderPlantDamageAssessment(data) {
   const box = el('plant-damage-result');
