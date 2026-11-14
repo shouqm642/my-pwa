@@ -63,6 +63,14 @@
   .nabta-risk-high{background:rgba(220,80,70,.18);color:#ffb5ae}
   .nabta-advisor-note{font-size:12px;color:#c7e6cc;margin-top:9px}
   @media(max-width:560px){.nabta-advisor-grid{grid-template-columns:1fr}}
+  .nabta-plant-upload{display:block;width:100%;box-sizing:border-box;padding:10px;border:1px dashed rgba(159,234,176,.4);border-radius:9px;background:rgba(0,0,0,.18);color:#eaffea;margin-top:8px}
+  .nabta-plant-preview{display:none;width:100%;max-height:240px;object-fit:contain;background:#03190b;border-radius:9px;margin-top:10px}
+  .nabta-plant-output{margin-top:10px;padding:12px;border-radius:9px;background:rgba(0,0,0,.24);line-height:1.5}
+  .nabta-plant-output h4{margin:8px 0 4px;color:#b9ffc5}
+  .nabta-plant-output .status{display:inline-block;padding:4px 10px;border-radius:99px;font-size:12px;font-weight:800}
+  .nabta-plant-output .status.good{background:rgba(70,190,110,.17);color:#a9f5b8}
+  .nabta-plant-output .status.warn{background:rgba(230,180,60,.17);color:#ffe09a}
+  .nabta-plant-output .status.bad{background:rgba(220,80,70,.18);color:#ffb5ae}
 
 </style>
 </head>
@@ -269,6 +277,27 @@
             </div>
           </div>
 
+          <section class="card nabta-advisor-card" style="margin-top:12px">
+            <div class="nabta-cloud-head">
+              <strong id="plant-damage-title">🍃 Plant Damage Detection</strong>
+              <span class="nabta-cloud-status">Leaf screening</span>
+            </div>
+            <div class="small" id="plant-damage-intro">Upload a clear photo of one or more leaves. The server checks for classes supported by the model.</div>
+            <label class="small" id="plant-damage-name-label" for="plant-damage-name" style="display:block;margin-top:10px">Plant name (optional)</label>
+            <input id="plant-damage-name" class="nabta-cloud-field" type="text" maxlength="80" placeholder="e.g. tomato, potato, grape">
+            <label class="small" id="plant-damage-photo-label" for="plant-damage-file" style="display:block;margin-top:10px">Leaf photo (JPEG, PNG or WebP; max 4 MB)</label>
+            <input id="plant-damage-file" class="nabta-plant-upload" type="file" accept="image/jpeg,image/png,image/webp">
+            <img id="plant-damage-preview" class="nabta-plant-preview" alt="Leaf photo preview">
+            <div class="nabta-cloud-actions">
+              <button id="plant-damage-analyze" class="btn" type="button">Analyze leaf photo</button>
+              <button id="plant-damage-reset" class="btn secondary" type="button">Clear</button>
+            </div>
+            <div id="plant-damage-result" class="nabta-plant-output" aria-live="polite">
+              <div class="small">No leaf photo analysed yet.</div>
+            </div>
+            <div class="nabta-advisor-note" id="plant-damage-limit-note">This model covers selected crops (including tomato, potato, apple, grape, pepper and corn), not every plant species. A result is a screening aid, not a diagnosis. One image cannot prove a plant is disease-free.</div>
+          </section>
+
           <div class="card" style="margin-top:12px">
             <div style="display:flex;justify-content:space-between;align-items:center">
               <strong>Plant Health</strong>
@@ -355,6 +384,7 @@ function renderStaticTexts(){
   captureBtn.textContent = lang==='ar' ? 'التقاط صورة' : 'Capture Image';
   applySuggestBtn.textContent = lang==='ar' ? 'تطبيق الاقتراح' : 'Apply Suggestion';
   renderNabtaAdvisorTexts();
+  renderPlantDamageTexts();
 }
 
 /* Notification helper */
@@ -941,6 +971,127 @@ function resetNabtaAdvisor() {
 }
 el('nabta-advisor-evaluate').addEventListener('click',assessNabtaInsectRisk);
 el('nabta-advisor-reset').addEventListener('click',resetNabtaAdvisor);
+
+
+/* ===== Plant leaf photo screening =====
+   Uploaded images go to the NABTA backend; the private Roboflow key stays server-side.
+*/
+let plantDamagePreviewUrl = null;
+function renderPlantDamageTexts() {
+  const ar = lang === 'ar';
+  const labels = {
+    'plant-damage-title': ar ? '🍃 فحص أضرار النبات' : '🍃 Plant Damage Detection',
+    'plant-damage-intro': ar ? 'ارفعي صورة واضحة لورقة أو أكثر. يفحص الخادم الفئات التي يدعمها النموذج.' : 'Upload a clear photo of one or more leaves. The server checks for classes supported by the model.',
+    'plant-damage-name-label': ar ? 'اسم النبات (اختياري)' : 'Plant name (optional)',
+    'plant-damage-photo-label': ar ? 'صورة الورقة (JPEG أو PNG أو WebP؛ بحد أقصى 4 ميجابايت)' : 'Leaf photo (JPEG, PNG or WebP; max 4 MB)',
+    'plant-damage-analyze': ar ? 'تحليل صورة الورقة' : 'Analyze leaf photo',
+    'plant-damage-reset': ar ? 'مسح' : 'Clear',
+    'plant-damage-limit-note': ar ? 'هذا النموذج يغطي محاصيل محددة (منها الطماطم والبطاطس والتفاح والعنب والفلفل والذرة)، وليس كل أنواع النباتات. النتيجة فحص أولي وليست تشخيصًا. لا تثبت صورة واحدة أن النبات خالٍ من المرض.' : 'This model covers selected crops (including tomato, potato, apple, grape, pepper and corn), not every plant species. A result is a screening aid, not a diagnosis. One image cannot prove a plant is disease-free.'
+  };
+  Object.entries(labels).forEach(([id, value]) => { const node = el(id); if (node) node.textContent = value; });
+  const name = el('plant-damage-name');
+  if (name) name.placeholder = ar ? 'مثال: طماطم، بطاطس، عنب' : 'e.g. tomato, potato, grape';
+}
+function plantDiseaseGuidance(label) {
+  const key = String(label || '').toLowerCase().replace(/[_-]+/g, ' ');
+  const ar = lang === 'ar';
+  if (key.includes('healthy')) return {status:'good',heading:ar?'إشارة النموذج: ورقة تبدو سليمة':'Model signal: leaf appears healthy',actions:ar?['لم يرصد النموذج فئة مرضية معروفة في هذه الصورة.','استمر في المراقبة وصوّر أوراقًا أخرى، بما فيها السطح السفلي.','إذا استمرت الأعراض، اطلب تقييمًا زراعيًا؛ النتيجة لا تستبعد كل الأمراض.']:['The model returned a healthy-leaf class for this image.','Continue monitoring and photograph other leaves, including the undersides.','If symptoms persist, seek local plant-health advice; this result does not rule out every disease.']};
+  if (/early blight/.test(key)) return {status:'warn',heading:ar?'اشتباه تبقع مبكر':'Possible early blight',actions:ar?['أزل الأوراق المصابة بشدة وضعها في النفايات، لا في السماد المنزلي.','تجنب ترطيب الأوراق بالرش العلوي وحسّن التهوية والمسافات.','حافظ على ري منتظم واستخدم تغطية للتربة وبدّل المحاصيل في الموسم التالي.','إذا استمر الانتشار، استشر مختصًا بشأن منتج مسجل للمحصول والمرض.']:['Remove badly affected leaves and dispose of them rather than home-composting.','Avoid overhead watering and improve airflow and spacing.','Water consistently, mulch soil where appropriate and rotate crops next season.','If spread continues, ask a local adviser about a product registered for this crop and disease.']};
+  if (/late blight/.test(key)) return {status:'bad',heading:ar?'اشتباه لفحة متأخرة — يلزم فحص سريع':'Possible late blight — prompt review needed',actions:ar?['اعزل النباتات المشتبه بها عن التعامل مع النباتات السليمة وقلل لمس الأوراق وهي مبللة.','التقط صورًا واضحة للأوراق والسيقان والثمار وأعد الفحص.','تواصل سريعًا مع الإرشاد الزراعي المحلي؛ قد ينتشر المرض بسرعة.','لا ترش مبيدًا إلا بعد التحقق من التشخيص والمنتج المسجل للمحصول.']:['Keep suspect plants separate from routine handling of healthy plants and avoid touching wet foliage.','Photograph leaves, stems and fruit clearly and repeat the check.','Contact local agricultural extension promptly; this disease can spread quickly.','Do not spray until the diagnosis and a crop-labelled registered product are confirmed.']};
+  if (/bacterial spot|bacterial leaf blight/.test(key)) return {status:'warn',heading:ar?'اشتباه تبقع بكتيري':'Possible bacterial leaf spot',actions:ar?['تجنب العمل على النبات وهو مبلل ونظف الأدوات بين النباتات.','قلل الري فوق الأوراق وتخلص من البقايا المصابة.','أكد التشخيص؛ قد تتشابه الأعراض البكتيرية والفطرية.']:['Avoid handling plants while wet and clean tools between plants.','Reduce overhead watering and remove infected debris.','Confirm the diagnosis; bacterial and fungal symptoms can look similar.']};
+  if (/leaf mold|powdery mildew|rust|scab|septoria|leaf scorch|black rot|leaf blight|gray leaf spot|common rust/.test(key)) return {status:'warn',heading:ar?'اشتباه مرض ورقي':'Possible leaf disease',actions:ar?['حسّن التهوية والمسافة بين النباتات وتجنب بلل الأوراق لفترات طويلة.','أزل الأوراق شديدة الإصابة ونظف بقايا النبات.','أكد نوع المرض والمحصول قبل اختيار أي مبيد فطري.']:['Improve airflow and spacing; avoid keeping foliage wet for long periods.','Remove severely affected leaves and clean up plant debris.','Confirm the disease and crop before selecting any fungicide.']};
+  if (/mosaic virus|yellow leaf curl|huanglongbing|citrus greening/.test(key)) return {status:'bad',heading:ar?'اشتباه مرض فيروسي أو جهازي':'Possible viral or systemic disease',actions:ar?['اعزل النبات المشتبه به مؤقتًا وقلل نقل الأدوات أو الشتلات منه.','افحص وجود ناقلات مثل الذبابة البيضاء عند ملاءمة المرض.','لا يوجد علاج عام يعكس العدوى الفيروسية؛ اطلب تأكيدًا من مختص محلي قبل إزالة النبات.']:['Temporarily separate the suspect plant and avoid moving tools or cuttings from it.','Check for relevant insect vectors, such as whiteflies, where appropriate.','There is no general treatment that reverses a viral infection; seek local confirmation before removing the plant.']};
+  if (/spider mite/.test(key)) return {status:'warn',heading:ar?'اشتباه أكاروس العنكبوت':'Possible spider mites',actions:ar?['افحص أسفل الورقة بعدسة مكبرة بحثًا عن الأكاروس والخيوط الدقيقة.','اغسل أسفل الأوراق وقلل الغبار وحافظ على ري متوازن.','إذا تأكدت الإصابة، اطلب إرشادًا حول منتج مسجل لمكافحة الأكاروس على هذا النبات.']:['Use a hand lens to inspect leaf undersides for mites and fine webbing.','Rinse leaf undersides, reduce dust and maintain even watering.','If confirmed, seek advice on a product registered for mites on this plant.']};
+  return {status:'warn',heading:ar?'تصنيف يحتاج إلى تأكيد':'Model label needs confirmation',actions:ar?['هذه تسمية النموذج وليست تشخيصًا مؤكدًا.','قارن الأعراض بصورة واضحة للنبات كاملًا وللجهتين العلوية والسفلية للورقة.','اطلب تأكيدًا محليًا قبل المعالجة الكيميائية.']:['This is a model label, not a confirmed diagnosis.','Compare symptoms with clear images of the whole plant and both leaf surfaces.','Seek local confirmation before chemical treatment.']};
+}
+function renderPlantDamageAssessment(data) {
+  const box = el('plant-damage-result');
+  box.replaceChildren();
+  const ar = lang === 'ar';
+  const predictions = Array.isArray(data.predictions) ? data.predictions.slice() : [];
+  const model = document.createElement('div');
+  model.className = 'small';
+  model.textContent = (ar ? 'النموذج: ' : 'Model: ') + (data.model_id || 'leaf-disease-detection-system/2');
+  box.appendChild(model);
+  if (!predictions.length) {
+    const note = document.createElement('div');
+    note.className = 'status warn';
+    note.textContent = ar ? 'لم يرصد النموذج فئة معروفة في الصورة. هذا لا يؤكد أن النبات سليم؛ تحققي من الإضاءة والوضوح وصوّري ورقة أقرب.' : 'The model returned no supported class for this image. This does not confirm the plant is healthy; check lighting and focus and try a closer leaf photo.';
+    box.appendChild(note);
+    return;
+  }
+  predictions.sort((a, b) => (Number(b.confidence) || 0) - (Number(a.confidence) || 0));
+  const top = predictions[0];
+  const label = top.class || top.class_name || top.label || 'Unknown';
+  const confidence = normalizedNabtaConfidence(top.confidence);
+  const advice = plantDiseaseGuidance(label);
+  const status = document.createElement('span');
+  status.className = 'status ' + (confidence === null || confidence < 0.60 ? 'warn' : advice.status);
+  status.textContent = confidence === null || confidence < 0.60 ? (ar ? 'ثقة منخفضة — يحتاج تحققًا' : 'Low confidence — verify') : (advice.status === 'good' ? (ar ? 'إشارة سليمة محتملة' : 'Possible healthy signal') : (ar ? 'أعراض محتملة — تحقق' : 'Possible symptoms — verify'));
+  box.appendChild(status);
+  const title = document.createElement('strong');
+  title.style.display = 'block'; title.style.marginTop = '8px';
+  title.textContent = (ar ? 'الفئة التي رصدها النموذج: ' : 'Model class: ') + label;
+  box.appendChild(title);
+  const score = document.createElement('div');
+  score.className = 'small';
+  score.textContent = (ar ? 'درجة ثقة النموذج: ' : 'Model confidence: ') + (confidence === null ? '—' : Math.round(confidence * 100) + '%');
+  box.appendChild(score);
+  addAdvisorBlock(box, advice.heading, (confidence === null || confidence < 0.60) ? (ar ? 'لا تعتمدي على هذه النتيجة لتحديد المرض أو اختيار علاج. التقطي صورة أوضح أو اطلبي فحصًا بشريًا.' : 'Do not use this result to identify a disease or choose a treatment. Retake a clearer image or get a human review.') : (ar ? 'هذا فحص بصري أولي وليس تشخيصًا نهائيًا.' : 'This is an initial visual screen, not a final diagnosis.'));
+  addAdvisorList(box, ar ? 'خطوات الفحص التالية' : 'Suggested next checks', advice.actions);
+  const safety = document.createElement('div');
+  safety.className = 'nabta-advisor-note';
+  safety.textContent = ar ? 'لا تستخدمي مبيدًا أو مبيدًا فطريًا اعتمادًا على تصنيف الصورة وحده. تحققي من المرض والمحصول والتسجيل المحلي وملصق المنتج ومعدات الوقاية وفترات إعادة الدخول وما قبل الحصاد.' : 'Do not apply an insecticide or fungicide based on the image label alone. Confirm the disease and crop, local registration, product label, PPE, re-entry and pre-harvest intervals.';
+  box.appendChild(safety);
+}
+async function analyzePlantLeafPhoto() {
+  const file = el('plant-damage-file').files && el('plant-damage-file').files[0];
+  const box = el('plant-damage-result');
+  if (!file) { box.textContent = t('Choose a leaf photo first.','اختاري صورة ورقة أولًا.'); return; }
+  if (!['image/jpeg','image/png','image/webp'].includes(file.type)) { box.textContent = t('Choose a JPEG, PNG or WebP image.','اختاري صورة JPEG أو PNG أو WebP.'); return; }
+  if (file.size > 4 * 1024 * 1024) { box.textContent = t('Image is larger than 4 MB.','حجم الصورة أكبر من 4 ميجابايت.'); return; }
+  if (!nabtaApiBase) { box.textContent = t('Connect the NABTA API first in the Cloud Detection card.','اتصلي بخادم NABTA أولًا من قسم Cloud Detection.'); return; }
+  const button = el('plant-damage-analyze');
+  button.disabled = true;
+  button.textContent = t('Analysing…','جارٍ التحليل…');
+  box.textContent = t('Uploading leaf photo securely for analysis…','يتم رفع صورة الورقة بأمان للتحليل…');
+  try {
+    const form = new FormData();
+    form.append('image', file, file.name);
+    form.append('plant_name', (el('plant-damage-name').value || '').trim());
+    const response = await fetch(nabtaApiBase + '/api/plant-assessment', { method: 'POST', body: form, cache: 'no-store' });
+    const data = await response.json().catch(() => ({}));
+    if (!response.ok) {
+      const message = response.status === 503 ? t('Plant analysis is not configured on Render yet. Add ROBOFLOW_API_KEY to the backend environment.','تحليل النبات غير مفعّل في Render بعد. أضيفي ROBOFLOW_API_KEY إلى متغيرات الخادم.') : response.status === 429 ? t('Photo limit reached (5 per hour on this service). Try later.','وصلتِ إلى حد الصور (5 في الساعة). جربي لاحقًا.') : (data.detail || t('Plant analysis failed.','فشل تحليل النبات.'));
+      box.textContent = message;
+      return;
+    }
+    renderPlantDamageAssessment(data);
+  } catch (_) {
+    box.textContent = t('Could not reach the NABTA API. Check the connection.','تعذر الاتصال بخادم NABTA. تحققي من الاتصال.');
+  } finally {
+    button.disabled = false;
+    button.textContent = t('Analyze leaf photo','تحليل صورة الورقة');
+  }
+}
+function clearPlantDamagePhoto() {
+  el('plant-damage-file').value = '';
+  if (plantDamagePreviewUrl) { URL.revokeObjectURL(plantDamagePreviewUrl); plantDamagePreviewUrl = null; }
+  const preview = el('plant-damage-preview');
+  preview.removeAttribute('src'); preview.style.display = 'none';
+  el('plant-damage-result').textContent = t('No leaf photo analysed yet.','لم يتم تحليل صورة ورقة بعد.');
+}
+el('plant-damage-file').addEventListener('change', () => {
+  const file = el('plant-damage-file').files && el('plant-damage-file').files[0];
+  if (plantDamagePreviewUrl) { URL.revokeObjectURL(plantDamagePreviewUrl); plantDamagePreviewUrl = null; }
+  const preview = el('plant-damage-preview');
+  if (file && ['image/jpeg','image/png','image/webp'].includes(file.type)) {
+    plantDamagePreviewUrl = URL.createObjectURL(file);
+    preview.src = plantDamagePreviewUrl; preview.style.display = 'block';
+  } else { preview.removeAttribute('src'); preview.style.display = 'none'; }
+});
+el('plant-damage-analyze').addEventListener('click', analyzePlantLeafPhoto);
+el('plant-damage-reset').addEventListener('click', clearPlantDamagePhoto);
 
 /* ===== NABTA AI cloud dashboard =====
    Public read-only dashboard endpoints; the device upload token stays on the Raspberry Pi.
