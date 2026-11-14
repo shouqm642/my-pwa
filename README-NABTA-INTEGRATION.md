@@ -102,3 +102,11 @@ The PWA includes a bilingual, rule-based IPM advisor. It combines the latest mod
 The advisor is general decision support, not a species- or crop-specific diagnosis. Its chemical-control guidance is intentionally non-prescriptive: it does not provide a dose or product recommendation. Use only a pesticide currently registered in the UAE whose label explicitly covers the exact crop/site and target pest; follow PPE, re-entry and pre-harvest intervals. This is especially important for food crops and pollinators.
 
 Guidance sources shown in the app include UC IPM aphid, whitefly, spider-mite, mealybug and less-toxic-insecticide guidance, plus the UAE Ministry of Climate Change and Environment website.
+
+## 8. Plant leaf photo screening
+
+The PWA includes a leaf photo screening card. It posts a JPEG, PNG or WebP image (maximum 4 MB) to `POST /api/plant-assessment`. The backend calls the Roboflow Inference SDK with `PLANT_HEALTH_MODEL_ID` (default `leaf-disease-detection-system/2`). The private Roboflow key stays in the Render environment and is never sent to the browser.
+
+**Required Render setup:** add `ROBOFLOW_API_KEY` as a secret environment variable on the `nabta-ai-api` service. The Blueprint declares this value as `sync: false`; it must be supplied in Render's Environment settings. Do not put the key in GitHub, the PWA, screenshots or chat. Rotate any key previously exposed in a screenshot before reuse. The endpoint allows five photo checks per IP per hour in this in-memory prototype.
+
+The selected model reports 37 classes for selected crops (including tomato, potato, apple, grape, pepper and corn); it does not cover every plant species. No detection is not proof of health, and a "healthy" class does not rule out all conditions. The app describes outputs as preliminary screening only. Chemical or fungicide choices must be independently confirmed against current UAE registration and the exact product label.
