@@ -865,7 +865,11 @@ function assessNabtaInsectRisk() {
   const plantName=(el('nabta-advisor-plant-name').value||'').trim();
   const severity=el('nabta-advisor-severity').value;
   const confidence=nabtaAdvisorLatestConfidence;
-  const confidenceWarning=Boolean(nabtaAdvisorLatestLabel) && (confidence===null || confidence<0.60);
+  const selectedInsectKey=el('nabta-advisor-insect').value;
+  const latestModelInsectKey=mapNabtaPestLabel(nabtaAdvisorLatestLabel);
+  const modelLabelMatchesSelection=Boolean(latestModelInsectKey) && latestModelInsectKey===selectedInsectKey;
+  const confidenceWarning=modelLabelMatchesSelection && (confidence===null || confidence<0.60);
+  const manualSelectionNotice=Boolean(nabtaAdvisorLatestLabel) && !modelLabelMatchesSelection;
   const chemicalAdvice = confidenceWarning
     ? (ar ? 'لن تظهر توصية كيميائية حتى يتم تأكيد نوع الحشرة؛ أعد التصوير أو أكد الهوية يدويًا أولًا.' : 'No chemical-control option is shown until the insect identity is confirmed. Retake the image or confirm the pest manually first.')
     : (ar ? rule.chemicalAr : rule.chemicalEn);
@@ -888,7 +892,10 @@ function assessNabtaInsectRisk() {
   result.appendChild(sub);
   if (confidenceWarning) {
     addRisk(ar?'هوية غير مؤكدة':'Identification uncertain','nabta-risk-medium');
-    addAdvisorBlock(result,ar?'تنبيه الثقة':'Model confidence warning',ar?'ثقة نموذج الذكاء الاصطناعي أقل من 60% أو غير متاحة. لا تعتمد على هذا التصنيف لاختيار مبيد؛ التقط صورة أوضح أو أكد النوع يدويًا.':'The AI score is below 60% or unavailable. Do not use this label to select a pesticide; take a clearer image or confirm the insect manually.');
+    addAdvisorBlock(result,ar?'تنبيه الثقة':'Model confidence warning',ar?'ثقة نموذج الذكاء الاصطناعي أقل من 60% أو غير متاحة لهذا التصنيف. لا تعتمد عليه لاختيار مبيد؛ التقط صورة أوضح أو أكد النوع يدويًا.':'The AI score is below 60% or unavailable for this same insect label. Do not use it to select a pesticide; take a clearer image or confirm the insect manually.');
+  } else if (manualSelectionNotice) {
+    addRisk(ar?'اختيار يدوي':'Manually selected','nabta-risk-medium');
+    addAdvisorBlock(result,ar?'مصدر الاختيار':'Selection source',ar?'اخترت هذه الحشرة يدويًا، وهي تختلف عن آخر تصنيف للنموذج ('+nabtaAdvisorLatestLabel+'). تم فصل تحذير الثقة الخاص بالتصنيف السابق. تأكد بصريًا من هوية الحشرة قبل اختيار منتج مكافحة.':'You selected this insect manually; it differs from the model’s latest label ('+nabtaAdvisorLatestLabel+'). The previous prediction’s confidence warning is not applied to this selection. Verify the insect visually before choosing a control product.');
   }
   if (rule.type==='beneficial') {
     addRisk(ar?'حشرة نافعة — لا تكافحها':'Beneficial insect — do not control','nabta-risk-low');
