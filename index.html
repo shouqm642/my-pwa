@@ -1004,6 +1004,27 @@ function plantDiseaseGuidance(label) {
   if (/spider mite/.test(key)) return {status:'warn',heading:ar?'اشتباه أكاروس العنكبوت':'Possible spider mites',actions:ar?['افحص أسفل الورقة بعدسة مكبرة بحثًا عن الأكاروس والخيوط الدقيقة.','اغسل أسفل الأوراق وقلل الغبار وحافظ على ري متوازن.','إذا تأكدت الإصابة، اطلب إرشادًا حول منتج مسجل لمكافحة الأكاروس على هذا النبات.']:['Use a hand lens to inspect leaf undersides for mites and fine webbing.','Rinse leaf undersides, reduce dust and maintain even watering.','If confirmed, seek advice on a product registered for mites on this plant.']};
   return {status:'warn',heading:ar?'تصنيف يحتاج إلى تأكيد':'Model label needs confirmation',actions:ar?['هذه تسمية النموذج وليست تشخيصًا مؤكدًا.','قارن الأعراض بصورة واضحة للنبات كاملًا وللجهتين العلوية والسفلية للورقة.','اطلب تأكيدًا محليًا قبل المعالجة الكيميائية.']:['This is a model label, not a confirmed diagnosis.','Compare symptoms with clear images of the whole plant and both leaf surfaces.','Seek local confirmation before chemical treatment.']};
 }
+function normalizeNabtaCropName(value) {
+  const name = String(value || '').toLowerCase().trim().replace(/[_-]+/g, ' ').replace(/\\s+/g, ' ');
+  const cropAliases = [
+    [/\\b(tomato|tomatoes|solanum lycopersicum|طماطم|بندورة)\\b/,'tomato'],
+    [/\\b(potato|potatoes|بطاطس|بطاطا)\\b/,'potato'],
+    [/\\b(apple|apples|تفاح)\\b/,'apple'],
+    [/\\b(grape|grapes|عنب)\\b/,'grape'],
+    [/\\b(pepper|bell pepper|capsicum|فلفل)\\b/,'pepper'],
+    [/\\b(corn|maize|ذرة)\\b/,'corn'],
+    [/\\b(strawberry|فراولة)\\b/,'strawberry'],
+    [/\\b(orange|citrus|برتقال|حمضيات)\\b/,'citrus']
+  ];
+  for (const [pattern,crop] of cropAliases) if (pattern.test(name)) return crop;
+  return '';
+}
+function cropFromModelClass(label) {
+  const normalized=String(label||'').toLowerCase().replace(/[_-]+/g,' ');
+  const aliases=['tomato','potato','apple','grape','pepper','corn','strawberry','orange','citrus'];
+  for(const crop of aliases) if(new RegExp('\\\\b'+crop+'\\\\b').test(normalized)) return crop;
+  return '';
+}
 function renderPlantDamageAssessment(data) {
   const box = el('plant-damage-result');
   box.replaceChildren();
@@ -1025,9 +1046,20 @@ function renderPlantDamageAssessment(data) {
   const label = top.class || top.class_name || top.label || 'Unknown';
   const confidence = normalizedNabtaConfidence(top.confidence);
   const advice = plantDiseaseGuidance(label);
+  const suppliedPlant = String(data.plant_name || '').trim();
+  const modelCrop = cropFromModelClass(label);
+  const expectedCrop = normalizeNabtaCropName(suppliedPlant);
+  const cropMismatch = Boolean(expectedCrop && modelCrop && expectedCrop !== modelCrop);
+  const cropUnverified = Boolean(suppliedPlant && !expectedCrop && modelCrop);
   const status = document.createElement('span');
-  status.className = 'status ' + (confidence === null || confidence < 0.60 ? 'warn' : advice.status);
-  status.textContent = confidence === null || confidence < 0.60 ? (ar ? 'ثقة منخفضة — يحتاج تحققًا' : 'Low confidence — verify') : (advice.status === 'good' ? (ar ? 'إشارة سليمة محتملة' : 'Possible healthy signal') : (ar ? 'أعراض محتملة — تحقق' : 'Possible symptoms — verify'));
+  status.className = 'status ' + (cropMismatch || cropUnverified || confidence === null || confidence < 0.60 ? 'warn' : advice.status);
+  status.textContent = cropMismatch
+    ? (ar ? 'تعارض في نوع المحصول — أوقف التوصيات' : 'Crop mismatch — advice paused')
+    : cropUnverified
+      ? (ar ? 'تعذر التحقق من اسم المحصول' : 'Plant name not recognised')
+      : confidence === null || confidence < 0.60
+        ? (ar ? 'ثقة منخفضة — يحتاج تحققًا' : 'Low confidence — verify')
+        : (advice.status === 'good' ? (ar ? 'إشارة سليمة محتملة' : 'Possible healthy signal') : (ar ? 'أعراض محتملة — تحقق' : 'Possible symptoms — verify'));
   box.appendChild(status);
   const title = document.createElement('strong');
   title.style.display = 'block'; title.style.marginTop = '8px';
@@ -1037,8 +1069,26 @@ function renderPlantDamageAssessment(data) {
   score.className = 'small';
   score.textContent = (ar ? 'درجة ثقة النموذج: ' : 'Model confidence: ') + (confidence === null ? '—' : Math.round(confidence * 100) + '%');
   box.appendChild(score);
-  addAdvisorBlock(box, advice.heading, (confidence === null || confidence < 0.60) ? (ar ? 'لا تعتمدي على هذه النتيجة لتحديد المرض أو اختيار علاج. التقطي صورة أوضح أو اطلبي فحصًا بشريًا.' : 'Do not use this result to identify a disease or choose a treatment. Retake a clearer image or get a human review.') : (ar ? 'هذا فحص بصري أولي وليس تشخيصًا نهائيًا.' : 'This is an initial visual screen, not a final diagnosis.'));
-  addAdvisorList(box, ar ? 'خطوات الفحص التالية' : 'Suggested next checks', advice.actions);
+  if (suppliedPlant) {
+    const cropLine = document.createElement('div');
+    cropLine.className = 'small';
+    cropLine.textContent = (ar ? 'المحصول الذي أدخلته: ' : 'Plant entered: ') + suppliedPlant + (modelCrop ? (ar ? ' · المحصول حسب النموذج: ' : ' · Model crop: ') + modelCrop : '');
+    box.appendChild(cropLine);
+  }
+  if (cropMismatch || cropUnverified) {
+    addAdvisorBlock(box, ar ? 'لماذا توقفت التوصيات؟' : 'Why recommendations are paused',
+      cropMismatch
+        ? (ar ? 'أدخلتَ ' + suppliedPlant + ' لكن النموذج صنّف الصورة ضمن ' + modelCrop + '. قد تكون الصورة لنبات مختلف أو أخطأ النموذج في التعرف على المحصول. التقط صورة أوضح لورقة من النبات نفسه وأعد الفحص.' : 'You entered ' + suppliedPlant + ' but the model classified the image as ' + modelCrop + '. The photo may be from a different plant, or the model may have misidentified the crop. Take a clearer photo of a leaf from the intended plant and analyse again.')
+        : (ar ? 'لم يتمكن التطبيق من مطابقة اسم المحصول الذي أدخلته مع قائمة المحاصيل المدعومة. اختر اسمًا واضحًا أو تحقق يدويًا من المحصول قبل تفسير النتيجة.' : 'The app could not match the plant name you entered to its supported crop list. Use a recognised crop name or verify the crop manually before interpreting the result.'));
+    addAdvisorList(box, ar ? 'الخطوة الآمنة التالية' : 'Safe next step',
+      ar ? ['لا تعتمد على تصنيف المرض أو توصيات العلاج لهذه الصورة.','تأكد من أن الصورة للنبات الذي أدخلت اسمه.','التقط صورة قريبة وواضحة للورقة مع ظهور شكلها الكامل.'] :
+      ['Do not rely on the disease class or treatment guidance for this image.','Confirm the photo actually shows the plant you entered.','Take a close, clear image showing the full leaf.']);
+  } else {
+    addAdvisorBlock(box, advice.heading, (confidence === null || confidence < 0.60)
+      ? (ar ? 'لا تعتمدي على هذه النتيجة لتحديد المرض أو اختيار علاج. التقطي صورة أوضح أو اطلبي فحصًا بشريًا.' : 'Do not use this result to identify a disease or choose a treatment. Retake a clearer image or get a human review.')
+      : (ar ? 'هذا فحص بصري أولي وليس تشخيصًا نهائيًا.' : 'This is an initial visual screen, not a final diagnosis.'));
+    addAdvisorList(box, ar ? 'خطوات الفحص التالية' : 'Suggested next checks', advice.actions);
+  }
   const safety = document.createElement('div');
   safety.className = 'nabta-advisor-note';
   safety.textContent = ar ? 'لا تستخدمي مبيدًا أو مبيدًا فطريًا اعتمادًا على تصنيف الصورة وحده. تحققي من المرض والمحصول والتسجيل المحلي وملصق المنتج ومعدات الوقاية وفترات إعادة الدخول وما قبل الحصاد.' : 'Do not apply an insecticide or fungicide based on the image label alone. Confirm the disease and crop, local registration, product label, PPE, re-entry and pre-harvest intervals.';
