@@ -135,14 +135,21 @@ async def assess_plant_photo(
             error_text[:800],
         )
         lower_error = error_text.lower()
-        if "401" in lower_error or "403" in lower_error or "unauthorized" in lower_error:
-            detail = "Roboflow rejected the API key or this model is not authorized for the account. Check the key in Render."
-        elif "404" in lower_error or "not found" in lower_error:
-            detail = "Roboflow could not find this model version. Check PLANT_HEALTH_MODEL_ID in Render."
-        elif "429" in lower_error or "rate limit" in lower_error or "quota" in lower_error:
-            detail = "Roboflow rate limit or usage quota reached. Check the Roboflow account usage."
+        error_type = type(exc).__name__.lower()
+        if "401" in lower_error or "notauthorized" in error_type or "unauthorized" in lower_error:
+            detail = "Roboflow returned 401: the API key is invalid, expired, mistyped, or not the account's inference API key. Create/copy the key from the correct Roboflow workspace and update Render."
+        elif "403" in lower_error or "forbidden" in error_type:
+            detail = "Roboflow returned 403: the key was recognized but this workspace/key is not permitted to use this model or hosted inference. Test the model on its Roboflow page and check workspace access/scopes."
+        elif "402" in lower_error or "paymentrequired" in error_type or "quota" in lower_error or "credits" in lower_error:
+            detail = "Roboflow returned 402: hosted inference credits or workspace usage limit are unavailable. Check the Roboflow workspace usage/billing."
+        elif "404" in lower_error or "notfound" in error_type or "not found" in lower_error:
+            detail = "Roboflow returned 404: model/version was not found. Confirm PLANT_HEALTH_MODEL_ID is leaf-disease-detection-system/2."
+        elif "423" in lower_error or "usagepaused" in error_type:
+            detail = "Roboflow has paused API usage for this workspace. Check the workspace API-key or usage status."
+        elif "429" in lower_error or "rate limit" in lower_error:
+            detail = "Roboflow rate limit reached. Wait before retrying."
         else:
-            detail = "Roboflow inference failed. Open Render Logs for the Plant assessment error_type and detail."
+            detail = "Roboflow inference failed. Open Render Logs for the Plant assessment error_type and redacted detail."
         raise HTTPException(status_code=502, detail=detail)
     finally:
         if temp_path:
