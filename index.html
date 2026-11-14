@@ -866,6 +866,9 @@ function assessNabtaInsectRisk() {
   const severity=el('nabta-advisor-severity').value;
   const confidence=nabtaAdvisorLatestConfidence;
   const confidenceWarning=Boolean(nabtaAdvisorLatestLabel) && (confidence===null || confidence<0.60);
+  const chemicalAdvice = confidenceWarning
+    ? (ar ? 'لن تظهر توصية كيميائية حتى يتم تأكيد نوع الحشرة؛ أعد التصوير أو أكد الهوية يدويًا أولًا.' : 'No chemical-control option is shown until the insect identity is confirmed. Retake the image or confirm the pest manually first.')
+    : (ar ? rule.chemicalAr : rule.chemicalEn);
   const result=el('nabta-advisor-result');
   result.replaceChildren();
   const plantGroupNames={
@@ -891,13 +894,13 @@ function assessNabtaInsectRisk() {
     addRisk(ar?'حشرة نافعة — لا تكافحها':'Beneficial insect — do not control','nabta-risk-low');
     addAdvisorBlock(result,ar?'تأثيرها على النبات':'Plant impact',ar?rule.damageAr:rule.damageEn);
     addAdvisorList(result,ar?'الإجراء الموصى به':'Recommended actions',ar?rule.organicAr:rule.organicEn);
-    addAdvisorBlock(result,ar?'المبيدات':'Pesticides',ar?rule.chemicalAr:rule.chemicalEn);
+    addAdvisorBlock(result,ar?'المبيدات':'Pesticides',chemicalAdvice);
   } else if (rule.type==='neutral' || rule.type==='context' || rule.type==='unknown') {
     addRisk(ar?'تأثير محدود أو يعتمد على السياق':'Low or context-dependent plant risk','nabta-risk-low');
     addAdvisorBlock(result,ar?'تأثيرها على النبات':'Plant impact',ar?rule.damageAr:rule.damageEn);
     addAdvisorBlock(result,ar?'ما الذي تفحصه؟':'What to check',ar?rule.signsAr:rule.signsEn);
     addAdvisorList(result,ar?'الإجراء الموصى به':'Recommended actions',ar?rule.organicAr:rule.organicEn);
-    addAdvisorBlock(result,ar?'الخيار الكيميائي':'Chemical option',ar?rule.chemicalAr:rule.chemicalEn);
+    addAdvisorBlock(result,ar?'الخيار الكيميائي':'Chemical option',chemicalAdvice);
   } else {
     let risk='low';
     if (severity==='few') risk=rule.base==='high'?'medium':'low';
@@ -908,7 +911,7 @@ function assessNabtaInsectRisk() {
     addAdvisorBlock(result,ar?'الضرر المحتمل':'Potential plant damage',ar?rule.damageAr:rule.damageEn);
     addAdvisorBlock(result,ar?'علامات تساعد على التأكد':'Signs to verify',ar?rule.signsAr:rule.signsEn);
     addAdvisorList(result,ar?'المكافحة غير الكيميائية أولًا':'Non-chemical controls first',ar?rule.organicAr:rule.organicEn);
-    addAdvisorBlock(result,ar?'المكافحة الكيميائية عند الضرورة فقط':'Chemical option — only if necessary',ar?rule.chemicalAr:rule.chemicalEn);
+    addAdvisorBlock(result,ar?'المكافحة الكيميائية عند الضرورة فقط':'Chemical option — only if necessary',chemicalAdvice);
   }
   const note=document.createElement('div'); note.className='nabta-advisor-note';
   const cropCaution = ['vegetable','fruit','herb','field_crop'].includes(plantGroup)
@@ -976,7 +979,7 @@ function renderNabtaCloudDetection(item) {
     const detectedName = topPrediction.class || topPrediction.class_name || topPrediction.label || '';
     const select = el('nabta-advisor-insect');
     const mapped = mapNabtaPestLabel(detectedName);
-    if (select && mapped) select.value = mapped;
+    if (select) select.value = mapped || 'other';
     nabtaAdvisorLatestConfidence = normalizedNabtaConfidence(topPrediction.confidence);
     nabtaAdvisorLatestLabel = detectedName;
   } else if (item.id && item.id !== nabtaLastDetectionId) {
