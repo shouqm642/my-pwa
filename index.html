@@ -178,6 +178,11 @@
             <div id="nabta-cloud-latest" class="nabta-cloud-result" aria-live="polite">
               <div class="small">No cloud detection received yet.</div>
             </div>
+            <div class="nabta-cloud-result">
+              <strong>Model comparison · Last 10 tests</strong>
+              <div class="small">Results are estimates. Scores below 60% require manual verification.</div>
+              <div id="nabta-cloud-history" class="detections" style="margin-top:8px"></div>
+            </div>
           </section>
           <div class="card">
             <div style="display:flex;justify-content:space-between;align-items:center">
@@ -329,7 +334,7 @@ function addDetection(det){
   renderDetections();
   // notifications & suggestions
   if(det.type==='PERSON'){ notify(t('Person detected','تم كشف شخص'), t('Human near plants','شخص بالقرب من النباتات'), true); }
-  if(det.type==='INSECT'){ notify(t('Pest detected','حشرات مكتشفة'), `${det.subtype||''} ${det.confidence?('('+Math.round(det.confidence*100)+'%)'):''}`, true); }
+  if(det.type==='INSECT' && !det.needsVerification){ notify(t('Pest detected','حشرات مكتشفة'), `${det.subtype||''} ${Number.isFinite(det.confidence)?('('+Math.round(det.confidence*100)+'%)'):''}`, true); }
   if(det.type==='PLANT'){ notify(t('Plant issue','مشكلة بالنبات'), det.subtype||'', true); }
 }
 
@@ -342,7 +347,7 @@ function renderDetections(){
     img.src = d.image || 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="84" height="64"><rect width="100%"height="100%"fill="%23000000"/><text x="50%"y="50%"fill="%23fff"dominant-baseline="middle"text-anchor="middle"font-size="8">No Image</text></svg>';
     const info = document.createElement('div'); info.style.flex='1';
     const title = document.createElement('div'); title.style.fontWeight='800'; title.textContent = (d.type==='INSECT'?t('Insect','حشرة'):(d.type==='PERSON'?t('Person','شخص'):t('Plant','نبات'))) + (d.subtype?(' — '+d.subtype):'');
-    const meta = document.createElement('div'); meta.style.fontSize='12px'; meta.style.color='#cfe'; meta.textContent = `${d.time} ${d.confidence?(' • '+Math.round(d.confidence*100)+'%'):''}`;
+    const meta = document.createElement('div'); meta.style.fontSize='12px'; meta.style.color='#cfe'; meta.textContent = `${d.time}${Number.isFinite(d.confidence)?(' • '+Math.round(d.confidence*100)+'%'):''}${d.modelId?(' • '+d.modelId):''}${d.needsVerification?(' • '+t('Needs verification','يحتاج إلى تحقق')):''}`;
     const action = document.createElement('div'); action.style.marginTop='6px';
     action.textContent = getSuggestionText(d);
     info.appendChild(title); info.appendChild(meta); info.appendChild(action);
@@ -355,6 +360,7 @@ function renderDetections(){
 function getSuggestionText(d){
   if(d.type==='PERSON') return t('Check visitor. Consider alarm.', 'تحقق من الزائر. فكر في انذار.');
   if(d.type==='INSECT'){
+    if(d.needsVerification) return t('Low confidence — verify the insect before taking action.','الثقة منخفضة — تحقّق من نوع الحشرة قبل اتخاذ أي إجراء.');
     const s = (d.subtype||'').toLowerCase();
     if(s.includes('aphid')) return t('Possible aphids — spray neem oil or soap solution.', 'احتمال حشرات Aphids — رش زيت النيم أو محلول صابون.');
     if(s.includes('caterpillar')||s.includes('worm')) return t('Caterpillar — remove manually or apply safe insecticide.', 'يرقات — ازالة يدوياً أو مبيد آمن.');
@@ -555,6 +561,11 @@ function safeNabtaImageUrl(value) {
     return ['https:', 'http:'].includes(url.protocol) ? url.href : '';
   } catch (_) { return ''; }
 }
+function normalizedNabtaConfidence(value) {
+  const number = Number(value);
+  if (!Number.isFinite(number)) return null;
+  return Math.max(0, Math.min(1, number > 1 && number <= 100 ? number / 100 : number));
+}
 function renderNabtaCloudDetection(item) {
   nabtaLatestBox.replaceChildren();
   if (!item) {
@@ -566,12 +577,18 @@ function renderNabtaCloudDetection(item) {
   }
   const predictions = Array.isArray(item.predictions) ? item.predictions : [];
   const title = document.createElement('strong');
-  title.textContent = predictions.length ? t('Insect detection result','نتيجة اكتشاف الحشرات') : t('No insect detected','لم يتم اكتشاف حشرة');
+  title.textContent = predictions.length ? t('Model estimate — verify species','توقع النموذج — تحقّق من النوع') : t('No insect detected','لم يتم اكتشاف حشرة');
   nabtaLatestBox.appendChild(title);
   const timestamp = document.createElement('div');
   timestamp.className = 'small';
   timestamp.textContent = item.timestamp ? new Date(item.timestamp).toLocaleString() : '';
   nabtaLatestBox.appendChild(timestamp);
+  if (item.model_id) {
+    const model = document.createElement('div');
+    model.className = 'small';
+    model.textContent = t('Model: ','النموذج: ') + item.model_id;
+    nabtaLatestBox.appendChild(model);
+  }
   const imageUrl = safeNabtaImageUrl(item.image_url);
   if (imageUrl) {
     const image = document.createElement('img');
@@ -585,15 +602,19 @@ function renderNabtaCloudDetection(item) {
     const row = document.createElement('div');
     row.className = 'small';
     const name = prediction.class || prediction.class_name || prediction.label || 'Unknown';
-    const confidence = Number(prediction.confidence);
-    row.textContent = (index + 1) + '. ' + name + (Number.isFinite(confidence) ? ' · ' + Math.round(confidence * 100) + '%' : '');
+    const confidence = normalizedNabtaConfidence(prediction.confidence);
+    const needsVerification = confidence === null || confidence < 0.60;
+    const scoreText = confidence === null ? t('confidence unavailable','الثقة غير متاحة') : Math.round(confidence * 100) + '%';
+    row.textContent = (index + 1) + '. ' + name + ' · ' + scoreText + (needsVerification ? ' — ' + t('Needs verification','يحتاج إلى تحقق') : ' — ' + t('Model estimate; verify species','توقع النموذج؛ تحقّق من النوع'));
     nabtaLatestBox.appendChild(row);
     if (item.id && item.id !== nabtaLastDetectionId) {
       addDetection({
         type: 'INSECT',
         subtype: String(name),
-        confidence: Number.isFinite(confidence) ? confidence : null,
+        confidence,
         image: imageUrl || null,
+        modelId: item.model_id || '',
+        needsVerification,
         time: timestamp.textContent
       });
     }
@@ -606,17 +627,67 @@ function renderNabtaCloudDetection(item) {
     nabtaLatestBox.appendChild(note);
   }
 }
+function renderNabtaCloudHistory(items) {
+  const box = el('nabta-cloud-history');
+  if (!box) return;
+  box.replaceChildren();
+  if (!items.length) {
+    const empty = document.createElement('div');
+    empty.className = 'small';
+    empty.textContent = t('No model tests recorded yet.','لا توجد اختبارات نماذج مسجلة بعد.');
+    box.appendChild(empty);
+    return;
+  }
+  items.slice(0, 10).forEach(item => {
+    const row = document.createElement('div');
+    row.className = 'detect-item';
+    row.style.alignItems = 'flex-start';
+    const details = document.createElement('div');
+    details.style.flex = '1';
+    const predictions = Array.isArray(item.predictions) ? item.predictions : [];
+    const best = predictions.reduce((current, prediction) => {
+      const confidence = normalizedNabtaConfidence(prediction.confidence);
+      return !current || (confidence !== null && (current.confidence === null || confidence > current.confidence)) ? {
+        name: prediction.class || prediction.class_name || prediction.label || 'Unknown',
+        confidence
+      } : current;
+    }, null);
+    const heading = document.createElement('strong');
+    heading.textContent = best ? best.name : t('No detection','لا يوجد اكتشاف');
+    const meta = document.createElement('div');
+    meta.className = 'small';
+    meta.textContent = (item.timestamp ? new Date(item.timestamp).toLocaleString() : '') + (item.model_id ? ' · ' + item.model_id : '');
+    const verdict = document.createElement('div');
+    verdict.className = 'small';
+    if (!best) {
+      verdict.textContent = t('No insect detected','لم يتم اكتشاف حشرة');
+    } else if (best.confidence === null || best.confidence < 0.60) {
+      verdict.textContent = t('Needs verification · ','يحتاج إلى تحقق · ') + (best.confidence === null ? t('confidence unavailable','الثقة غير متاحة') : Math.round(best.confidence * 100) + '%');
+    } else {
+      verdict.textContent = t('Model estimate · verify species · ','توقع النموذج · تحقّق من النوع · ') + Math.round(best.confidence * 100) + '%';
+    }
+    details.appendChild(heading);
+    details.appendChild(meta);
+    details.appendChild(verdict);
+    row.appendChild(details);
+    box.appendChild(row);
+  });
+}
 async function refreshNabtaCloud() {
   if (!nabtaApiBase) {
     setNabtaApiStatus(t('Not connected','غير متصل'));
     return;
   }
   try {
-    const response = await fetch(nabtaApiBase + '/api/latest', { headers: { 'Accept': 'application/json' }, cache: 'no-store' });
-    if (!response.ok) throw new Error('API returned ' + response.status);
-    const data = await response.json();
+    const [latestResponse, historyResponse] = await Promise.all([
+      fetch(nabtaApiBase + '/api/latest', { headers: { 'Accept': 'application/json' }, cache: 'no-store' }),
+      fetch(nabtaApiBase + '/api/history', { headers: { 'Accept': 'application/json' }, cache: 'no-store' })
+    ]);
+    if (!latestResponse.ok || !historyResponse.ok) throw new Error('API returned ' + (!latestResponse.ok ? latestResponse.status : historyResponse.status));
+    const [latestData, historyData] = await Promise.all([latestResponse.json(), historyResponse.json()]);
     setNabtaApiStatus(t('Connected','متصل'), 'online');
-    renderNabtaCloudDetection(data.detection || null);
+    renderNabtaCloudDetection(latestData.detection || null);
+    renderNabtaCloudHistory(Array.isArray(historyData.detections) ? historyData.detections : []);
   } catch (error) {
     setNabtaApiStatus(t('Connection error','خطأ في الاتصال'), 'error');
     nabtaLatestBox.textContent = t('Could not reach the NABTA API. Check the backend URL and deployment.','تعذر الوصول إلى خادم نبتة. تحققي من الرابط ونشر الخدمة.');

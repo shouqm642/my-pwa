@@ -90,7 +90,7 @@ async def create_detection(
         "timestamp": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
         "predictions": predictions,
         "image_url": f"{public_base}/uploads/{filename}",
-        "model_id": model_result.get("model_id", "insects-mytwu/1"),
+        "model_id": ((model_result.get("resolved_model") if isinstance(model_result.get("resolved_model"), dict) else {}) or {}).get("model_id") or model_result.get("model_id", "unknown"),
         "image_width": ((model_result.get("image") if isinstance(model_result.get("image"), dict) else {}) or {}).get("width", model_result.get("width")),
         "image_height": ((model_result.get("image") if isinstance(model_result.get("image"), dict) else {}) or {}).get("height", model_result.get("height")),
     }

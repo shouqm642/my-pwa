@@ -88,3 +88,9 @@ bash auto_capture_publish.sh
 ```
 
 By default it captures and uploads 5 photos, 60 seconds apart. You can choose a different count and interval in seconds, for example `bash auto_capture_publish.sh 3 90`. Press `Ctrl+C` to stop early. Keep the insect in view and use good lighting. This test does not move the robot.
+
+## 5. Model comparison and confidence review
+
+The PWA reads up to 10 recent test submissions from `GET /api/history` and displays the model ID recorded by Roboflow. To compare candidate models fairly, upload the same test image separately with each model ID set via `ROBOFLOW_MODEL_ID` on the Raspberry Pi. This is a manual comparison workflow; the system does not automatically fan out one image to multiple models or incur extra inference charges.
+
+The dashboard treats confidence below 60% (or missing confidence) as **Needs verification**. Scores at or above 60% are still shown as **Model estimate — verify species**; a confidence score is not proof that the species label is correct. Low-confidence outputs are not sent as pest alerts and do not generate treatment suggestions.
