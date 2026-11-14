@@ -50,6 +50,19 @@
   .nabta-cloud-result{background:rgba(0,0,0,.2);border-radius:9px;padding:10px;margin-top:10px}
   .nabta-cloud-result strong{color:#b9ffc5}
   .nabta-cloud-actions{display:flex;gap:8px;margin-top:8px;flex-wrap:wrap}
+  .nabta-advisor-card{border:1px solid rgba(159,234,176,.24);background:linear-gradient(145deg,rgba(18,72,37,.55),rgba(3,25,12,.82))}
+  .nabta-advisor-grid{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-top:10px}
+  .nabta-advisor-grid label{display:block;font-size:12px;color:var(--muted);margin-bottom:4px}
+  .nabta-advisor-grid select,.nabta-advisor-grid input{width:100%;box-sizing:border-box;padding:9px;border-radius:8px;border:1px solid rgba(255,255,255,.12);background:#082b16;color:#efffef}
+  .nabta-advisor-result{margin-top:10px;padding:12px;border-radius:9px;background:rgba(0,0,0,.24);line-height:1.55}
+  .nabta-advisor-result h4{margin:10px 0 5px;color:#b9ffc5}
+  .nabta-advisor-result ul{margin:5px 0 10px;padding-inline-start:20px}
+  .nabta-risk-pill{display:inline-block;border-radius:99px;padding:4px 10px;font-size:12px;font-weight:800;margin:6px 0}
+  .nabta-risk-low{background:rgba(70,190,110,.17);color:#a9f5b8}
+  .nabta-risk-medium{background:rgba(230,180,60,.17);color:#ffe09a}
+  .nabta-risk-high{background:rgba(220,80,70,.18);color:#ffb5ae}
+  .nabta-advisor-note{font-size:12px;color:#c7e6cc;margin-top:9px}
+  @media(max-width:560px){.nabta-advisor-grid{grid-template-columns:1fr}}
 
 </style>
 </head>
@@ -184,6 +197,56 @@
               <div id="nabta-cloud-history" class="detections" style="margin-top:8px"></div>
             </div>
           </section>
+          <section class="card nabta-advisor-card" style="margin-top:12px">
+            <div class="nabta-cloud-head">
+              <strong id="nabta-advisor-title">🌿 Insect Risk & Treatment Advisor</strong>
+              <span class="nabta-cloud-status">IPM guide</span>
+            </div>
+            <div class="small" id="nabta-advisor-intro">Estimate plant risk and review practical control options. Confirm the insect and inspect the plant before acting.</div>
+            <div class="nabta-advisor-grid">
+              <div>
+                <label id="nabta-advisor-insect-label" for="nabta-advisor-insect">Detected insect</label>
+                <select id="nabta-advisor-insect">
+                  <option value="aphid">Aphid</option><option value="whitefly">Whitefly</option><option value="spider_mite">Spider mite</option>
+                  <option value="mealybug">Mealybug</option><option value="thrips">Thrips</option><option value="caterpillar">Caterpillar / larva</option>
+                  <option value="leaf_miner">Leaf miner</option><option value="blister_beetle">Blister beetle</option><option value="locust">Locust / grasshopper</option>
+                  <option value="fungus_gnat">Fungus gnat</option><option value="scale">Scale insect</option><option value="psyllid">Psyllid</option>
+                  <option value="ant">Ant</option><option value="ladybug">Ladybug</option><option value="dragonfly">Dragonfly</option>
+                  <option value="honeybee">Honeybee</option><option value="butterfly">Adult butterfly / moth</option><option value="housefly">Housefly</option>
+                  <option value="other">Other / uncertain</option>
+                </select>
+              </div>
+              <div>
+                <label id="nabta-advisor-plant-label" for="nabta-advisor-plant">Plant group</label>
+                <select id="nabta-advisor-plant">
+                  <option value="vegetable">Vegetables</option><option value="fruit">Fruit trees / berries</option>
+                  <option value="ornamental">Ornamental / landscape</option><option value="houseplant">Indoor plants</option>
+                  <option value="herb">Herbs</option><option value="field_crop">Field crops</option><option value="other">Other / unknown</option>
+                </select>
+              </div>
+              <div>
+                <label id="nabta-advisor-plant-name-label" for="nabta-advisor-plant-name">Plant name (optional)</label>
+                <input id="nabta-advisor-plant-name" type="text" maxlength="80" placeholder="e.g. tomato, rose, lemon">
+              </div>
+              <div>
+                <label id="nabta-advisor-severity-label" for="nabta-advisor-severity">Observed infestation</label>
+                <select id="nabta-advisor-severity">
+                  <option value="few">A few insects / limited signs</option>
+                  <option value="moderate">Clusters or several affected leaves</option>
+                  <option value="severe">Widespread insects or visible damage</option>
+                </select>
+              </div>
+            </div>
+            <div class="nabta-cloud-actions">
+              <button id="nabta-advisor-evaluate" class="btn">Assess risk & treatment</button>
+              <button id="nabta-advisor-reset" class="btn secondary">Reset</button>
+            </div>
+            <div id="nabta-advisor-result" class="nabta-advisor-result" aria-live="polite">
+              <div class="small">Choose the insect, plant group and observed extent, then assess.</div>
+            </div>
+            <div class="nabta-advisor-note" id="nabta-advisor-disclaimer">This is general decision support, not a confirmed diagnosis. Never apply a pesticide unless its current UAE registration and label cover the exact crop/site and target pest. Follow all label directions, PPE, re-entry and pre-harvest intervals.</div>
+          </section>
+
           <div class="card">
             <div style="display:flex;justify-content:space-between;align-items:center">
               <strong>Camera & AI</strong>
@@ -283,6 +346,7 @@ function renderStaticTexts(){
   clearDetBtn.textContent = lang==='ar' ? 'مسح' : 'Clear';
   captureBtn.textContent = lang==='ar' ? 'التقاط صورة' : 'Capture Image';
   applySuggestBtn.textContent = lang==='ar' ? 'تطبيق الاقتراح' : 'Apply Suggestion';
+  renderNabtaAdvisorTexts();
 }
 
 /* Notification helper */
@@ -537,6 +601,325 @@ applySuggestBtn.addEventListener('click', ()=>applySuggestion());
 langEnBtn.addEventListener('click', ()=>setLang('en')); langArBtn.addEventListener('click', ()=>setLang('ar'));
 
 
+
+/* ===== NABTA insect risk and treatment advisor =====
+   Cautious, rule-based integrated pest management guidance.
+   The model label is a hypothesis, not a confirmed species diagnosis.
+*/
+let nabtaAdvisorLatestConfidence = null;
+let nabtaAdvisorLatestLabel = '';
+const nabtaAdvisorRules = {
+  aphid: {
+    en:'Aphids', ar:'حشرات المنّ', type:'pest', base:'medium',
+    damageEn:'Sap-feeding can curl new leaves and produce sticky honeydew; heavy colonies can weaken growth. Many established plants tolerate light infestations.',
+    damageAr:'تمتص العصارة وقد تسبب تجعد الأوراق الحديثة وإفراز الندوة العسلية اللزجة؛ وقد تضعف المستعمرات الكبيرة النمو. تتحمل نباتات كثيرة الإصابة الخفيفة.',
+    organicEn:['Check the undersides of new leaves; wash small colonies off sturdy plants with water.','Prune and bag heavily infested tips; avoid excess nitrogen and protect ladybirds, lacewings and hoverfly larvae.'],
+    organicAr:['افحص أسفل الأوراق الحديثة واغسل المستعمرات الصغيرة بالماء إذا كان النبات يتحمل ذلك.','أزل القمم شديدة الإصابة وضعها في كيس؛ تجنب الإفراط في النيتروجين واحمِ الدعاسيق وأسود المنّ ويرقات الذباب الحوّام.'],
+    chemicalEn:'If damage continues, a labelled insecticidal soap or horticultural oil may help when the exact plant and aphid use is on the label. Coverage of leaf undersides matters. Avoid heat and drought-stressed plants.',
+    chemicalAr:'إذا استمر الضرر، قد يفيد صابون حشري أو زيت بستاني مسجل إذا كان الملصق يجيز استخدامه على النبات والمنّ المحددين. يجب تغطية أسفل الأوراق، وتجنب الحر الشديد والنبات المجهد بالعطش.',
+    signsEn:'Clusters on tender shoots, curled leaves and sticky honeydew.', signsAr:'تجمعات على النموات الغضة وأوراق ملتفة وندوة عسلية لزجة.'
+  },
+  whitefly: {
+    en:'Whiteflies', ar:'الذبابة البيضاء', type:'pest', base:'medium',
+    damageEn:'Sap feeding can weaken plants and produce honeydew and sooty mould; some whitefly species transmit plant viruses.',
+    damageAr:'قد يضعف امتصاص العصارة النبات ويكوّن الندوة العسلية والعفن الهبابي؛ وتنقل بعض الأنواع فيروسات نباتية.',
+    organicEn:['Check leaf undersides and gently hose adults and nymphs from plants.','Remove isolated heavily infested leaves; use yellow sticky cards for monitoring and conserve parasitoid wasps and other natural enemies.'],
+    organicAr:['افحص أسفل الأوراق واغسل الحشرات والحوريات بلطف بالماء.','أزل الأوراق شديدة الإصابة بشكل محدود واستخدم المصائد الصفراء للمراقبة، واحمِ الدبابير الطفيلية والأعداء الحيوية.'],
+    chemicalEn:'For persistent infestation, use only a locally registered insecticidal soap or horticultural oil labelled for this crop and whitefly. Thorough underside coverage is needed; avoid broad-spectrum sprays that harm beneficial insects.',
+    chemicalAr:'عند استمرار الإصابة، استخدم فقط صابونًا حشريًا أو زيتًا بستانيًا مسجلًا ومدونًا على ملصقه المحصول والذبابة البيضاء. يلزم تغطية أسفل الأوراق، وتجنب المبيدات واسعة الطيف التي تضر الحشرات النافعة.',
+    signsEn:'Tiny white adults fly up when foliage is disturbed; pale immobile stages occur under leaves.', signsAr:'تطير حشرات بيضاء صغيرة عند تحريك الأوراق، وتوجد أطوار شاحبة ثابتة أسفل الورقة.'
+  },
+  spider_mite: {
+    en:'Spider mites', ar:'العنكبوت الأحمر / الأكاروس', type:'pest', base:'medium',
+    damageEn:'Mites cause fine pale stippling, bronzing and sometimes webbing; severe infestations yellow leaves and cause leaf drop. Hot, dusty and dry conditions can worsen damage.',
+    damageAr:'تسبب الأكاروسات تنقيطًا فاتحًا دقيقًا وبرونزة وقد تنسج خيوطًا؛ والإصابة الشديدة تصفر الأوراق وتسبب تساقطها. يزيد الحر والغبار والعطش المشكلة.',
+    organicEn:['Confirm mites are present with a hand lens before treating. Rinse leaf undersides and reduce dust.','Keep plants evenly watered without waterlogging; conserve predatory mites and other natural enemies.'],
+    organicAr:['تأكد من وجود الأكاروس بعدسة مكبرة قبل العلاج. اغسل أسفل الأوراق وقلل الغبار.','حافظ على ري متوازن دون إغراق، واحمِ الأكاروسات المفترسة والأعداء الحيوية.'],
+    chemicalEn:'If confirmed and damaging, choose a registered miticide or labelled insecticidal soap/oil specifically suitable for the plant and mite. Do not assume ordinary insecticides control mites; avoid heat and plant stress.',
+    chemicalAr:'إذا تأكد وجوده واستمر الضرر، اختر مبيد أكاروس مسجلًا أو صابونًا/زيتًا حشريًا يجيز ملصقه استخدامه على النبات والأكاروس. لا تفترض أن المبيد الحشري العادي يعالج الأكاروس، وتجنب الحر وإجهاد النبات.',
+    signsEn:'Fine yellow speckles, bronze leaves or delicate webbing, especially underneath.', signsAr:'نقاط صفراء دقيقة أو أوراق برونزية أو خيوط رفيعة، خاصة أسفل الأوراق.'
+  },
+  mealybug: {
+    en:'Mealybugs', ar:'البق الدقيقي', type:'pest', base:'medium',
+    damageEn:'Sap feeding weakens plants; waxy white clusters and honeydew may lead to sooty mould. Hidden colonies make control difficult.',
+    damageAr:'يمتص العصارة ويضعف النبات؛ وقد تظهر كتل شمعية بيضاء وندوة عسلية يعقبها عفن هبابي. تختبئ المستعمرات مما يصعّب المكافحة.',
+    organicEn:['Isolate an affected potted plant where practical. Remove small colonies with water or by pruning infested parts.','Inspect leaf joints, stems and roots; monitor weekly and avoid excess fertiliser.'],
+    organicAr:['اعزل النبات المزروع في أصيص عند الإمكان. أزل المستعمرات الصغيرة بالماء أو بتقليم الأجزاء المصابة.','افحص آباط الأوراق والسيقان والجذور، وراقب أسبوعيًا وتجنب الإفراط في التسميد.'],
+    chemicalEn:'For persistent colonies, consider a registered insecticidal soap or horticultural oil labelled for the plant and mealybug; hidden adults may be protected by wax, so coverage and repeat timing must follow the label.',
+    chemicalAr:'للمستعمرات المستمرة، يمكن بحث صابون حشري أو زيت بستاني مسجل يجيز ملصقه النبات والبق الدقيقي؛ قد تحمي الطبقة الشمعية الحشرات البالغة، لذا اتبع الملصق في التغطية وتوقيت التكرار.',
+    signsEn:'White cottony or waxy clusters, sticky leaves, yellowing or stunted growth.', signsAr:'كتل بيضاء قطنية أو شمعية وأوراق لزجة واصفرار أو بطء نمو.'
+  },
+  thrips: {
+    en:'Thrips', ar:'التربس', type:'pest', base:'medium',
+    damageEn:'Feeding scars leaves and flowers with silvery patches, streaks or distorted growth; some species transmit plant viruses.',
+    damageAr:'يخدش الأوراق والأزهار مسببًا بقعًا فضية وخطوطًا وتشوه النمو؛ وتنقل بعض الأنواع فيروسات نباتية.',
+    organicEn:['Inspect inside flowers and tender leaf folds; remove badly affected flowers or shoots.','Use suitable sticky cards for monitoring and reduce nearby weeds; conserve predatory mites and minute pirate bugs.'],
+    organicAr:['افحص داخل الأزهار وطيات الأوراق الحديثة، وأزل الأزهار أو النموات شديدة الضرر.','استخدم مصائد لاصقة مناسبة للمراقبة وقلل الأعشاب القريبة، واحمِ الأكاروسات المفترسة والبق المفترس.'],
+    chemicalEn:'If damage is increasing, use only a locally registered product labelled for thrips and the exact crop/site. Some products can harm pollinators and beneficial insects; follow all timing and re-entry directions.',
+    chemicalAr:'إذا ازداد الضرر، استخدم فقط منتجًا مسجلًا محليًا ومدونًا على ملصقه التربس والمحصول/الموقع المحدد. قد تضر بعض المنتجات الملقحات والحشرات النافعة؛ اتبع تعليمات التوقيت وفترة إعادة الدخول.',
+    signsEn:'Silvery scarring, black specks of frass and distorted buds or flowers.', signsAr:'خدوش فضية ونقاط سوداء من الفضلات وتشوه البراعم أو الأزهار.'
+  },
+  caterpillar: {
+    en:'Caterpillars / leaf-feeding larvae', ar:'اليرقات / الديدان قارضة الأوراق', type:'pest', base:'high',
+    damageEn:'Leaf-feeding larvae can make holes, skeletonise leaves or rapidly defoliate young plants; risk depends strongly on species and plant stage.',
+    damageAr:'قد تثقب اليرقات الأوراق أو تأكل نسيجها وتجرّد النباتات الصغيرة بسرعة؛ ويتوقف الضرر على النوع ومرحلة النبات.',
+    organicEn:['Inspect leaf undersides and stems; hand-pick accessible larvae and remove egg masses.','Use insect exclusion netting where appropriate and remove badly damaged material.'],
+    organicAr:['افحص أسفل الأوراق والسيقان واجمع اليرقات وكتل البيض الظاهرة يدويًا.','استخدم شبكًا مانعًا للحشرات عند ملاءمته وأزل الأجزاء شديدة التلف.'],
+    chemicalEn:'For confirmed leaf-feeding caterpillars, a registered Btk microbial product may be an option only when its label covers the identified caterpillar and crop. Other pesticides are a last resort and must be specifically labelled.',
+    chemicalAr:'لليرقات القارضة المؤكدة، قد يكون منتج ميكروبي مسجل من نوع Btk خيارًا فقط إذا شمل ملصقه اليرقة والمحصول المحددين. المبيدات الأخرى خيار أخير ويجب أن تكون مسجلة ومخصصة.',
+    signsEn:'Fresh holes, ragged edges, frass or larvae on leaf undersides.', signsAr:'ثقوب حديثة وحواف ممزقة وفضلات أو يرقات أسفل الأوراق.'
+  },
+  leaf_miner: {
+    en:'Leaf miners', ar:'صانعات الأنفاق داخل الأوراق', type:'pest', base:'low',
+    damageEn:'Larvae tunnel between leaf surfaces, creating pale winding mines; established plants often tolerate a small number, but seedlings and heavy attacks can be affected.',
+    damageAr:'تحفر اليرقات بين طبقتي الورقة فتظهر أنفاق فاتحة متعرجة؛ تتحمل النباتات الراسخة غالبًا الأعداد القليلة، لكن الشتلات والإصابات الشديدة قد تتضرر.',
+    organicEn:['Remove and dispose of mined leaves where practical; do not remove so much foliage that the plant is weakened.','Use insect-proof row covers before infestation and monitor new growth.'],
+    organicAr:['أزل الأوراق ذات الأنفاق وتخلص منها عند الإمكان، دون إزالة كمية كبيرة تضعف النبات.','استخدم أغطية مانعة للحشرات قبل حدوث الإصابة وراقب النمو الجديد.'],
+    chemicalEn:'Broad-spectrum sprays often disrupt natural enemies and may not reach larvae inside leaves. Seek crop-specific local advice before any registered treatment.',
+    chemicalAr:'قد تقتل المبيدات واسعة الطيف الأعداء الحيوية ولا تصل إلى اليرقات داخل الورقة. اطلب إرشادًا محليًا خاصًا بالمحصول قبل أي معالجة مسجلة.',
+    signsEn:'Pale winding trails or blotches inside leaves.', signsAr:'مسارات أو بقع فاتحة متعرجة داخل نسيج الأوراق.'
+  },
+  blister_beetle: {
+    en:'Blister beetles (including legume blister beetle)', ar:'خنافس الفقاعات (ومنها خنفساء البقوليات)', type:'pest', base:'high',
+    damageEn:'Adults can consume leaves, flowers and pods; clustered feeding can cause rapid defoliation. Species confirmation matters.',
+    damageAr:'قد تأكل الحشرات البالغة الأوراق والأزهار والقرون؛ وقد تسبب التغذية الجماعية تجريدًا سريعًا للأوراق. يلزم تأكيد النوع.',
+    organicEn:['Keep children and pets away. Do not touch or crush blister beetles with bare hands; their body fluid can blister skin.','If safe and appropriate, remove using gloves and place directly into a sealed container; inspect nearby plants for clusters.'],
+    organicAr:['أبعد الأطفال والحيوانات الأليفة. لا تلمس خنافس الفقاعات أو تسحقها باليد العارية؛ فقد يسبب سائل جسمها بثورًا جلدية.','إذا كان ذلك آمنًا ومناسبًا، أزلها بقفازات وضعها مباشرة في وعاء محكم، وافحص النباتات القريبة بحثًا عن تجمعات.'],
+    chemicalEn:'For a confirmed damaging outbreak on a crop, contact local agricultural extension or a licensed adviser. Use a pesticide only if it is currently registered in the UAE and its label explicitly covers that crop and blister beetle.',
+    chemicalAr:'عند تأكيد تفشٍ ضار في محصول، تواصل مع الإرشاد الزراعي المحلي أو مختص مرخص. لا تستخدم مبيدًا إلا إذا كان مسجلًا حاليًا في الإمارات ويذكر ملصقه المحصول وخنفساء الفقاعات صراحة.',
+    signsEn:'Groups of soft-bodied beetles feeding on leaves, flowers or pods.', signsAr:'تجمعات من خنافس رخوة الجسم تتغذى على الأوراق أو الأزهار أو القرون.'
+  },
+  locust: {
+    en:'Locusts / grasshoppers', ar:'الجراد / الجنادب', type:'pest', base:'high',
+    damageEn:'Chewing insects can remove leaf tissue and cause severe defoliation during large outbreaks; a single insect is not the same risk as a swarm.',
+    damageAr:'تقضم الأوراق وقد تسبب تجريدًا شديدًا أثناء التفشيات الكبيرة؛ وجود حشرة واحدة لا يعادل خطر السرب.',
+    organicEn:['For small garden areas, use insect-proof netting and remove individual insects where practical.','Remove nearby weed cover and monitor for increasing numbers or fresh feeding damage.'],
+    organicAr:['في المساحات الصغيرة استخدم شبكًا مانعًا للحشرات وأزل الأفراد عند الإمكان.','قلل غطاء الأعشاب القريبة وراقب زيادة الأعداد أو ظهور قضم حديث.'],
+    chemicalEn:'For widespread locust activity, contact the relevant UAE agricultural authority rather than applying a general garden spray. Any pesticide must be officially permitted for the site and pest.',
+    chemicalAr:'عند انتشار الجراد على نطاق واسع، تواصل مع الجهة الزراعية المختصة في الإمارات بدل رش مبيد حدائق عام. يجب أن يكون أي مبيد مسموحًا للموقع والآفة.',
+    signsEn:'Chewed leaf edges and rapidly increasing numbers of jumping insects.', signsAr:'حواف أوراق مقضومة وزيادة سريعة في أعداد الحشرات القافزة.'
+  },
+  fungus_gnat: {
+    en:'Fungus gnats', ar:'هاموش الفطريات', type:'pest', base:'low',
+    damageEn:'Adults are mainly a nuisance; larvae in persistently wet potting mix may damage fine roots, especially in seedlings.',
+    damageAr:'الحشرات البالغة مزعجة غالبًا؛ وقد تضر اليرقات الجذور الدقيقة في التربة الرطبة باستمرار، خصوصًا الشتلات.',
+    organicEn:['Allow the surface of potting mix to dry between watering when the plant tolerates it; improve drainage and remove decaying debris.','Use yellow sticky cards to monitor adults and avoid keeping pots constantly wet.'],
+    organicAr:['اترك سطح التربة يجف بين الريات إذا كان النبات يتحمل ذلك، وحسّن الصرف وأزل البقايا المتحللة.','استخدم المصائد الصفراء لمراقبة البالغات وتجنب بقاء الأصص مبللة باستمرار.'],
+    chemicalEn:'For confirmed larvae, a registered Bti product may be suitable only if the label covers fungus gnat larvae and the plant/production setting.',
+    chemicalAr:'لليرقات المؤكدة، قد يناسب منتج Bti مسجل فقط إذا ذكر الملصق يرقات هاموش الفطريات والنبات/بيئة الإنتاج.',
+    signsEn:'Small dark flies around moist pots; larvae in wet media.', signsAr:'ذباب صغير داكن حول الأصص الرطبة ويرقات في الوسط الزراعي المبلل.'
+  },
+  scale: {
+    en:'Scale insects', ar:'الحشرات القشرية', type:'pest', base:'medium',
+    damageEn:'Sap-feeding scales can weaken stems and leaves and may produce honeydew; severe infestations can cause yellowing and dieback.',
+    damageAr:'تمتص القشريات العصارة وتضعف السيقان والأوراق وقد تفرز الندوة العسلية؛ والإصابات الشديدة قد تسبب الاصفرار وموت الأفرع.',
+    organicEn:['Prune isolated infested twigs and inspect stems and leaf undersides.','Protect parasitoids and predators; monitor crawler stages, which are more exposed than mature scales.'],
+    organicAr:['قلّم الأفرع المصابة بشكل محدود وافحص السيقان وأسفل الأوراق.','احمِ الطفيليات والمفترسات وراقب طور الحوريات المتحركة الأكثر تعرضًا من الحشرات البالغة.'],
+    chemicalEn:'A labelled horticultural oil may suppress exposed crawler stages on some plants. Use only a product registered for the exact host and scale pest, and check heat and plant-sensitivity restrictions.',
+    chemicalAr:'قد يحد زيت بستاني مسجل من الحوريات المتحركة المكشوفة على بعض النباتات. لا تستخدم إلا منتجًا مسجلًا للعائل والحشرة المحددين، وتحقق من قيود الحرارة وحساسية النبات.',
+    signsEn:'Small immobile bumps on stems or leaves, sometimes sticky honeydew.', signsAr:'نتوءات صغيرة ثابتة على السيقان أو الأوراق وقد تصاحبها ندوة عسلية.'
+  },
+  psyllid: {
+    en:'Psyllids', ar:'بسيلا النباتات', type:'pest', base:'medium',
+    damageEn:'Nymph and adult feeding can distort new growth, cause leaf yellowing or produce honeydew; damage varies greatly by psyllid and host.',
+    damageAr:'قد يسبب تغذي الحوريات والبالغات تشوه النمو الحديث واصفرار الأوراق أو الندوة العسلية؛ ويختلف الضرر حسب نوع البسيلا والنبات العائل.',
+    organicEn:['Inspect fresh growth and undersides; prune only heavily affected tips if the plant can tolerate it.','Avoid excess nitrogen and conserve parasitoids and predators.'],
+    organicAr:['افحص النمو الحديث وأسفل الأوراق؛ قلّم الأطراف شديدة الإصابة فقط إذا كان النبات يتحمل ذلك.','تجنب الإفراط في النيتروجين واحمِ الطفيليات والمفترسات.'],
+    chemicalEn:'Treat only when a damaging infestation is confirmed and local crop-specific guidance supports it. Use a registered product labelled for this host and psyllid.',
+    chemicalAr:'لا تعالج إلا بعد تأكيد إصابة ضارة ووجود توصية محلية خاصة بالمحصول. استخدم منتجًا مسجلًا يذكر النبات العائل والبسيلا على الملصق.',
+    signsEn:'Distorted shoots, cupped leaves, honeydew or waxy nymphs.', signsAr:'نموات مشوهة وأوراق مقعرة وندوة عسلية أو حوريات شمعية.'
+  },
+  ant: {
+    en:'Ants', ar:'النمل', type:'context', base:'low',
+    damageEn:'Most garden ants do not directly feed on healthy leaves. Some protect aphids, mealybugs or scale insects in exchange for honeydew; some species may disturb roots or seedlings.',
+    damageAr:'معظم نمل الحدائق لا يتغذى مباشرة على الأوراق السليمة. بعض الأنواع تحمي المنّ أو البق الدقيقي أو القشريات مقابل الندوة العسلية؛ وقد تزعج أنواع أخرى الجذور أو الشتلات.',
+    organicEn:['Look for aphids, mealybugs or scales on the same plant before treating ants.','Reduce food and nesting access around pots; use physical barriers where suitable.'],
+    organicAr:['ابحث عن المنّ أو البق الدقيقي أو القشريات على النبات نفسه قبل مكافحة النمل.','قلل مصادر الغذاء ومداخل الأعشاش حول الأصص واستخدم حواجز مادية عند ملاءمتها.'],
+    chemicalEn:'Do not spray the plant just because ants are present. If a nest causes a documented problem, use only a bait or product labelled for the exact site and keep it away from children, pets and pollinators.',
+    chemicalAr:'لا ترش النبات لمجرد وجود النمل. إذا سبب العش مشكلة مؤكدة، استخدم طُعمًا أو منتجًا مسجلًا للموقع المحدد وأبعده عن الأطفال والحيوانات والملقحات.',
+    signsEn:'Ant trails; inspect for honeydew-producing pests.', signsAr:'مسارات نمل؛ افحص وجود آفات تفرز الندوة العسلية.'
+  },
+  ladybug: {
+    en:'Ladybugs / lady beetles', ar:'الدعاسيق', type:'beneficial', base:'none',
+    damageEn:'Most lady beetles are beneficial predators that feed on aphids, scale insects and other soft-bodied pests. Confirm the species if uncertain.',
+    damageAr:'معظم الدعاسيق مفترسات نافعة تتغذى على المنّ والقشريات وآفات رخوة الجسم أخرى. تأكد من النوع إذا كان غير واضح.',
+    organicEn:['Protect the insect and avoid broad-spectrum insecticides.','Inspect nearby leaves for aphids or other prey; the ladybug may indicate natural biological control.'],
+    organicAr:['احمِ الحشرة وتجنب المبيدات واسعة الطيف.','افحص الأوراق القريبة بحثًا عن المنّ أو فرائس أخرى؛ فقد تكون الدعسوقة جزءًا من المكافحة الحيوية الطبيعية.'],
+    chemicalEn:'No pesticide is recommended for the ladybug itself. Treat only a separately confirmed pest if necessary and use a selective, labelled option that protects beneficial insects.',
+    chemicalAr:'لا يوصى بأي مبيد ضد الدعسوقة نفسها. عالج آفة أخرى مؤكدة فقط عند الضرورة وبخيار انتقائي مسجل يحمي الحشرات النافعة.',
+    signsEn:'Often found among aphid colonies.', signsAr:'توجد غالبًا بين مستعمرات المنّ.'
+  },
+  dragonfly: {
+    en:'Dragonflies', ar:'اليعاسيب', type:'beneficial', base:'none',
+    damageEn:'Dragonflies are predators of flying insects and are not plant-feeding pests.',
+    damageAr:'اليعاسيب مفترسات للحشرات الطائرة وليست آفات تتغذى على النبات.',
+    organicEn:['Protect the insect and nearby habitat; do not spray it.','If plant damage is present, identify the actual plant-feeding pest separately.'],
+    organicAr:['احمِ الحشرة وموئلها القريب ولا ترشها.','إذا وُجد ضرر على النبات، فحدد الآفة التي تتغذى على النبات بشكل منفصل.'],
+    chemicalEn:'No pesticide or plant treatment is recommended for dragonflies.',
+    chemicalAr:'لا يوصى بمبيد أو علاج نباتي ضد اليعسوب.',
+    signsEn:'Long body, two pairs of wings; often seen hunting other insects.', signsAr:'جسم طويل وزوجان من الأجنحة؛ يُشاهد غالبًا وهو يصطاد حشرات أخرى.'
+  },
+  honeybee: {
+    en:'Honeybees', ar:'نحل العسل', type:'beneficial', base:'none',
+    damageEn:'Honeybees are important pollinators and do not normally damage healthy plants.',
+    damageAr:'نحل العسل من الملقحات المهمة ولا يضر النباتات السليمة عادة.',
+    organicEn:['Protect flowering plants and allow bees to forage undisturbed.','If another pest is confirmed, choose non-chemical controls first and avoid exposing bees.'],
+    organicAr:['احمِ النباتات المزهرة ودع النحل يجمع الرحيق دون إزعاج.','إذا تأكدت آفة أخرى، ابدأ بالمكافحة غير الكيميائية وتجنب تعريض النحل لها.'],
+    chemicalEn:'Never spray bees. Avoid applying insecticides to blooming plants or when bees are foraging; any exception must be explicitly allowed by the product label and local rules.',
+    chemicalAr:'لا ترش النحل مطلقًا. تجنب رش النباتات المزهرة أو وقت نشاط النحل؛ وأي استثناء يجب أن يسمح به ملصق المنتج والقواعد المحلية صراحة.',
+    signsEn:'Bee visiting flowers and collecting pollen or nectar.', signsAr:'نحلة تزور الأزهار لجمع حبوب اللقاح أو الرحيق.'
+  },
+  butterfly: {
+    en:'Adult butterflies / moths', ar:'الفراشات / العث البالغ', type:'context', base:'low',
+    damageEn:'Adults usually feed on nectar and are not leaf-chewing pests. Some caterpillar larvae can feed on particular host plants, so identify the larva rather than treating the adult.',
+    damageAr:'تتغذى الفراشات البالغة غالبًا على الرحيق وليست آفات قارضة للأوراق. قد تتغذى يرقات بعض الأنواع على نباتات عائلة محددة؛ لذا حدد اليرقة بدلًا من مكافحة الحشرة البالغة.',
+    organicEn:['Do not treat the adult butterfly. Inspect leaves for eggs or caterpillars and identify the larval species first.','Protect pollinators and use netting only where appropriate for the crop.'],
+    organicAr:['لا تكافح الفراشة البالغة. افحص الأوراق بحثًا عن البيض أو اليرقات وحدد نوع اليرقة أولًا.','احمِ الملقحات واستخدم الشبك فقط إذا كان مناسبًا للمحصول.'],
+    chemicalEn:'No pesticide is recommended for the adult butterfly. If a damaging caterpillar is confirmed, use only a larval-control product specifically labelled for that caterpillar and crop.',
+    chemicalAr:'لا يوصى بمبيد ضد الفراشة البالغة. إذا تأكدت يرقة ضارة، استخدم فقط منتج مكافحة يرقات مسجلًا لتلك اليرقة والمحصول.',
+    signsEn:'Adult visiting flowers; inspect separately for leaf-feeding larvae.', signsAr:'فراشة بالغة تزور الأزهار؛ افحص بشكل منفصل وجود يرقات قارضة للأوراق.'
+  },
+  housefly: {
+    en:'Houseflies', ar:'الذباب المنزلي', type:'neutral', base:'none',
+    damageEn:'Houseflies do not normally feed on living plant tissue. They can transfer contamination to food and surfaces, but that is a hygiene issue rather than a plant pest diagnosis.',
+    damageAr:'لا يتغذى الذباب المنزلي عادة على أنسجة النبات الحية. قد ينقل التلوث إلى الغذاء والأسطح، وهذه مسألة نظافة وليست تشخيص آفة نباتية.',
+    organicEn:['Remove decaying organic matter and keep bins and compost areas managed.','If a plant is damaged, inspect for another pest or disease.'],
+    organicAr:['أزل المواد العضوية المتحللة وحافظ على نظافة الحاويات ومناطق السماد.','إذا كان النبات متضررًا، افحص وجود آفة أو مرض آخر.'],
+    chemicalEn:'Do not apply plant insecticide for a housefly identification alone. Manage sanitation and identify the actual cause of plant damage.',
+    chemicalAr:'لا تستخدم مبيدًا نباتيًا لمجرد تحديد الذباب المنزلي. عالج مصادر التلوث وحدد السبب الحقيقي لضرر النبات.',
+    signsEn:'Flies around waste or decaying material; not evidence of leaf damage.', signsAr:'ذباب حول النفايات أو المواد المتحللة؛ ولا يدل ذلك على ضرر الأوراق.'
+  },
+  other: {
+    en:'Unidentified insect', ar:'حشرة غير محددة', type:'unknown', base:'none',
+    damageEn:'Plant risk cannot be estimated reliably without a confirmed pest identity and visible plant symptoms.',
+    damageAr:'لا يمكن تقدير خطر النبات بشكل موثوق دون تأكيد هوية الآفة وملاحظة أعراض النبات.',
+    organicEn:['Take a sharp close-up photo of the insect and the affected plant area.','Record which leaves, stems, flowers or fruit are affected and whether numbers are increasing.'],
+    organicAr:['التقط صورة قريبة وواضحة للحشرة وللجزء المتضرر من النبات.','سجل ما إذا كانت الأوراق أو السيقان أو الأزهار أو الثمار متضررة، وهل الأعداد تتزايد.'],
+    chemicalEn:'Do not select a pesticide from an uncertain image label. Confirm the insect and plant first or seek local extension advice.',
+    chemicalAr:'لا تختَر مبيدًا بناءً على تصنيف صورة غير مؤكد. تحقق من الحشرة والنبات أولًا أو اطلب إرشادًا زراعيًا محليًا.',
+    signsEn:'Identification needed before assessing risk.', signsAr:'يلزم تحديد النوع قبل تقدير الخطر.'
+  }
+};
+const nabtaPestAliases = [
+  [/aphid/,'aphid'],[/white.?fl(y|ies)/,'whitefly'],[/spider.?mite|red.?mite/,'spider_mite'],[/mealybug/,'mealybug'],
+  [/thrips/,'thrips'],[/caterpillar|larva|worm/,'caterpillar'],[/leaf.?miner/,'leaf_miner'],[/blister.?beetle/,'blister_beetle'],
+  [/legume blister beetle/,'blister_beetle'],[/locust|grasshopper/,'locust'],[/fungus gnat/,'fungus_gnat'],
+  [/scale insect/,'scale'],[/psyllid/,'psyllid'],[/ant/,'ant'],[/lady.?bug|lady.?beetle/,'ladybug'],
+  [/dragon.?fl(y|ies)/,'dragonfly'],[/honey.?bee|bee/,'honeybee'],[/butterfl(y|ies)|moth/,'butterfly'],[/house.?fl(y|ies)/,'housefly']
+];
+function mapNabtaPestLabel(label) {
+  const value = String(label || '').toLowerCase();
+  for (const pair of nabtaPestAliases) if (pair[0].test(value)) return pair[1];
+  return '';
+}
+function renderNabtaAdvisorTexts() {
+  const ar = lang === 'ar';
+  const texts = {
+    'nabta-advisor-title': ar ? '🌿 مستشار مخاطر الحشرات والعلاج' : '🌿 Insect Risk & Treatment Advisor',
+    'nabta-advisor-intro': ar ? 'قدّر خطر الحشرة على النبات وراجع خيارات المكافحة. أكّد النوع وافحص النبات قبل اتخاذ إجراء.' : 'Estimate plant risk and review practical control options. Confirm the insect and inspect the plant before acting.',
+    'nabta-advisor-insect-label': ar ? 'الحشرة المكتشفة' : 'Detected insect',
+    'nabta-advisor-plant-label': ar ? 'مجموعة النبات' : 'Plant group',
+    'nabta-advisor-plant-name-label': ar ? 'اسم النبات (اختياري)' : 'Plant name (optional)',
+    'nabta-advisor-severity-label': ar ? 'شدة الإصابة الملحوظة' : 'Observed infestation',
+    'nabta-advisor-evaluate': ar ? 'تقييم الخطر والعلاج' : 'Assess risk & treatment',
+    'nabta-advisor-reset': ar ? 'إعادة ضبط' : 'Reset',
+    'nabta-advisor-disclaimer': ar ? 'هذه إرشادات عامة وليست تشخيصًا مؤكدًا. لا تستخدم مبيدًا إلا إذا كان تسجيله الحالي في الإمارات وملصقه يشملان المحصول/الموقع والآفة المحددين. اتبع تعليمات الملصق ومعدات الوقاية وفترات إعادة الدخول وما قبل الحصاد.' : 'This is general decision support, not a confirmed diagnosis. Never apply a pesticide unless its current UAE registration and label cover the exact crop/site and target pest. Follow all label directions, PPE, re-entry and pre-harvest intervals.'
+  };
+  Object.entries(texts).forEach(([id,value]) => { const node=el(id); if(node) node.textContent=value; });
+  const insect=el('nabta-advisor-insect'), plant=el('nabta-advisor-plant'), severity=el('nabta-advisor-severity');
+  if (insect) Array.from(insect.options).forEach(o=>{ const rule=nabtaAdvisorRules[o.value]; if(rule) o.textContent=ar?rule.ar:rule.en; });
+  if (plant) {
+    const opts = ar ? ['الخضروات','أشجار الفاكهة / التوت','نباتات الزينة والحدائق','نباتات داخلية','أعشاب','محاصيل حقلية','أخرى / غير معروف'] : ['Vegetables','Fruit trees / berries','Ornamental / landscape','Indoor plants','Herbs','Field crops','Other / unknown'];
+    Array.from(plant.options).forEach((o,i)=>o.textContent=opts[i]);
+  }
+  if (severity) {
+    const opts = ar ? ['عدد قليل / علامات محدودة','تجمعات أو عدة أوراق مصابة','انتشار واسع أو ضرر واضح'] : ['A few insects / limited signs','Clusters or several affected leaves','Widespread insects or visible damage'];
+    Array.from(severity.options).forEach((o,i)=>o.textContent=opts[i]);
+  }
+  const name=el('nabta-advisor-plant-name');
+  if(name) name.placeholder=ar?'مثال: طماطم، ورد، ليمون':'e.g. tomato, rose, lemon';
+}
+function addAdvisorBlock(result, heading, body) {
+  const h=document.createElement('h4'); h.textContent=heading; result.appendChild(h);
+  const p=document.createElement('div'); p.textContent=body; result.appendChild(p);
+}
+function addAdvisorList(result, heading, items) {
+  const h=document.createElement('h4'); h.textContent=heading; result.appendChild(h);
+  const ul=document.createElement('ul');
+  items.forEach(text=>{ const li=document.createElement('li'); li.textContent=text; ul.appendChild(li); });
+  result.appendChild(ul);
+}
+function assessNabtaInsectRisk() {
+  const ar=lang==='ar';
+  const rule=nabtaAdvisorRules[el('nabta-advisor-insect').value] || nabtaAdvisorRules.other;
+  const plantGroup=el('nabta-advisor-plant').value;
+  const plantName=(el('nabta-advisor-plant-name').value||'').trim();
+  const severity=el('nabta-advisor-severity').value;
+  const confidence=nabtaAdvisorLatestConfidence;
+  const confidenceWarning=Boolean(nabtaAdvisorLatestLabel) && (confidence===null || confidence<0.60);
+  const result=el('nabta-advisor-result');
+  result.replaceChildren();
+  const plantGroupNames={
+    vegetable:ar?'الخضروات':'vegetables',fruit:ar?'أشجار الفاكهة':'fruit trees',ornamental:ar?'نباتات الزينة':'ornamentals',
+    houseplant:ar?'النباتات الداخلية':'indoor plants',herb:ar?'الأعشاب':'herbs',field_crop:ar?'المحاصيل الحقلية':'field crops',other:ar?'نبات غير محدد':'unspecified plant'
+  };
+  const plantLabel=plantName || plantGroupNames[plantGroup] || (ar?'نبات غير محدد':'unspecified plant');
+  const addRisk=(text,cls)=>{
+    const badge=document.createElement('span'); badge.className='nabta-risk-pill '+cls; badge.textContent=text; result.appendChild(badge);
+  };
+  const selectedLabel=ar?rule.ar:rule.en;
+  const heading=document.createElement('strong');
+  heading.textContent=(ar?'التقييم المبدئي: ':'Preliminary assessment: ')+selectedLabel;
+  result.appendChild(heading);
+  const sub=document.createElement('div'); sub.className='small';
+  sub.textContent=(ar?'النبات: ':'Plant: ')+plantLabel;
+  result.appendChild(sub);
+  if (confidenceWarning) {
+    addRisk(ar?'هوية غير مؤكدة':'Identification uncertain','nabta-risk-medium');
+    addAdvisorBlock(result,ar?'تنبيه الثقة':'Model confidence warning',ar?'ثقة نموذج الذكاء الاصطناعي أقل من 60% أو غير متاحة. لا تعتمد على هذا التصنيف لاختيار مبيد؛ التقط صورة أوضح أو أكد النوع يدويًا.':'The AI score is below 60% or unavailable. Do not use this label to select a pesticide; take a clearer image or confirm the insect manually.');
+  }
+  if (rule.type==='beneficial') {
+    addRisk(ar?'حشرة نافعة — لا تكافحها':'Beneficial insect — do not control','nabta-risk-low');
+    addAdvisorBlock(result,ar?'تأثيرها على النبات':'Plant impact',ar?rule.damageAr:rule.damageEn);
+    addAdvisorList(result,ar?'الإجراء الموصى به':'Recommended actions',ar?rule.organicAr:rule.organicEn);
+    addAdvisorBlock(result,ar?'المبيدات':'Pesticides',ar?rule.chemicalAr:rule.chemicalEn);
+  } else if (rule.type==='neutral' || rule.type==='context' || rule.type==='unknown') {
+    addRisk(ar?'تأثير محدود أو يعتمد على السياق':'Low or context-dependent plant risk','nabta-risk-low');
+    addAdvisorBlock(result,ar?'تأثيرها على النبات':'Plant impact',ar?rule.damageAr:rule.damageEn);
+    addAdvisorBlock(result,ar?'ما الذي تفحصه؟':'What to check',ar?rule.signsAr:rule.signsEn);
+    addAdvisorList(result,ar?'الإجراء الموصى به':'Recommended actions',ar?rule.organicAr:rule.organicEn);
+    addAdvisorBlock(result,ar?'الخيار الكيميائي':'Chemical option',ar?rule.chemicalAr:rule.chemicalEn);
+  } else {
+    let risk='low';
+    if (severity==='few') risk=rule.base==='high'?'medium':'low';
+    else if (severity==='moderate') risk=rule.base==='low'?'medium':rule.base;
+    else risk='high';
+    const riskLabels=ar?{low:'منخفض',medium:'متوسط',high:'مرتفع'}:{low:'Low',medium:'Moderate',high:'High'};
+    addRisk((ar?'مستوى الخطر: ':'Risk level: ')+riskLabels[risk],risk==='high'?'nabta-risk-high':risk==='medium'?'nabta-risk-medium':'nabta-risk-low');
+    addAdvisorBlock(result,ar?'الضرر المحتمل':'Potential plant damage',ar?rule.damageAr:rule.damageEn);
+    addAdvisorBlock(result,ar?'علامات تساعد على التأكد':'Signs to verify',ar?rule.signsAr:rule.signsEn);
+    addAdvisorList(result,ar?'المكافحة غير الكيميائية أولًا':'Non-chemical controls first',ar?rule.organicAr:rule.organicEn);
+    addAdvisorBlock(result,ar?'المكافحة الكيميائية عند الضرورة فقط':'Chemical option — only if necessary',ar?rule.chemicalAr:rule.chemicalEn);
+  }
+  const note=document.createElement('div'); note.className='nabta-advisor-note';
+  note.textContent=ar
+    ? 'لا توجد جرعة أو وصفة مبيد عامة صالحة لكل النباتات. تحقق من تسجيل المنتج وملصقه المحلي للمحصول والآفة، ومعدات الوقاية وفترة إعادة الدخول وفترة ما قبل الحصاد. لا ترش النحل أو النباتات المزهرة أثناء زيارة الملقحات.'
+    : 'There is no universal pesticide rate or recipe for all plants. Check local registration and the product label for the exact crop and pest, PPE, re-entry interval and pre-harvest interval. Never spray bees or flowering plants while pollinators are foraging.';
+  result.appendChild(note);
+}
+function resetNabtaAdvisor() {
+  el('nabta-advisor-insect').value='other';
+  el('nabta-advisor-plant').value='vegetable';
+  el('nabta-advisor-plant-name').value='';
+  el('nabta-advisor-severity').value='few';
+  nabtaAdvisorLatestConfidence=null;
+  nabtaAdvisorLatestLabel='';
+  const result=el('nabta-advisor-result');
+  result.textContent=t('Choose the insect, plant group and observed extent, then assess.','اختر الحشرة ومجموعة النبات وشدة الإصابة ثم اضغط تقييم.');
+}
+el('nabta-advisor-evaluate').addEventListener('click',assessNabtaInsectRisk);
+el('nabta-advisor-reset').addEventListener('click',resetNabtaAdvisor);
+
 /* ===== NABTA AI cloud dashboard =====
    Public read-only dashboard endpoints; the device upload token stays on the Raspberry Pi.
    Set the backend URL in the field below after deploying backend/.
@@ -576,6 +959,18 @@ function renderNabtaCloudDetection(item) {
     return;
   }
   const predictions = Array.isArray(item.predictions) ? item.predictions : [];
+  if (item.id && item.id !== nabtaLastDetectionId && predictions.length) {
+    const topPrediction = predictions[0];
+    const detectedName = topPrediction.class || topPrediction.class_name || topPrediction.label || '';
+    const select = el('nabta-advisor-insect');
+    const mapped = mapNabtaPestLabel(detectedName);
+    if (select && mapped) select.value = mapped;
+    nabtaAdvisorLatestConfidence = normalizedNabtaConfidence(topPrediction.confidence);
+    nabtaAdvisorLatestLabel = detectedName;
+  } else if (item.id && item.id !== nabtaLastDetectionId) {
+    nabtaAdvisorLatestConfidence = null;
+    nabtaAdvisorLatestLabel = '';
+  }
   const title = document.createElement('strong');
   title.textContent = predictions.length ? t('Model estimate — verify species','توقع النموذج — تحقّق من النوع') : t('No insect detected','لم يتم اكتشاف حشرة');
   nabtaLatestBox.appendChild(title);
@@ -712,6 +1107,7 @@ if (nabtaApiBase) {
   refreshNabtaCloud();
   nabtaPollTimer = setInterval(refreshNabtaCloud, 15000);
 }
+renderNabtaAdvisorTexts();
 
 /* notifications & initial */
 if('Notification' in window && Notification.permission==='default') Notification.requestPermission().catch(()=>{});
