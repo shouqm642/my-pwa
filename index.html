@@ -870,8 +870,8 @@ function assessNabtaInsectRisk() {
   const modelLabelMatchesSelection=Boolean(latestModelInsectKey) && latestModelInsectKey===selectedInsectKey;
   const confidenceWarning=modelLabelMatchesSelection && (confidence===null || confidence<0.60);
   const manualSelectionNotice=Boolean(nabtaAdvisorLatestLabel) && !modelLabelMatchesSelection;
-  const chemicalAdvice = confidenceWarning
-    ? (ar ? 'لن تظهر توصية كيميائية حتى يتم تأكيد نوع الحشرة؛ أعد التصوير أو أكد الهوية يدويًا أولًا.' : 'No chemical-control option is shown until the insect identity is confirmed. Retake the image or confirm the pest manually first.')
+  const chemicalAdvice = (confidenceWarning || manualSelectionNotice)
+    ? (ar ? 'لن تظهر توصية كيميائية لأن هوية الحشرة غير مؤكدة أو تختلف عن آخر تصنيف للنموذج. أكد النوع بصريًا أو أعد التصوير أولًا.' : 'No chemical-control option is shown because the insect identity is uncertain or conflicts with the latest model label. Confirm the insect visually or retake the image first.')
     : (ar ? rule.chemicalAr : rule.chemicalEn);
   const result=el('nabta-advisor-result');
   result.replaceChildren();
