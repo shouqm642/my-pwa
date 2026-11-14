@@ -1,6 +1,7 @@
 import json
 import os
 import secrets
+import tempfile
 import time
 import uuid
 from pathlib import Path
@@ -48,6 +49,78 @@ def require_device_token(value: str | None) -> None:
 def health() -> dict[str, str]:
     return {"status": "ok", "service": "NABTA AI"}
 
+
+
+PLANT_HEALTH_MODEL_ID = os.getenv("PLANT_HEALTH_MODEL_ID", "leaf-disease-detection-system/2")
+ROBOFLOW_API_KEY = os.getenv("ROBOFLOW_API_KEY", "")
+PLANT_IMAGE_MAX_BYTES = 4 * 1024 * 1024
+PLANT_ASSESSMENT_LIMIT = 5
+PLANT_ASSESSMENT_WINDOW = 60 * 60
+plant_assessment_requests: dict[str, list[float]] = {}
+
+
+def check_plant_assessment_rate_limit(client_key: str) -> None:
+    now = time.time()
+    recent = [stamp for stamp in plant_assessment_requests.get(client_key, []) if now - stamp < PLANT_ASSESSMENT_WINDOW]
+    if len(recent) >= PLANT_ASSESSMENT_LIMIT:
+        raise HTTPException(status_code=429, detail="Plant photo limit reached. Try again in one hour.")
+    recent.append(now)
+    plant_assessment_requests[client_key] = recent
+
+
+@app.post("/api/plant-assessment")
+async def assess_plant_photo(
+    request: Request,
+    image: UploadFile = File(...),
+    plant_name: str = Form(default=""),
+) -> dict[str, Any]:
+    if not ROBOFLOW_API_KEY:
+        raise HTTPException(status_code=503, detail="Plant analysis is not configured. Add ROBOFLOW_API_KEY to the Render service environment.")
+    if image.content_type not in {"image/jpeg", "image/png", "image/webp"}:
+        raise HTTPException(status_code=415, detail="Choose a JPEG, PNG, or WebP leaf photo.")
+    if len(plant_name) > 80:
+        raise HTTPException(status_code=400, detail="Plant name must be 80 characters or fewer.")
+    client_key = request.client.host if request.client else "unknown"
+    check_plant_assessment_rate_limit(client_key)
+    raw = await image.read(PLANT_IMAGE_MAX_BYTES + 1)
+    if not raw or len(raw) > PLANT_IMAGE_MAX_BYTES:
+        raise HTTPException(status_code=413, detail="Leaf photo must be no larger than 4 MB.")
+
+    suffix = {"image/jpeg": ".jpg", "image/png": ".png", "image/webp": ".webp"}[image.content_type]
+    temp_path = None
+    try:
+        from inference_sdk import InferenceConfiguration, InferenceHTTPClient
+        with tempfile.NamedTemporaryFile(prefix="nabta-plant-", suffix=suffix, delete=False) as temp_file:
+            temp_file.write(raw)
+            temp_path = temp_file.name
+        client = InferenceHTTPClient(api_url="https://serverless.roboflow.com", api_key=ROBOFLOW_API_KEY)
+        client.configure(InferenceConfiguration(api_key_transport="header"))
+        model_result = client.infer(temp_path, model_id=PLANT_HEALTH_MODEL_ID)
+        if not isinstance(model_result, dict):
+            raise RuntimeError("Unexpected model response")
+        predictions = model_result.get("predictions", [])
+        if not isinstance(predictions, list):
+            raise RuntimeError("Unexpected predictions format")
+        resolved = model_result.get("resolved_model") if isinstance(model_result.get("resolved_model"), dict) else {}
+        return {
+            "status": "analysed",
+            "timestamp": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
+            "plant_name": plant_name.strip(),
+            "model_id": resolved.get("model_id") or PLANT_HEALTH_MODEL_ID,
+            "predictions": predictions,
+            "image": model_result.get("image") if isinstance(model_result.get("image"), dict) else {},
+            "note": "Model screening result only; not a confirmed diagnosis."
+        }
+    except HTTPException:
+        raise
+    except Exception:
+        raise HTTPException(status_code=502, detail="Plant analysis could not be completed. Check the model configuration and try a clear leaf photo.")
+    finally:
+        if temp_path:
+            try:
+                Path(temp_path).unlink(missing_ok=True)
+            except OSError:
+                pass
 
 # Read-only dashboard endpoints are public. Never include private keys or personal data here.
 @app.get("/api/latest")

@@ -11,3 +11,7 @@ services:
         generateValue: true
       - key: ALLOWED_ORIGINS
         value: https://shouqm642.github.io
+      - key: ROBOFLOW_API_KEY
+        sync: false
+      - key: PLANT_HEALTH_MODEL_ID
+        value: leaf-disease-detection-system/2
