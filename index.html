@@ -245,6 +245,14 @@
               <div class="small">Choose the insect, plant group and observed extent, then assess.</div>
             </div>
             <div class="nabta-advisor-note" id="nabta-advisor-disclaimer">This is general decision support, not a confirmed diagnosis. Never apply a pesticide unless its current UAE registration and label cover the exact crop/site and target pest. Follow all label directions, PPE, re-entry and pre-harvest intervals.</div>
+            <div class="nabta-advisor-note"><strong id="nabta-advisor-sources-label">Guidance sources:</strong>
+              <a href="https://ipm.ucanr.edu/home-and-landscape/aphids/" target="_blank" rel="noopener noreferrer">Aphids</a> ·
+              <a href="https://ipm.ucanr.edu/home-and-landscape/whiteflies/" target="_blank" rel="noopener noreferrer">Whiteflies</a> ·
+              <a href="https://ipm.ucanr.edu/home-and-landscape/spider-mites/" target="_blank" rel="noopener noreferrer">Spider mites</a> ·
+              <a href="https://ipm.ucanr.edu/home-and-landscape/mealybugs/" target="_blank" rel="noopener noreferrer">Mealybugs</a> ·
+              <a href="https://ipm.ucanr.edu/home-and-landscape/less-toxic-insecticides/" target="_blank" rel="noopener noreferrer">Less-toxic options</a> ·
+              <a href="https://moccae.gov.ae/" target="_blank" rel="noopener noreferrer">UAE MOCCAE</a>
+            </div>
           </section>
 
           <div class="card">
@@ -823,7 +831,8 @@ function renderNabtaAdvisorTexts() {
     'nabta-advisor-severity-label': ar ? 'شدة الإصابة الملحوظة' : 'Observed infestation',
     'nabta-advisor-evaluate': ar ? 'تقييم الخطر والعلاج' : 'Assess risk & treatment',
     'nabta-advisor-reset': ar ? 'إعادة ضبط' : 'Reset',
-    'nabta-advisor-disclaimer': ar ? 'هذه إرشادات عامة وليست تشخيصًا مؤكدًا. لا تستخدم مبيدًا إلا إذا كان تسجيله الحالي في الإمارات وملصقه يشملان المحصول/الموقع والآفة المحددين. اتبع تعليمات الملصق ومعدات الوقاية وفترات إعادة الدخول وما قبل الحصاد.' : 'This is general decision support, not a confirmed diagnosis. Never apply a pesticide unless its current UAE registration and label cover the exact crop/site and target pest. Follow all label directions, PPE, re-entry and pre-harvest intervals.'
+    'nabta-advisor-disclaimer': ar ? 'هذه إرشادات عامة وليست تشخيصًا مؤكدًا. لا تستخدم مبيدًا إلا إذا كان تسجيله الحالي في الإمارات وملصقه يشملان المحصول/الموقع والآفة المحددين. اتبع تعليمات الملصق ومعدات الوقاية وفترات إعادة الدخول وما قبل الحصاد.' : 'This is general decision support, not a confirmed diagnosis. Never apply a pesticide unless its current UAE registration and label cover the exact crop/site and target pest. Follow all label directions, PPE, re-entry and pre-harvest intervals.',
+    'nabta-advisor-sources-label': ar ? 'مصادر الإرشاد:' : 'Guidance sources:'
   };
   Object.entries(texts).forEach(([id,value]) => { const node=el(id); if(node) node.textContent=value; });
   const insect=el('nabta-advisor-insect'), plant=el('nabta-advisor-plant'), severity=el('nabta-advisor-severity');
@@ -902,9 +911,12 @@ function assessNabtaInsectRisk() {
     addAdvisorBlock(result,ar?'المكافحة الكيميائية عند الضرورة فقط':'Chemical option — only if necessary',ar?rule.chemicalAr:rule.chemicalEn);
   }
   const note=document.createElement('div'); note.className='nabta-advisor-note';
+  const cropCaution = ['vegetable','fruit','herb','field_crop'].includes(plantGroup)
+    ? (ar ? ' للمحاصيل الغذائية، تحقّق أيضًا من فترة ما قبل الحصاد وفترة إعادة الدخول على الملصق.' : ' For food crops, also check the label pre-harvest interval and re-entry interval.')
+    : '';
   note.textContent=ar
-    ? 'لا توجد جرعة أو وصفة مبيد عامة صالحة لكل النباتات. تحقق من تسجيل المنتج وملصقه المحلي للمحصول والآفة، ومعدات الوقاية وفترة إعادة الدخول وفترة ما قبل الحصاد. لا ترش النحل أو النباتات المزهرة أثناء زيارة الملقحات.'
-    : 'There is no universal pesticide rate or recipe for all plants. Check local registration and the product label for the exact crop and pest, PPE, re-entry interval and pre-harvest interval. Never spray bees or flowering plants while pollinators are foraging.';
+    ? 'لا توجد جرعة أو وصفة مبيد عامة صالحة لكل النباتات. تحقق من تسجيل المنتج وملصقه المحلي للمحصول والآفة، ومعدات الوقاية وفترة إعادة الدخول وفترة ما قبل الحصاد. لا ترش النحل أو النباتات المزهرة أثناء زيارة الملقحات.' + cropCaution
+    : 'There is no universal pesticide rate or recipe for all plants. Check local registration and the product label for the exact crop and pest, PPE, re-entry interval and pre-harvest interval. Never spray bees or flowering plants while pollinators are foraging.' + cropCaution;
   result.appendChild(note);
 }
 function resetNabtaAdvisor() {

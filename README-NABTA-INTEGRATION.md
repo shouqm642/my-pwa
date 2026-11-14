@@ -94,3 +94,11 @@ By default it captures and uploads 5 photos, 60 seconds apart. You can choose a 
 The PWA reads up to 10 recent test submissions from `GET /api/history` and displays the model ID recorded by Roboflow. To compare candidate models fairly, upload the same test image separately with each model ID set via `ROBOFLOW_MODEL_ID` on the Raspberry Pi. This is a manual comparison workflow; the system does not automatically fan out one image to multiple models or incur extra inference charges.
 
 The dashboard treats confidence below 60% (or missing confidence) as **Needs verification**. Scores at or above 60% are still shown as **Model estimate — verify species**; a confidence score is not proof that the species label is correct. Low-confidence outputs are not sent as pest alerts and do not generate treatment suggestions.
+
+## 6. Insect risk and treatment advisor
+
+The PWA includes a bilingual, rule-based IPM advisor. It combines the latest model label (when it matches a supported pest), plant group/name selected by the user, and observed infestation extent to show a preliminary plant-risk level and practical control steps. Beneficial/neutral insects (for example lady beetles, dragonflies and honeybees) are not treated as plant pests. Low-confidence model results are flagged for verification and should not drive pesticide selection.
+
+The advisor is general decision support, not a species- or crop-specific diagnosis. Its chemical-control guidance is intentionally non-prescriptive: it does not provide a dose or product recommendation. Use only a pesticide currently registered in the UAE whose label explicitly covers the exact crop/site and target pest; follow PPE, re-entry and pre-harvest intervals. This is especially important for food crops and pollinators.
+
+Guidance sources shown in the app include UC IPM aphid, whitefly, spider-mite, mealybug and less-toxic-insecticide guidance, plus the UAE Ministry of Climate Change and Environment website.
