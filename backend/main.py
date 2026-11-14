@@ -1,5 +1,7 @@
 import json
+import logging
 import os
+import re
 import secrets
 import tempfile
 import time
@@ -17,6 +19,7 @@ MAX_IMAGE_BYTES = 8 * 1024 * 1024
 DEVICE_TOKEN = os.getenv("NABTA_DEVICE_TOKEN", "")
 
 app = FastAPI(title="NABTA AI API", version="1.0.0")
+logger = logging.getLogger("nabta.plant_assessment")
 allowed_origins = [
     item.strip()
     for item in os.getenv(
@@ -89,12 +92,15 @@ async def assess_plant_photo(
     suffix = {"image/jpeg": ".jpg", "image/png": ".png", "image/webp": ".webp"}[image.content_type]
     temp_path = None
     try:
-        from inference_sdk import InferenceConfiguration, InferenceHTTPClient
+        from inference_sdk import InferenceHTTPClient
         with tempfile.NamedTemporaryFile(prefix="nabta-plant-", suffix=suffix, delete=False) as temp_file:
             temp_file.write(raw)
             temp_path = temp_file.name
-        client = InferenceHTTPClient(api_url="https://serverless.roboflow.com", api_key=ROBOFLOW_API_KEY)
-        client.configure(InferenceConfiguration(api_key_transport="header"))
+        # Match the exact Python snippet published on this Roboflow model page.
+        client = InferenceHTTPClient(
+            api_url="https://serverless.roboflow.com",
+            api_key=ROBOFLOW_API_KEY,
+        )
         model_result = client.infer(temp_path, model_id=PLANT_HEALTH_MODEL_ID)
         if not isinstance(model_result, dict):
             raise RuntimeError("Unexpected model response")
@@ -113,8 +119,29 @@ async def assess_plant_photo(
         }
     except HTTPException:
         raise
-    except Exception:
-        raise HTTPException(status_code=502, detail="Plant analysis could not be completed. Check the model configuration and try a clear leaf photo.")
+    except Exception as exc:
+        # Keep credentials out of Render logs and API responses while making the real
+        # upstream failure category visible for troubleshooting.
+        error_text = str(exc)
+        if ROBOFLOW_API_KEY:
+            error_text = error_text.replace(ROBOFLOW_API_KEY, "[REDACTED]")
+        error_text = re.sub(r"(?i)(api[_-]?key[=:\\s]+)[^&\\s,]+", r"\\1[REDACTED]", error_text)
+        logger.error(
+            "Plant assessment failed: error_type=%s model_id=%s detail=%s",
+            type(exc).__name__,
+            PLANT_HEALTH_MODEL_ID,
+            error_text[:800],
+        )
+        lower_error = error_text.lower()
+        if "401" in lower_error or "403" in lower_error or "unauthorized" in lower_error:
+            detail = "Roboflow rejected the API key or this model is not authorized for the account. Check the key in Render."
+        elif "404" in lower_error or "not found" in lower_error:
+            detail = "Roboflow could not find this model version. Check PLANT_HEALTH_MODEL_ID in Render."
+        elif "429" in lower_error or "rate limit" in lower_error or "quota" in lower_error:
+            detail = "Roboflow rate limit or usage quota reached. Check the Roboflow account usage."
+        else:
+            detail = "Roboflow inference failed. Open Render Logs for the Plant assessment error_type and detail."
+        raise HTTPException(status_code=502, detail=detail)
     finally:
         if temp_path:
             try:
