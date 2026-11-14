@@ -92,15 +92,17 @@ async def assess_plant_photo(
     suffix = {"image/jpeg": ".jpg", "image/png": ".png", "image/webp": ".webp"}[image.content_type]
     temp_path = None
     try:
-        from inference_sdk import InferenceHTTPClient
+        from inference_sdk import InferenceConfiguration, InferenceHTTPClient
         with tempfile.NamedTemporaryFile(prefix="nabta-plant-", suffix=suffix, delete=False) as temp_file:
             temp_file.write(raw)
             temp_path = temp_file.name
-        # Match the exact Python snippet published on this Roboflow model page.
+        # The Roboflow model's published example recommends Bearer-header API-key transport.
         client = InferenceHTTPClient(
             api_url="https://serverless.roboflow.com",
             api_key=ROBOFLOW_API_KEY,
-        )
+        ).configure(InferenceConfiguration(
+            api_key_transport="header",
+        ))
         model_result = client.infer(temp_path, model_id=PLANT_HEALTH_MODEL_ID)
         if not isinstance(model_result, dict):
             raise RuntimeError("Unexpected model response")
