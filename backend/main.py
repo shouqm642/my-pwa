@@ -158,6 +158,109 @@ async def assess_plant_photo(
             except OSError:
                 pass
 
+
+INSECT_MODEL_ID = os.getenv("INSECT_MODEL_ID", "insect-detection-wfwbv/2")
+
+
+def run_roboflow_image(raw: bytes, content_type: str, model_id: str, prefix: str) -> dict[str, Any]:
+    """Run one Roboflow model on an uploaded image; the API key stays server-side."""
+    from inference_sdk import InferenceConfiguration, InferenceHTTPClient
+
+    suffix = {"image/jpeg": ".jpg", "image/png": ".png", "image/webp": ".webp"}[content_type]
+    temp_path = None
+    try:
+        with tempfile.NamedTemporaryFile(prefix=prefix, suffix=suffix, delete=False) as temp_file:
+            temp_file.write(raw)
+            temp_path = temp_file.name
+        client = InferenceHTTPClient(
+            api_url="https://serverless.roboflow.com",
+            api_key=ROBOFLOW_API_KEY,
+        ).configure(InferenceConfiguration(api_key_transport="header"))
+        result = client.infer(temp_path, model_id=model_id)
+        if not isinstance(result, dict) or not isinstance(result.get("predictions", []), list):
+            raise RuntimeError("Unexpected Roboflow response")
+        return result
+    finally:
+        if temp_path:
+            try:
+                Path(temp_path).unlink(missing_ok=True)
+            except OSError:
+                pass
+
+
+@app.post("/api/smart-diagnosis")
+async def smart_plant_diagnosis(
+    request: Request,
+    leaf_image: UploadFile = File(...),
+    insect_image: UploadFile | None = File(default=None),
+    plant_name: str = Form(default=""),
+    severity: str = Form(default="few"),
+) -> dict[str, Any]:
+    """Cross-check insect photo and leaf symptoms. Outputs model evidence, not a diagnosis."""
+    if not ROBOFLOW_API_KEY:
+        raise HTTPException(status_code=503, detail="Plant analysis is not configured. Add ROBOFLOW_API_KEY to the Render service environment.")
+    valid_types = {"image/jpeg", "image/png", "image/webp"}
+    if leaf_image.content_type not in valid_types:
+        raise HTTPException(status_code=415, detail="Leaf photo must be JPEG, PNG, or WebP.")
+    if insect_image and insect_image.content_type not in valid_types:
+        raise HTTPException(status_code=415, detail="Insect photo must be JPEG, PNG, or WebP.")
+    if len(plant_name) > 80:
+        raise HTTPException(status_code=400, detail="Plant name must be 80 characters or fewer.")
+    if severity not in {"few", "moderate", "severe"}:
+        raise HTTPException(status_code=400, detail="Invalid observed severity.")
+    client_key = request.client.host if request.client else "unknown"
+    check_plant_assessment_rate_limit(client_key)
+    leaf_raw = await leaf_image.read(PLANT_IMAGE_MAX_BYTES + 1)
+    if not leaf_raw or len(leaf_raw) > PLANT_IMAGE_MAX_BYTES:
+        raise HTTPException(status_code=413, detail="Leaf photo must be no larger than 4 MB.")
+    insect_raw = None
+    if insect_image:
+        insect_raw = await insect_image.read(PLANT_IMAGE_MAX_BYTES + 1)
+        if not insect_raw or len(insect_raw) > PLANT_IMAGE_MAX_BYTES:
+            raise HTTPException(status_code=413, detail="Insect photo must be no larger than 4 MB.")
+    try:
+        leaf_result = run_roboflow_image(leaf_raw, leaf_image.content_type, PLANT_HEALTH_MODEL_ID, "nabta-leaf-")
+        insect_result = None
+        if insect_raw is not None and insect_image is not None:
+            insect_result = run_roboflow_image(insect_raw, insect_image.content_type, INSECT_MODEL_ID, "nabta-insect-")
+        leaf_resolved = leaf_result.get("resolved_model") if isinstance(leaf_result.get("resolved_model"), dict) else {}
+        insect_resolved = (insect_result or {}).get("resolved_model") if isinstance((insect_result or {}).get("resolved_model"), dict) else {}
+        return {
+            "status": "analysed",
+            "timestamp": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
+            "plant_name": plant_name.strip(),
+            "severity": severity,
+            "leaf_model_id": leaf_resolved.get("model_id") or PLANT_HEALTH_MODEL_ID,
+            "leaf_predictions": leaf_result.get("predictions", []),
+            "insect_model_id": (insect_resolved.get("model_id") or INSECT_MODEL_ID) if insect_result else None,
+            "insect_predictions": (insect_result or {}).get("predictions", []) if insect_result else [],
+            "insect_photo_supplied": insect_result is not None,
+            "note": "Two independent model outputs are evidence only. They do not prove that the detected insect caused the leaf symptom."
+        }
+    except HTTPException:
+        raise
+    except Exception as exc:
+        error_text = str(exc)
+        if ROBOFLOW_API_KEY:
+            error_text = error_text.replace(ROBOFLOW_API_KEY, "[REDACTED]")
+        error_text = re.sub(r"(?i)(api[_-]?key[=:\\s]+)[^&\\s,]+", r"\\1[REDACTED]", error_text)
+        logger.error(
+            "Smart diagnosis failed: error_type=%s leaf_model=%s insect_model=%s detail=%s",
+            type(exc).__name__, PLANT_HEALTH_MODEL_ID, INSECT_MODEL_ID, error_text[:800]
+        )
+        lower = error_text.lower()
+        if "401" in lower or "notauthorized" in type(exc).__name__.lower() or "unauthorized" in lower:
+            detail = "Roboflow returned 401: check the Render inference API key."
+        elif "403" in lower or "forbidden" in type(exc).__name__.lower():
+            detail = "Roboflow returned 403: this key/workspace cannot access one of the selected models."
+        elif "429" in lower or "rate limit" in lower:
+            detail = "Roboflow rate limit reached. Try later."
+        elif "404" in lower or "not found" in lower:
+            detail = "A model version was not found. Check PLANT_HEALTH_MODEL_ID and INSECT_MODEL_ID in Render."
+        else:
+            detail = "Smart diagnosis failed. Check the redacted Smart diagnosis failure in Render Logs."
+        raise HTTPException(status_code=502, detail=detail)
+
 # Read-only dashboard endpoints are public. Never include private keys or personal data here.
 @app.get("/api/latest")
 def latest() -> dict[str, Any]:

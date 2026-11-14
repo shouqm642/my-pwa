@@ -110,3 +110,9 @@ The PWA includes a leaf photo screening card. It posts a JPEG, PNG or WebP image
 **Required Render setup:** add `ROBOFLOW_API_KEY` as a secret environment variable on the `nabta-ai-api` service. The Blueprint declares this value as `sync: false`; it must be supplied in Render's Environment settings. Do not put the key in GitHub, the PWA, screenshots or chat. Rotate any key previously exposed in a screenshot before reuse. The endpoint allows five photo checks per IP per hour in this in-memory prototype.
 
 The selected model reports 37 classes for selected crops (including tomato, potato, apple, grape, pepper and corn); it does not cover every plant species. No detection is not proof of health, and a "healthy" class does not rule out all conditions. The app describes outputs as preliminary screening only. Chemical or fungicide choices must be independently confirmed against current UAE registration and the exact product label.
+
+## 9. Combined smart plant diagnosis
+
+The PWA can submit a leaf photo plus an optional insect photo, plant name and observed severity to `POST /api/smart-diagnosis`. The backend runs the leaf model (`PLANT_HEALTH_MODEL_ID`) and, when supplied, the insect model (`INSECT_MODEL_ID`) independently. The response clearly separates both predictions and warns that co-occurrence does not prove causation. Photos are processed in temporary files and deleted after inference; neither image is added to the public insect-detection history.
+
+The endpoint allows five combined checks per IP per hour, with a maximum of 4 MB for each image. Both models use the same Render-side `ROBOFLOW_API_KEY`. Default insect model: `insect-detection-wfwbv/2`. Outputs are screening evidence only; low confidence or a crop mismatch must pause treatment advice.
