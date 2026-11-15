@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>Green Guardian — Smart Plant Robot (AI)</title>
+<title>NABTA AI — Smart Plant Guardian</title>
 <meta name="theme-color" content="#0b3f1a" />
 <style>
   :root{
@@ -82,6 +82,7 @@
   .nabta-demo-top{display:flex;align-items:flex-start;justify-content:space-between;gap:14px;flex-wrap:wrap}
   .nabta-demo-kicker{display:inline-flex;align-items:center;gap:7px;border:1px solid rgba(164,240,178,.35);background:rgba(115,205,132,.12);color:#caffd3;border-radius:999px;padding:5px 10px;font-size:11px;font-weight:800;letter-spacing:.05em}
   .nabta-demo-title{font-size:20px;font-weight:850;color:#f1fff2;margin:8px 0 4px}
+  .nabta-demo-active #demo-toggle{background:#2e8b3a;border-color:#78d58b;color:#fff}
   .nabta-demo-subtitle{font-size:13px;color:#c2e8c9;max-width:780px;line-height:1.5}
   .nabta-demo-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin-top:16px}
   .nabta-demo-tile{min-width:0;border:1px solid rgba(180,240,190,.16);background:rgba(0,0,0,.2);border-radius:12px;padding:12px}
@@ -104,7 +105,7 @@
   <div class="container" id="app-root" dir="ltr">
     <header>
       <div style="display:flex;align-items:center;gap:12px">
-        <div class="brand"><svg width="28" height="28" viewBox="0 0 24 24" fill="none"><path d="M12 2c2.8 0 5 2 6 4-1.6.2-3.5 1-5 2-1.4 1-2.5 2.5-3 4-.5-1.5-1.6-3-3-4-1.4-1-3.4-1.8-5-2 1-2 3.2-4 6-4z" fill="#9feab0"/></svg><strong id="brand-text">Green Guardian AI</strong></div>
+        <div class="brand"><svg width="28" height="28" viewBox="0 0 24 24" fill="none"><path d="M12 2c2.8 0 5 2 6 4-1.6.2-3.5 1-5 2-1.4 1-2.5 2.5-3 4-.5-1.5-1.6-3-3-4-1.4-1-3.4-1.8-5-2 1-2 3.2-4 6-4z" fill="#9feab0"/></svg><strong id="brand-text">NABTA AI</strong></div>
       </div>
 
       <div style="display:flex;align-items:center;gap:12px">
@@ -143,7 +144,7 @@
         </article>
         <article class="nabta-demo-tile">
           <h3 id="demo-leaf-title">02 · Plant leaf screening test</h3>
-          <div style="height:138px;border-radius:8px;background:linear-gradient(145deg,#164c29,#0b2817);display:grid;place-items:center;font-size:54px;margin-bottom:9px" aria-hidden="true">🍅</div>
+          <img class="nabta-demo-photo" src="./assets/tomato-lateblight-test.jpg" alt="Tomato leaf photo used in a previous NABTA plant screening example">
           <div class="nabta-demo-copy" id="demo-leaf-label">Entered crop: Tomato</div>
           <div class="nabta-demo-score">68%</div>
           <span class="nabta-demo-tag warn" id="demo-leaf-tag">Preliminary model signal</span>
@@ -160,11 +161,12 @@
       </div>
       <div class="nabta-demo-actions">
         <button id="demo-load-advisor" class="btn" type="button">Load Aphid + Tomato advisor example</button>
+        <button id="demo-show-dashboard" class="btn secondary" type="button">Open live dashboard</button>
       </div>
       <div class="nabta-demo-separation" id="demo-separation">Presentation note: the camera, leaf-screening and advisor cards are separate previously tested examples. They are not evidence that the ladybug caused the tomato leaf symptoms.</div>
     </section>
 
-    <main>
+    <main id="live-dashboard">
       <div class="grid-2">
         <div>
           <section class="grid-3">
@@ -403,7 +405,7 @@
       </div>
     </main>
 
-    <footer>Green Guardian • AI-enhanced PWA</footer>
+    <footer>NABTA AI • Smart Plant Guardian</footer>
   </div>
 
 <script>
@@ -757,11 +759,17 @@ function renderNabtaDemoTexts() {
 function openNabtaDemo() {
   const panel = el('nabta-demo-panel');
   panel.hidden = false;
+  document.body.classList.add('nabta-demo-active');
   renderNabtaDemoTexts();
   panel.scrollIntoView({ behavior: 'smooth', block: 'start' });
 }
 function closeNabtaDemo() {
   el('nabta-demo-panel').hidden = true;
+  document.body.classList.remove('nabta-demo-active');
+}
+function showNabtaLiveDashboard() {
+  closeNabtaDemo();
+  el('live-dashboard').scrollIntoView({ behavior: 'smooth', block: 'start' });
 }
 function loadNabtaDemoAdvisor() {
   el('nabta-advisor-insect').value = 'aphid';
@@ -776,6 +784,7 @@ function loadNabtaDemoAdvisor() {
 el('demo-toggle').addEventListener('click', openNabtaDemo);
 el('demo-close').addEventListener('click', closeNabtaDemo);
 el('demo-load-advisor').addEventListener('click', loadNabtaDemoAdvisor);
+el('demo-show-dashboard').addEventListener('click', showNabtaLiveDashboard);
 
 /* ===== NABTA insect risk and treatment advisor =====
    Cautious, rule-based integrated pest management guidance.
@@ -1595,6 +1604,7 @@ renderNabtaAdvisorTexts();
 /* notifications & initial */
 if('Notification' in window && Notification.permission==='default') Notification.requestPermission().catch(()=>{});
 setLang(lang); updateUI({}); renderDetections();
+if (new URLSearchParams(window.location.search).get('demo') === '1') openNabtaDemo();
 
 /* Export for debugging */
 window._GG = { parseRobotMessage, detections, last, sendCommandToRobot };
