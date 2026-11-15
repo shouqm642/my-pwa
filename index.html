@@ -87,7 +87,8 @@
   .nabta-demo-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin-top:16px}
   .nabta-demo-tile{min-width:0;border:1px solid rgba(180,240,190,.16);background:rgba(0,0,0,.2);border-radius:12px;padding:12px}
   .nabta-demo-tile h3{font-size:14px;color:#c5ffd0;margin:0 0 9px}
-  .nabta-demo-photo{width:100%;height:138px;object-fit:cover;border-radius:8px;background:#03190b;margin-bottom:9px}
+  .nabta-demo-photo{width:100%;height:138px;object-fit:cover;border-radius:8px;background:#123c24;margin-bottom:9px;display:block}
+  .nabta-demo-image-fallback{height:138px;border-radius:8px;background:linear-gradient(135deg,#164d2b,#082313);display:none;place-items:center;color:#c5f2ce;font-size:13px;text-align:center;padding:12px;box-sizing:border-box;margin-bottom:9px}
   .nabta-demo-score{font-size:28px;font-weight:900;line-height:1.1;color:#a7f4b7;margin:5px 0}
   .nabta-demo-tag{display:inline-block;padding:4px 8px;border-radius:99px;background:rgba(92,190,111,.14);color:#caffd3;font-size:11px;font-weight:800;margin-top:6px}
   .nabta-demo-tag.warn{background:rgba(230,180,60,.14);color:#ffe4a4}
@@ -136,19 +137,23 @@
       <div class="nabta-demo-grid">
         <article class="nabta-demo-tile">
           <h3 id="demo-camera-title">01 · Raspberry Pi camera test</h3>
-          <img class="nabta-demo-photo" src="https://nabta-ai-api.onrender.com/uploads/1794755381-56c8c95f2d.jpg" alt="Previously uploaded Raspberry Pi camera sample showing a ladybug">
+          <img class="nabta-demo-photo" src="https://upload.wikimedia.org/wikipedia/commons/thumb/4/4c/Ladybug_on_leaf.jpg/960px-Ladybug_on_leaf.jpg" alt="Reference photograph of a ladybug standing on a leaf" data-fallback="demo-camera-fallback">
+          <div id="demo-camera-fallback" class="nabta-demo-image-fallback" aria-hidden="true">🐞<br>Ladybug reference photo</div>
           <div class="nabta-demo-copy" id="demo-camera-label">Insect model estimate · Ladybug</div>
+          <div class="nabta-demo-copy" style="font-size:10px;color:#a9cdb1">Reference photo: WikipediaNeko · <a href="https://commons.wikimedia.org/wiki/File:Ladybug_on_leaf.jpg" target="_blank" rel="noopener noreferrer" style="color:#baf5c4">CC BY-SA 4.0</a></div>
           <div class="nabta-demo-score">96%</div>
           <span class="nabta-demo-tag" id="demo-camera-tag">Previously received by NABTA API</span>
-          <p class="nabta-demo-copy" id="demo-camera-note">Historical Raspberry Pi upload, 15 Nov 2026. The insect model does not identify the host plant.</p>
+          <p class="nabta-demo-copy" id="demo-camera-note">Historical Raspberry Pi test, 15 Nov 2026: 96% Ladybug. This reference photo is illustrative and is not confirmed to be the exact scored camera frame. The insect model does not identify the host plant.</p>
         </article>
         <article class="nabta-demo-tile">
           <h3 id="demo-leaf-title">02 · Plant leaf screening test</h3>
-          <img class="nabta-demo-photo" src="./assets/tomato-lateblight-test.jpg" alt="Tomato leaf photo used in a previous NABTA plant screening example">
+          <img class="nabta-demo-photo" src="https://upload.wikimedia.org/wikipedia/commons/thumb/1/10/Phytophthora_infestans_%28late_blight%29_on_tomato.jpg/960px-Phytophthora_infestans_%28late_blight%29_on_tomato.jpg" alt="Reference photograph showing severe late blight symptoms on tomato" data-fallback="demo-leaf-fallback">
+          <div id="demo-leaf-fallback" class="nabta-demo-image-fallback" aria-hidden="true">🍅<br>Tomato leaf reference photo</div>
           <div class="nabta-demo-copy" id="demo-leaf-label">Entered crop: Tomato</div>
+          <div class="nabta-demo-copy" style="font-size:10px;color:#a9cdb1">Photo: Mary Ann Hansen / Bugwood.org · <a href="https://commons.wikimedia.org/wiki/File:Phytophthora_infestans_(late_blight)_on_tomato.jpg" target="_blank" rel="noopener noreferrer" style="color:#baf5c4">CC BY 3.0 US</a></div>
           <div class="nabta-demo-score">68%</div>
           <span class="nabta-demo-tag warn" id="demo-leaf-tag">Preliminary model signal</span>
-          <p class="nabta-demo-copy" id="demo-leaf-note">Previous reference-image test: Tomato___Late_blight. Screening only; confirm symptoms and crop before acting.</p>
+          <p class="nabta-demo-copy" id="demo-leaf-note">Previous screening test on a separate reference image: Tomato___Late_blight · 68%. The photo shown here is an illustrative reference, not the confirmed original inference input. Screening only; confirm symptoms and crop before acting.</p>
         </article>
         <article class="nabta-demo-tile">
           <h3 id="demo-advisor-title">03 · Risk & treatment example</h3>
@@ -732,6 +737,15 @@ langEnBtn.addEventListener('click', ()=>setLang('en')); langArBtn.addEventListen
 */
 function renderNabtaDemoTexts() {
   const ar = lang === 'ar';
+  document.querySelectorAll('.nabta-demo-photo').forEach(img => {
+    if (img.dataset.fallbackBound) return;
+    img.dataset.fallbackBound = '1';
+    img.addEventListener('error', () => {
+      img.style.display = 'none';
+      const fallback = document.getElementById(img.dataset.fallback);
+      if (fallback) fallback.style.display = 'grid';
+    }, { once: true });
+  });
   const values = {
     'demo-toggle': ar ? 'وضع العرض' : 'Presentation Demo',
     'demo-kicker': ar ? '● وضع العرض · سجلات تجريبية' : '● PRESENTATION MODE · SAMPLE RECORDS',
