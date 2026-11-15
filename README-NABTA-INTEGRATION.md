@@ -74,7 +74,7 @@ The original Bluetooth controls remain available and unchanged.
 
 ## Prototype limitations
 
-- The current model ID defaults to `insects-mytwu/1`; it only recognizes labels it was trained for. A high confidence score is not proof that the insect species is correct.
+- The Raspberry Pi publisher defaults to `insect-detection-wfwbv/2`, matching the combined smart-diagnosis endpoint. Set `ROBOFLOW_MODEL_ID` in `~/.nabta-secrets` only when intentionally testing a different insect model. It only recognizes labels it was trained for. A high confidence score is not proof that the insect species is correct.
 - The web dashboard displays results produced by the Raspberry Pi script; it does not yet trigger the robot to move or capture automatically.
 - The Pi still needs an internet-connected network to call Roboflow and the backend.
 

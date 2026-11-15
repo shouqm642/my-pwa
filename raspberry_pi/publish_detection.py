@@ -7,14 +7,15 @@ Required environment variables (load from ~/.nabta-secrets):
   NABTA_API_URL  Public HTTPS URL of the deployed FastAPI service
 """
 import json
+import mimetypes
 import os
 import sys
 from pathlib import Path
 
 import requests
-from inference_sdk import InferenceHTTPClient
+from inference_sdk import InferenceConfiguration, InferenceHTTPClient
 
-MODEL_ID = os.getenv("ROBOFLOW_MODEL_ID", "insects-mytwu/1")
+MODEL_ID = os.getenv("ROBOFLOW_MODEL_ID", "insect-detection-wfwbv/2")
 API_URL = os.getenv("NABTA_API_URL", "").rstrip("/")
 IMAGE_PATH = Path(sys.argv[1]) if len(sys.argv) > 1 else Path("nabta_test.jpg")
 
@@ -39,16 +40,21 @@ def main() -> int:
     client = InferenceHTTPClient(
         api_url="https://serverless.roboflow.com",
         api_key=roboflow_key,
-    )
+    ).configure(InferenceConfiguration(api_key_transport="header"))
     result = client.infer(str(IMAGE_PATH), model_id=MODEL_ID)
     print(json.dumps(result, indent=2))
+
+    content_type, _ = mimetypes.guess_type(IMAGE_PATH.name)
+    if content_type not in {"image/jpeg", "image/png", "image/webp"}:
+        print("Image must be JPEG, PNG, or WebP.")
+        return 2
 
     with IMAGE_PATH.open("rb") as image_file:
         response = requests.post(
             f"{API_URL}/api/detections",
             headers={"X-Device-Token": device_token},
             data={"payload": json.dumps(result)},
-            files={"image": (IMAGE_PATH.name, image_file, "image/jpeg")},
+            files={"image": (IMAGE_PATH.name, image_file, content_type)},
             timeout=60,
         )
     response.raise_for_status()
