@@ -1101,7 +1101,7 @@ function renderSmartDiagnosis(data){
   const enteredCrop=normalizeNabtaCropName(plant);
   const modelCrop=leafLabel?cropFromModelClass(leafLabel):'';
   const mismatch=Boolean(enteredCrop&&modelCrop&&enteredCrop!==modelCrop);
-  const unknownCrop=Boolean(plant&&!enteredCrop&&modelCrop);
+  const unknownCrop=Boolean(plant&&!enteredCrop);
   const weakLeaf=!leaf||leafConfidence===null||leafConfidence<.60;
   const weakInsect=Boolean(data.insect_photo_supplied&&(!insect||insectConfidence===null||insectConfidence<.60));
   const summary=document.createElement('div');summary.className='small';
@@ -1196,7 +1196,7 @@ function renderPlantDamageAssessment(data) {
   const modelCrop = cropFromModelClass(label);
   const expectedCrop = normalizeNabtaCropName(suppliedPlant);
   const cropMismatch = Boolean(expectedCrop && modelCrop && expectedCrop !== modelCrop);
-  const cropUnverified = Boolean(suppliedPlant && !expectedCrop && modelCrop);
+  const cropUnverified = Boolean(suppliedPlant && !expectedCrop);
   const status = document.createElement('span');
   status.className = 'status ' + (cropMismatch || cropUnverified || confidence === null || confidence < 0.60 ? 'warn' : advice.status);
   status.textContent = cropMismatch
