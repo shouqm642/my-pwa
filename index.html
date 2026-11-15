@@ -740,11 +740,13 @@ function renderNabtaDemoTexts() {
   document.querySelectorAll('.nabta-demo-photo').forEach(img => {
     if (img.dataset.fallbackBound) return;
     img.dataset.fallbackBound = '1';
-    img.addEventListener('error', () => {
+    const showFallback = () => {
       img.style.display = 'none';
       const fallback = document.getElementById(img.dataset.fallback);
       if (fallback) fallback.style.display = 'grid';
-    }, { once: true });
+    };
+    img.addEventListener('error', showFallback, { once: true });
+    if (img.complete && img.naturalWidth === 0) showFallback();
   });
   const values = {
     'demo-toggle': ar ? 'وضع العرض' : 'Presentation Demo',
