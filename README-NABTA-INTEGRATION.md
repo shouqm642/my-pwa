@@ -116,3 +116,9 @@ The selected model reports 37 classes for selected crops (including tomato, pota
 The PWA can submit a leaf photo plus an optional insect photo, plant name and observed severity to `POST /api/smart-diagnosis`. The backend runs the leaf model (`PLANT_HEALTH_MODEL_ID`) and, when supplied, the insect model (`INSECT_MODEL_ID`) independently. The response clearly separates both predictions and warns that co-occurrence does not prove causation. Photos are processed in temporary files and deleted after inference; neither image is added to the public insect-detection history.
 
 The endpoint allows five combined checks per IP per hour, with a maximum of 4 MB for each image. Both models use the same Render-side `ROBOFLOW_API_KEY`. Default insect model: `insect-detection-wfwbv/2`. Outputs are screening evidence only; low confidence or a crop mismatch must pause treatment advice.
+
+## 10. Combined smart plant diagnosis UI
+
+The dashboard has a combined check: enter the plant name and observed severity, upload a leaf photo, and optionally upload an insect photo. The browser posts these files to `POST /api/smart-diagnosis`; the backend runs the leaf-health model and, when an insect photo is attached, a separate insect model. The results are shown independently and crop labels are compared before any interpretation.
+
+Each uploaded file is limited to 4 MB, and the combined endpoint shares the five-checks-per-IP-per-hour in-memory prototype limit with the single-leaf endpoint. A combined check may use two Roboflow inferences. Co-detection is not proof that the insect caused the leaf symptom; crop conflicts or low confidence pause interpretation.

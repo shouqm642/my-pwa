@@ -72,6 +72,13 @@
   .nabta-plant-output .status.warn{background:rgba(230,180,60,.17);color:#ffe09a}
   .nabta-plant-output .status.bad{background:rgba(220,80,70,.18);color:#ffb5ae}
 
+  .nabta-smart-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:10px}
+  .nabta-smart-grid label{display:block;font-size:12px;color:var(--muted);margin-bottom:4px}
+  .nabta-smart-grid input,.nabta-smart-grid select{width:100%;box-sizing:border-box;padding:9px;border-radius:8px;border:1px solid rgba(255,255,255,.12);background:#082b16;color:#efffef}
+  .nabta-smart-results{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:10px}
+  .nabta-smart-result{padding:10px;border-radius:9px;background:rgba(0,0,0,.2);min-width:0;overflow-wrap:anywhere}
+  .nabta-smart-result h4{margin:0 0 8px;color:#b9ffc5}
+  @media(max-width:560px){.nabta-smart-grid,.nabta-smart-results{grid-template-columns:1fr}}
 </style>
 </head>
 <body>
@@ -298,6 +305,21 @@
             <div class="nabta-advisor-note" id="plant-damage-limit-note">This model covers selected crops (including tomato, potato, apple, grape, pepper and corn), not every plant species. A result is a screening aid, not a diagnosis. One image cannot prove a plant is disease-free.</div>
           </section>
 
+          <section class="card nabta-advisor-card" style="margin-top:12px">
+            <div class="nabta-cloud-head"><strong id="smart-diagnosis-title">🧠 NABTA AI · Smart Plant Diagnosis</strong><span class="nabta-cloud-status">Two-model check</span></div>
+            <div class="small" id="smart-diagnosis-intro">Submit a leaf photo and optionally an insect photo. NABTA runs the two models independently and cross-checks the crop label.</div>
+            <div class="nabta-smart-grid">
+              <div><label id="smart-plant-label" for="smart-plant-name">Plant name (required)</label><input id="smart-plant-name" type="text" maxlength="80" placeholder="e.g. tomato, potato, rose"></div>
+              <div><label id="smart-severity-label" for="smart-severity">Observed damage</label><select id="smart-severity"><option value="few">Few / limited</option><option value="moderate">Moderate / several leaves</option><option value="severe">Severe / widespread</option></select></div>
+              <div><label id="smart-leaf-label" for="smart-leaf-file">Leaf photo (required, max 4 MB)</label><input id="smart-leaf-file" type="file" class="nabta-plant-upload" accept="image/jpeg,image/png,image/webp"><img id="smart-leaf-preview" class="nabta-plant-preview" alt="Leaf photo preview"></div>
+              <div><label id="smart-insect-label" for="smart-insect-file">Insect photo (optional, max 4 MB)</label><input id="smart-insect-file" type="file" class="nabta-plant-upload" accept="image/jpeg,image/png,image/webp"><img id="smart-insect-preview" class="nabta-plant-preview" alt="Insect photo preview"></div>
+            </div>
+            <div class="nabta-cloud-actions"><button id="smart-diagnosis-run" class="btn" type="button">Run combined analysis</button><button id="smart-diagnosis-clear" class="btn secondary" type="button">Clear</button></div>
+            <div class="nabta-advisor-note" id="smart-diagnosis-cost-note">One leaf-model inference, plus one additional insect-model inference if you attach an insect photo. Each can use Roboflow workspace quota.</div>
+            <div id="smart-diagnosis-result" class="nabta-plant-output" aria-live="polite"><div class="small">No combined assessment yet.</div></div>
+            <div class="nabta-advisor-note" id="smart-diagnosis-safety">Independent model detections do not prove that the insect caused the leaf damage. Confirm crop and symptoms before acting.</div>
+          </section>
+
           <div class="card" style="margin-top:12px">
             <div style="display:flex;justify-content:space-between;align-items:center">
               <strong>Plant Health</strong>
@@ -385,6 +407,7 @@ function renderStaticTexts(){
   applySuggestBtn.textContent = lang==='ar' ? 'تطبيق الاقتراح' : 'Apply Suggestion';
   renderNabtaAdvisorTexts();
   renderPlantDamageTexts();
+  renderSmartDiagnosisTexts();
 }
 
 /* Notification helper */
@@ -1027,6 +1050,127 @@ function cropFromModelClass(label) {
   const crops=['tomato','potato','apple','grape','pepper','corn','strawberry','orange','citrus'];
   return crops.find(crop => normalized.startsWith(crop+' ') || normalized===crop) || '';
 }
+
+/* ===== Combined smart diagnosis ===== */
+const smartPreviewUrls={leaf:null,insect:null};
+function renderSmartDiagnosisTexts(){
+  const ar=lang==='ar';
+  const labels={
+    'smart-diagnosis-title':ar?'🧠 NABTA AI · التشخيص الذكي للنبات':'🧠 NABTA AI · Smart Plant Diagnosis',
+    'smart-diagnosis-intro':ar?'أدخل اسم النبات وارفع صورة الورقة، ويمكنك إضافة صورة الحشرة. يحلل النموذجان الصورتين بشكل مستقل ويتحقق التطبيق من توافق المحصول.':'Enter the plant name and upload a leaf photo; an insect photo is optional. The two models analyse images independently and the app cross-checks the crop.',
+    'smart-plant-label':ar?'اسم النبات (مطلوب)':'Plant name (required)',
+    'smart-severity-label':ar?'شدة الضرر الملحوظ':'Observed damage',
+    'smart-leaf-label':ar?'صورة الورقة (مطلوبة، 4 ميجابايت كحد أقصى)':'Leaf photo (required, max 4 MB)',
+    'smart-insect-label':ar?'صورة الحشرة (اختيارية، 4 ميجابايت كحد أقصى)':'Insect photo (optional, max 4 MB)',
+    'smart-diagnosis-run':ar?'تشغيل التحليل المدمج':'Run combined analysis',
+    'smart-diagnosis-clear':ar?'مسح':'Clear',
+    'smart-diagnosis-cost-note':ar?'يشغّل هذا تحليلًا واحدًا للورقة، وتحليلًا إضافيًا للحشرة عند إرفاق صورتها. قد يستهلك كل تحليل من رصيد Roboflow.':'This runs one leaf-model inference, plus one insect-model inference when an insect photo is attached. Each may use Roboflow workspace quota.',
+    'smart-diagnosis-safety':ar?'نتائج النموذجين لا تثبت أن الحشرة سببت ضرر الورقة. أكّد نوع النبات والأعراض قبل اتخاذ إجراء، ولا تختَر مبيدًا بناءً على هذا الفحص وحده.':'The two model outputs do not prove that an insect caused the leaf damage. Confirm the plant and symptoms before acting; do not choose a pesticide from this screen alone.'
+  };
+  Object.entries(labels).forEach(([id,value])=>{const n=el(id);if(n)n.textContent=value;});
+  const plant=el('smart-plant-name');if(plant)plant.placeholder=ar?'مثال: طماطم، بطاطس، ورد':'e.g. tomato, potato, rose';
+  const severity=el('smart-severity');
+  if(severity)Array.from(severity.options).forEach((o,i)=>o.textContent=(ar?['قليل / محدود','متوسط / عدة أوراق','شديد / منتشر']:['Few / limited','Moderate / several leaves','Severe / widespread'])[i]);
+}
+function updateSmartPreview(kind){
+  if(smartPreviewUrls[kind]){URL.revokeObjectURL(smartPreviewUrls[kind]);smartPreviewUrls[kind]=null;}
+  const file=el(kind==='leaf'?'smart-leaf-file':'smart-insect-file').files?.[0];
+  const preview=el(kind==='leaf'?'smart-leaf-preview':'smart-insect-preview');
+  if(file&&['image/jpeg','image/png','image/webp'].includes(file.type)){
+    smartPreviewUrls[kind]=URL.createObjectURL(file);preview.src=smartPreviewUrls[kind];preview.style.display='block';
+  }else{preview.removeAttribute('src');preview.style.display='none';}
+}
+function smartBlock(parent,title,body){
+  const h=document.createElement('h4');h.textContent=title;parent.appendChild(h);
+  const p=document.createElement('div');p.textContent=body;parent.appendChild(p);
+}
+function smartTopPrediction(list){
+  if(!Array.isArray(list)||!list.length)return null;
+  return list.slice().sort((a,b)=>(normalizedNabtaConfidence(b.confidence)??0)-(normalizedNabtaConfidence(a.confidence)??0))[0];
+}
+function renderSmartDiagnosis(data){
+  const box=el('smart-diagnosis-result');box.replaceChildren();
+  const ar=lang==='ar';
+  const plant=String(data.plant_name||'').trim();
+  const leaf=smartTopPrediction(data.leaf_predictions);
+  const insect=smartTopPrediction(data.insect_predictions);
+  const leafLabel=leaf&&(leaf.class||leaf.class_name||leaf.label||'Unknown');
+  const leafConfidence=leaf?normalizedNabtaConfidence(leaf.confidence):null;
+  const insectLabel=insect&&(insect.class||insect.class_name||insect.label||'Unknown');
+  const insectConfidence=insect?normalizedNabtaConfidence(insect.confidence):null;
+  const enteredCrop=normalizeNabtaCropName(plant);
+  const modelCrop=leafLabel?cropFromModelClass(leafLabel):'';
+  const mismatch=Boolean(enteredCrop&&modelCrop&&enteredCrop!==modelCrop);
+  const unknownCrop=Boolean(plant&&!enteredCrop&&modelCrop);
+  const weakLeaf=!leaf||leafConfidence===null||leafConfidence<.60;
+  const weakInsect=Boolean(data.insect_photo_supplied&&(!insect||insectConfidence===null||insectConfidence<.60));
+  const summary=document.createElement('div');summary.className='small';
+  summary.textContent=(ar?'النبات: ':'Plant: ')+plant+' · '+(ar?'شدة الضرر: ':'Observed severity: ')+data.severity;box.appendChild(summary);
+  const grid=document.createElement('div');grid.className='nabta-smart-results';box.appendChild(grid);
+  const leafBox=document.createElement('div');leafBox.className='nabta-smart-result';grid.appendChild(leafBox);
+  smartBlock(leafBox,ar?'تحليل الورقة':'Leaf analysis',leafLabel?(leafLabel+' · '+(leafConfidence===null?'—':Math.round(leafConfidence*100)+'%')):(ar?'لم يرصد النموذج فئة مدعومة.':'No supported leaf class detected.'));
+  const insectBox=document.createElement('div');insectBox.className='nabta-smart-result';grid.appendChild(insectBox);
+  if(!data.insect_photo_supplied)smartBlock(insectBox,ar?'تحليل الحشرة':'Insect analysis',ar?'لم تُرفق صورة حشرة.':'No insect photo supplied.');
+  else smartBlock(insectBox,ar?'تحليل الحشرة':'Insect analysis',insectLabel?(insectLabel+' · '+(insectConfidence===null?'—':Math.round(insectConfidence*100)+'%')):(ar?'لم يرصد النموذج حشرة.':'No insect detected.'));
+  const status=document.createElement('span');status.className='status '+(mismatch||unknownCrop||weakLeaf||weakInsect?'warn':'good');
+  status.textContent=mismatch?(ar?'تعارض المحصول — التوصيات متوقفة':'Crop mismatch — advice paused'):unknownCrop?(ar?'اسم المحصول غير معروف':'Plant name not recognised'):(weakLeaf||weakInsect)?(ar?'نتيجة غير حاسمة — تحقق مطلوب':'Inconclusive — verification needed'):(ar?'اكتمل الفحص الأولي':'Initial screening complete');
+  box.appendChild(status);
+  if(mismatch||unknownCrop){
+    smartBlock(box,ar?'سبب إيقاف التوصيات':'Why advice is paused',mismatch?(ar?'أدخلت '+plant+' لكن نموذج الورقة صنّف الصورة '+modelCrop+'. لا يمكن ربط نتائج الحشرات أو المرض بهذا المحصول حتى يتم التأكد.':'You entered '+plant+' but the leaf model classified '+modelCrop+'. Insect or disease advice is paused until the crop is verified.'):(ar?'تعذر مطابقة اسم النبات مع المحاصيل المعروفة. تحقق من اسم النبات أولًا.':'The plant name did not match a supported crop alias. Verify the crop name first.'));
+  }else if(weakLeaf||weakInsect){
+    smartBlock(box,ar?'يلزم تحقق إضافي':'Additional verification needed',ar?'ثقة أحد النموذجين أقل من 60% أو لم يرصد فئة. أعد التصوير بإضاءة أوضح ولا تختر علاجًا بناءً على هذه النتيجة.':'At least one model is below 60% confidence or returned no class. Retake the relevant photo in clear light and do not choose treatment from this result.');
+  }else{
+    smartBlock(box,ar?'ملخص أولي':'Preliminary summary',ar?'تم تحليل الورقة والحشرة بشكل مستقل. وجودهما معًا لا يثبت أن الحشرة سببت أعراض الورقة.':'Leaf and insect were analysed independently. Their co-occurrence does not prove the insect caused the leaf symptoms.');
+  }
+  if(insect&&!weakInsect&&!mismatch&&!unknownCrop){
+    const mapped=mapNabtaPestLabel(insectLabel);
+    if(mapped){
+      el('nabta-advisor-insect').value=mapped;
+      nabtaAdvisorLatestLabel=insectLabel;nabtaAdvisorLatestConfidence=insectConfidence;
+      el('nabta-advisor-severity').value=data.severity||'few';
+      smartBlock(box,ar?'تم تحديث مستشار الحشرات':'Insect advisor updated',ar?'نُقلت فئة الحشرة وشدة الإصابة إلى مستشار المخاطر. راجع الإرشادات بعد تأكيد النبات والأعراض.':'The insect class and observed severity were copied to the risk advisor. Review guidance after confirming the plant and symptoms.');
+    }
+  }
+  const caution=document.createElement('div');caution.className='nabta-advisor-note';
+  caution.textContent=ar?'هذا فحص أولي وليس تشخيصًا. لا يثبت تزامن النتائج علاقة سببية بين الحشرة وأعراض الورقة.':'This is preliminary screening, not a diagnosis. Co-occurring outputs do not establish a causal link between the insect and leaf symptoms.';
+  box.appendChild(caution);
+}
+async function runSmartDiagnosis(){
+  const leaf=el('smart-leaf-file').files?.[0],insect=el('smart-insect-file').files?.[0];
+  const plant=el('smart-plant-name').value.trim(),box=el('smart-diagnosis-result');
+  if(!plant){box.textContent=t('Enter the plant name first.','أدخلي اسم النبات أولًا.');return;}
+  if(!leaf){box.textContent=t('Choose a leaf photo first.','اختاري صورة الورقة أولًا.');return;}
+  for(const file of [leaf,insect].filter(Boolean)){
+    if(!['image/jpeg','image/png','image/webp'].includes(file.type)){box.textContent=t('Use JPEG, PNG or WebP images only.','استخدمي صور JPEG أو PNG أو WebP فقط.');return;}
+    if(file.size>4*1024*1024){box.textContent=t('Each image must be no larger than 4 MB.','يجب ألا يتجاوز حجم كل صورة 4 ميجابايت.');return;}
+  }
+  if(!nabtaApiBase){box.textContent=t('Connect the NABTA API first.','اتصلي بخادم NABTA أولًا.');return;}
+  const button=el('smart-diagnosis-run');button.disabled=true;button.textContent=t('Analysing…','جارٍ التحليل…');
+  box.textContent=t('Sending photos for independent checks…','يتم إرسال الصور للفحص بشكل مستقل…');
+  try{
+    const form=new FormData();form.append('leaf_image',leaf,leaf.name);
+    if(insect)form.append('insect_image',insect,insect.name);
+    form.append('plant_name',plant);form.append('severity',el('smart-severity').value);
+    const response=await fetch(nabtaApiBase+'/api/smart-diagnosis',{method:'POST',body:form,cache:'no-store'});
+    const data=await response.json().catch(()=>({}));
+    if(!response.ok){box.textContent=data.detail||t('Combined analysis failed.','فشل التحليل المدمج.');return;}
+    renderSmartDiagnosis(data);
+  }catch(_){box.textContent=t('Could not reach NABTA API.','تعذر الاتصال بخادم NABTA.');}
+  finally{button.disabled=false;button.textContent=t('Run combined analysis','تشغيل التحليل المدمج');}
+}
+function clearSmartDiagnosis(){
+  ['smart-leaf-file','smart-insect-file'].forEach(id=>el(id).value='');
+  for(const kind of ['leaf','insect']){
+    if(smartPreviewUrls[kind]){URL.revokeObjectURL(smartPreviewUrls[kind]);smartPreviewUrls[kind]=null;}
+    const preview=el(kind==='leaf'?'smart-leaf-preview':'smart-insect-preview');preview.removeAttribute('src');preview.style.display='none';
+  }
+  el('smart-plant-name').value='';el('smart-severity').value='few';
+  el('smart-diagnosis-result').textContent=t('No combined assessment yet.','لا يوجد تقييم مدمج بعد.');
+}
+for(const kind of ['leaf','insect'])el(kind==='leaf'?'smart-leaf-file':'smart-insect-file').addEventListener('change',()=>updateSmartPreview(kind));
+el('smart-diagnosis-run').addEventListener('click',runSmartDiagnosis);
+el('smart-diagnosis-clear').addEventListener('click',clearSmartDiagnosis);
+
 function renderPlantDamageAssessment(data) {
   const box = el('plant-damage-result');
   box.replaceChildren();
