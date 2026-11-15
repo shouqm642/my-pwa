@@ -1,0 +1,19 @@
+services:
+  - type: web
+    name: nabta-ai-api
+    runtime: docker
+    dockerfilePath: ./backend/Dockerfile
+    dockerContext: .
+    plan: free
+    healthCheckPath: /api/health
+    envVars:
+      - key: NABTA_DEVICE_TOKEN
+        generateValue: true
+      - key: ALLOWED_ORIGINS
+        value: https://shouqm642.github.io
+      - key: ROBOFLOW_API_KEY
+        sync: false
+      - key: PLANT_HEALTH_MODEL_ID
+        value: leaf-disease-detection-system/2
+      - key: INSECT_MODEL_ID
+        value: insect-detection-wfwbv/2
