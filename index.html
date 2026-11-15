@@ -78,6 +78,25 @@
   .nabta-smart-results{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:10px}
   .nabta-smart-result{padding:10px;border-radius:9px;background:rgba(0,0,0,.2);min-width:0;overflow-wrap:anywhere}
   .nabta-smart-result h4{margin:0 0 8px;color:#b9ffc5}
+  .nabta-demo-panel{margin:0 0 14px;border:1px solid rgba(146,235,166,.42);background:linear-gradient(145deg,rgba(19,82,42,.92),rgba(3,27,13,.96));box-shadow:0 12px 30px rgba(0,0,0,.25)}
+  .nabta-demo-top{display:flex;align-items:flex-start;justify-content:space-between;gap:14px;flex-wrap:wrap}
+  .nabta-demo-kicker{display:inline-flex;align-items:center;gap:7px;border:1px solid rgba(164,240,178,.35);background:rgba(115,205,132,.12);color:#caffd3;border-radius:999px;padding:5px 10px;font-size:11px;font-weight:800;letter-spacing:.05em}
+  .nabta-demo-title{font-size:20px;font-weight:850;color:#f1fff2;margin:8px 0 4px}
+  .nabta-demo-subtitle{font-size:13px;color:#c2e8c9;max-width:780px;line-height:1.5}
+  .nabta-demo-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin-top:16px}
+  .nabta-demo-tile{min-width:0;border:1px solid rgba(180,240,190,.16);background:rgba(0,0,0,.2);border-radius:12px;padding:12px}
+  .nabta-demo-tile h3{font-size:14px;color:#c5ffd0;margin:0 0 9px}
+  .nabta-demo-photo{width:100%;height:138px;object-fit:cover;border-radius:8px;background:#03190b;margin-bottom:9px}
+  .nabta-demo-score{font-size:28px;font-weight:900;line-height:1.1;color:#a7f4b7;margin:5px 0}
+  .nabta-demo-tag{display:inline-block;padding:4px 8px;border-radius:99px;background:rgba(92,190,111,.14);color:#caffd3;font-size:11px;font-weight:800;margin-top:6px}
+  .nabta-demo-tag.warn{background:rgba(230,180,60,.14);color:#ffe4a4}
+  .nabta-demo-copy{font-size:12px;line-height:1.55;color:#d3ead7}
+  .nabta-demo-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:13px}
+  .nabta-demo-separation{font-size:11px;color:#d2e5d5;margin-top:12px;padding-top:10px;border-top:1px solid rgba(255,255,255,.1)}
+  #nabta-demo-panel[hidden]{display:none!important}
+  @media(max-width:760px){.nabta-demo-grid{grid-template-columns:1fr 1fr}}
+  @media(max-width:560px){.nabta-demo-grid{grid-template-columns:1fr}.nabta-demo-photo{height:180px}}
+
   @media(max-width:560px){.nabta-smart-grid,.nabta-smart-results{grid-template-columns:1fr}}
 </style>
 </head>
@@ -94,6 +113,7 @@
           <button id="lang-ar" class="lang-btn">عربي</button>
         </div>
 
+        <button id="demo-toggle" class="btn secondary" type="button">Presentation Demo</button>
         <div class="badge" id="conn-badge">
           <span id="conn-dot" style="width:10px;height:10px;border-radius:50%;background:#6b6b6b;display:inline-block;margin-left:6px"></span>
           <span id="conn-text">Disconnected</span>
@@ -102,6 +122,47 @@
         <button id="bt-btn" class="btn secondary">Connect Bluetooth</button>
       </div>
     </header>
+
+    <section id="nabta-demo-panel" class="card nabta-demo-panel" hidden aria-label="NABTA AI presentation demo">
+      <div class="nabta-demo-top">
+        <div>
+          <span class="nabta-demo-kicker" id="demo-kicker">● PRESENTATION MODE · SAMPLE RECORDS</span>
+          <div class="nabta-demo-title" id="demo-title">NABTA AI · Guided Showcase</div>
+          <div class="nabta-demo-subtitle" id="demo-subtitle">A clean walkthrough using previously tested examples. These records are separate test cases, not a live camera feed or one combined diagnosis.</div>
+        </div>
+        <button id="demo-close" class="btn secondary" type="button">Exit demo</button>
+      </div>
+      <div class="nabta-demo-grid">
+        <article class="nabta-demo-tile">
+          <h3 id="demo-camera-title">01 · Raspberry Pi camera test</h3>
+          <img class="nabta-demo-photo" src="https://nabta-ai-api.onrender.com/uploads/1794755381-56c8c95f2d.jpg" alt="Previously uploaded Raspberry Pi camera sample showing a ladybug">
+          <div class="nabta-demo-copy" id="demo-camera-label">Insect model estimate · Ladybug</div>
+          <div class="nabta-demo-score">96%</div>
+          <span class="nabta-demo-tag" id="demo-camera-tag">Previously received by NABTA API</span>
+          <p class="nabta-demo-copy" id="demo-camera-note">Historical Raspberry Pi upload, 15 Nov 2026. The insect model does not identify the host plant.</p>
+        </article>
+        <article class="nabta-demo-tile">
+          <h3 id="demo-leaf-title">02 · Plant leaf screening test</h3>
+          <div style="height:138px;border-radius:8px;background:linear-gradient(145deg,#164c29,#0b2817);display:grid;place-items:center;font-size:54px;margin-bottom:9px" aria-hidden="true">🍅</div>
+          <div class="nabta-demo-copy" id="demo-leaf-label">Entered crop: Tomato</div>
+          <div class="nabta-demo-score">68%</div>
+          <span class="nabta-demo-tag warn" id="demo-leaf-tag">Preliminary model signal</span>
+          <p class="nabta-demo-copy" id="demo-leaf-note">Previous reference-image test: Tomato___Late_blight. Screening only; confirm symptoms and crop before acting.</p>
+        </article>
+        <article class="nabta-demo-tile">
+          <h3 id="demo-advisor-title">03 · Risk & treatment example</h3>
+          <div style="height:138px;border-radius:8px;background:linear-gradient(145deg,#164c29,#0b2817);display:grid;place-items:center;font-size:54px;margin-bottom:9px" aria-hidden="true">🌿</div>
+          <div class="nabta-demo-copy" id="demo-advisor-label">Manual example · Aphids on tomato</div>
+          <div class="nabta-demo-score" style="font-size:22px" id="demo-advisor-score">Moderate risk</div>
+          <span class="nabta-demo-tag" id="demo-advisor-tag">IPM guidance</span>
+          <p class="nabta-demo-copy" id="demo-advisor-note">Shows non-chemical controls first, with chemical options only when necessary and label-compliant.</p>
+        </article>
+      </div>
+      <div class="nabta-demo-actions">
+        <button id="demo-load-advisor" class="btn" type="button">Load Aphid + Tomato advisor example</button>
+      </div>
+      <div class="nabta-demo-separation" id="demo-separation">Presentation note: the camera, leaf-screening and advisor cards are separate previously tested examples. They are not evidence that the ladybug caused the tomato leaf symptoms.</div>
+    </section>
 
     <main>
       <div class="grid-2">
@@ -408,6 +469,7 @@ function renderStaticTexts(){
   renderNabtaAdvisorTexts();
   renderPlantDamageTexts();
   renderSmartDiagnosisTexts();
+  renderNabtaDemoTexts();
 }
 
 /* Notification helper */
@@ -662,6 +724,58 @@ applySuggestBtn.addEventListener('click', ()=>applySuggestion());
 langEnBtn.addEventListener('click', ()=>setLang('en')); langArBtn.addEventListener('click', ()=>setLang('ar'));
 
 
+
+/* ===== NABTA presentation demo =====
+   Replays clearly labelled historical test examples; never changes live model results.
+*/
+function renderNabtaDemoTexts() {
+  const ar = lang === 'ar';
+  const values = {
+    'demo-toggle': ar ? 'وضع العرض' : 'Presentation Demo',
+    'demo-kicker': ar ? '● وضع العرض · سجلات تجريبية' : '● PRESENTATION MODE · SAMPLE RECORDS',
+    'demo-title': ar ? 'NABTA AI · عرض توضيحي' : 'NABTA AI · Guided Showcase',
+    'demo-subtitle': ar ? 'عرض مرتب باستخدام أمثلة اختُبرت سابقًا. هذه سجلات منفصلة وليست بثًا حيًا أو تشخيصًا مدمجًا واحدًا.' : 'A clean walkthrough using previously tested examples. These records are separate test cases, not a live camera feed or one combined diagnosis.',
+    'demo-close': ar ? 'إنهاء العرض' : 'Exit demo',
+    'demo-camera-title': ar ? '01 · اختبار كاميرا Raspberry Pi' : '01 · Raspberry Pi camera test',
+    'demo-camera-label': ar ? 'تقدير نموذج الحشرات · دعسوقة' : 'Insect model estimate · Ladybug',
+    'demo-camera-tag': ar ? 'وصلت سابقًا إلى خادم NABTA' : 'Previously received by NABTA API',
+    'demo-camera-note': ar ? 'رفع سابق من Raspberry Pi بتاريخ 15 نوفمبر 2026. نموذج الحشرات لا يحدد نوع النبات المضيف.' : 'Historical Raspberry Pi upload, 15 Nov 2026. The insect model does not identify the host plant.',
+    'demo-leaf-title': ar ? '02 · اختبار فحص ورقة النبات' : '02 · Plant leaf screening test',
+    'demo-leaf-label': ar ? 'المحصول المُدخل: طماطم' : 'Entered crop: Tomato',
+    'demo-leaf-tag': ar ? 'إشارة أولية من النموذج' : 'Preliminary model signal',
+    'demo-leaf-note': ar ? 'اختبار سابق بصورة مرجعية: Tomato___Late_blight. فحص أولي فقط؛ تحقق من الأعراض والمحصول قبل أي إجراء.' : 'Previous reference-image test: Tomato___Late_blight. Screening only; confirm symptoms and crop before acting.',
+    'demo-advisor-title': ar ? '03 · مثال تقييم الخطر والعلاج' : '03 · Risk & treatment example',
+    'demo-advisor-label': ar ? 'مثال اختيار يدوي · المنّ على الطماطم' : 'Manual example · Aphids on tomato',
+    'demo-advisor-score': ar ? 'خطر متوسط' : 'Moderate risk',
+    'demo-advisor-tag': ar ? 'إرشادات المكافحة المتكاملة' : 'IPM guidance',
+    'demo-advisor-note': ar ? 'يعرض المكافحة غير الكيميائية أولًا، والخيارات الكيميائية عند الضرورة فقط ووفق الملصق.' : 'Shows non-chemical controls first, with chemical options only when necessary and label-compliant.',
+    'demo-load-advisor': ar ? 'تحميل مثال مستشار المنّ والطماطم' : 'Load Aphid + Tomato advisor example',
+    'demo-separation': ar ? 'ملاحظة للعرض: أمثلة الكاميرا وفحص الورقة ومستشار المكافحة اختبارات منفصلة سابقة. ولا تثبت أن الدعسوقة سببت أعراض ورقة الطماطم.' : 'Presentation note: the camera, leaf-screening and advisor cards are separate previously tested examples. They are not evidence that the ladybug caused the tomato leaf symptoms.'
+  };
+  Object.entries(values).forEach(([id, value]) => { const node = el(id); if (node) node.textContent = value; });
+}
+function openNabtaDemo() {
+  const panel = el('nabta-demo-panel');
+  panel.hidden = false;
+  renderNabtaDemoTexts();
+  panel.scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+function closeNabtaDemo() {
+  el('nabta-demo-panel').hidden = true;
+}
+function loadNabtaDemoAdvisor() {
+  el('nabta-advisor-insect').value = 'aphid';
+  el('nabta-advisor-plant').value = 'vegetable';
+  el('nabta-advisor-plant-name').value = 'Tomato';
+  el('nabta-advisor-severity').value = 'moderate';
+  nabtaAdvisorLatestConfidence = null;
+  nabtaAdvisorLatestLabel = '';
+  assessNabtaInsectRisk();
+  el('nabta-advisor-result').scrollIntoView({ behavior: 'smooth', block: 'center' });
+}
+el('demo-toggle').addEventListener('click', openNabtaDemo);
+el('demo-close').addEventListener('click', closeNabtaDemo);
+el('demo-load-advisor').addEventListener('click', loadNabtaDemoAdvisor);
 
 /* ===== NABTA insect risk and treatment advisor =====
    Cautious, rule-based integrated pest management guidance.
