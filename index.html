@@ -1122,7 +1122,7 @@ function renderSmartDiagnosis(data){
   }else{
     smartBlock(box,ar?'ملخص أولي':'Preliminary summary',ar?'تم تحليل الورقة والحشرة بشكل مستقل. وجودهما معًا لا يثبت أن الحشرة سببت أعراض الورقة.':'Leaf and insect were analysed independently. Their co-occurrence does not prove the insect caused the leaf symptoms.');
   }
-  if(insect&&!weakInsect&&!mismatch&&!unknownCrop){
+  if(insect&&!weakInsect&&!weakLeaf&&!mismatch&&!unknownCrop){
     const mapped=mapNabtaPestLabel(insectLabel);
     if(mapped){
       el('nabta-advisor-insect').value=mapped;
